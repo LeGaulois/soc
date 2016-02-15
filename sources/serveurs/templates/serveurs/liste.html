@@ -1,0 +1,70 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+ <div class="container">
+    		<div class="row">
+    			<h3>Serveurs ANCV</h3>
+    		</div>
+			<div class="row">
+
+<a class="btn btn-success"  href="{% url 'serveurs:ajout' %}">Ajout</a>&nbsp;
+<input type="button"  class='btn' onclick="return toggleMe('filtre')" value="Filtre"><br>
+	<span id="filtre" style='display:none'>
+	<form class="form-horizontal" action="{% url 'serveurs:liste'%}" method="post">
+		{% csrf_token %}
+    		
+		<div class="form-horizontal">
+		{% for field in form %}
+			{{ field.label_tag }} {{ field }}
+			{{ field.errors }}
+		{%endfor%}
+		<br>
+		<br>		
+			<!--<div class="form-actions">-->
+				<input type="submit" class="btn btn-success" value='Filtrer'>
+				<a class="btn btn-danger"  href="{% url 'serveurs:liste' %}">Défaut</a>
+			<!--</div>-->
+		</div>
+	</form>
+	</span>
+
+<br>
+
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+	<th>Adresse IP</th>
+	<th>application</th>
+	<th>Criticite</th>
+	<th>Vulnérabilite</th>
+	<th>Localisation</th>
+	<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for serveur in liste_machines %}
+	<tr>
+	<td>{{serveur.ip}}</td>
+	<td>{{serveur.nom}}</td>
+	<td>{{serveur.criticite}}</td>
+	<td>{{serveur.vulnerabilite}}</td>
+	<td>{{serveur.localisation}}</td>
+	<td>
+		<a class="btn btn-default" href="{% url 'serveurs:identite' serveur.ip %}">Infos</a>
+		&nbsp;
+		<a class="btn btn-success" href="{% url 'serveurs:edit' serveur.ip %}">Edit</a>
+		&nbsp;
+		<a class="btn btn-danger"  href="{% url 'serveurs:suppression' serveur.ip %}">Supprimer</a>
+		&nbsp;
+		{% if serveur.etat == "encours" %}
+		<a class="btn btn-primary" disabled href="{% url 'scans:ajoutScanManuel' serveur.ip %}">Scanner</a>
+		{% else %}
+		<a class="btn btn-primary" href="{% url 'scans:ajoutScanManuel' serveur.ip %}">Scanner</a>
+		{% endif %}
+	</td>
+	</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

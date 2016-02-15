@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  {% load static %}
+    <title>SOC</title>
+    <link   href="{% static 'css/menu.css' %}" rel="stylesheet">
+    <link   href="{% static 'css/new.css' %}" rel="stylesheet">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script src="{% static 'js/soc.js' %}"></script>
+</head>
+<body>
+
+<nav>
+      <ul>
+        <li><a href="{% url 'serveurs:liste' %}">Machines</a></li>
+	<li><a href="{% url 'applications:liste' %}">Applications</a></li>
+	<li><a>Scans</a>
+		<ul>
+			<li><a href="{% url 'scans:liste_scans_plannifies' %}">Liste plannifies</a></li>
+			<li><a href="{% url 'scans:status_scans_plannifies' %}">Status plannifies</a></li>
+			<li><a href="{% url 'scans:status_scans_manuels' %}">Status manuels</a></li>
+			<li><a href="{% url 'scans:ajoutScanManuel' %}">Ajout manuel</a></li>
+		</ul>
+	</li>
+	<li><a>Vulns</a>
+		<ul>
+			<li><a href="{% url 'vulns:liste' %}">Liste</a></li>
+			<li><a href="{% url 'vulns:stats_vulns' %}">Statistiques</a></li>
+		</ul>
+	</li>
+	<li><a href="{% url 'rapports:getPDF' %}">Rapports</a></li>
+
+	 <ul style="float:right;list-style-type:none;">
+	    <li><a  href="{% url 'logout_view' %}">Deconnexion</a></li>
+	  </ul>
+      </ul>
+	
+</nav>
+
+{% block content %}{% endblock content %}
+	
+
+</body>
+</html>
+

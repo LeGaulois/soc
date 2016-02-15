@@ -1,0 +1,69 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+ <div class="container">
+    		<div class="row">
+    			<h3>Liste des applications</h3>
+    		</div>
+			<div class="row">
+
+<a class="btn btn-success"  href="{% url 'applications:ajout' %}">Ajout</a>&nbsp;
+<input type="button"  class='btn' onclick="return toggleMe('filtre')" value="Filtre"><br>
+	<span id="filtre" style='display:none'>
+	<form class="form-horizontal" action="{% url 'applications:liste'%}" method="post">
+		{% csrf_token %}
+    		
+		<div class="form-horizontal">
+		{% for field in form %}
+			{{ field.label_tag }} {{ field }}
+			{{ field.errors }}
+		{%endfor%}
+		<br>
+		<br>		
+			<!--<div class="form-actions">-->
+				<input type="submit" class="btn btn-success" value='Filtrer'>
+				<a class="btn btn-danger"  href="{% url 'applications:liste' %}">Défaut</a>
+			<!--</div>-->
+		</div>
+	</form>
+	</span>
+
+<br>
+
+{%if liste_applis %}
+
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+	<th><center>Nom</center></th>
+	<th><center>Description</center></th>
+	<th><center>Criticite</center></th>
+	<th><center>Actions</center></th>
+</tr>
+</thead>
+<tbody>
+{% for appli in liste_applis %}
+	<tr>
+	<td>{{appli.nom}}</td>
+	<td>{{appli.description}}</td>
+	<td>{{appli.criticite}}</td>
+	<td>
+		<a class="btn btn-default" href="{% url 'applications:identite' appli.id %}">Infos</a>
+		&nbsp;
+		<a class="btn btn-success" href="{% url 'applications:edit' appli.id %}">MAJ</a>
+		&nbsp;
+		<a class="btn btn-danger"  href="{% url 'applications:suppression' appli.id %}">Supprimer</a>
+		&nbsp;
+	</td>
+	</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{%else%}
+Aucune application présente dans la base
+{%endif%}
+
+
+</div>
+</div>
+{% endblock %}

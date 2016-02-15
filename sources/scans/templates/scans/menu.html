@@ -1,0 +1,35 @@
+<!--
+<nav class='.navbar-fixed-top'>
+<ul>
+    {% for item in menu %}
+    {% if item.separator %}<li>------------</li>{% endif %}
+
+    <a class="btn btn-navbar"  href="{{ item.url }}">{{ item.title }}</a>
+    {% endfor %}
+</ul>
+</nav>-->
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  {% load static %}
+    <link   href="{% static 'css/menu.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<nav>
+      <ul>
+	
+       {% for item in menu %}
+        <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+  	{%endfor%}
+      </ul>
+</nav>
+
+
+  
+</body>
+</html>
+

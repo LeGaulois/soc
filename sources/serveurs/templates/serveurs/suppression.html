@@ -1,0 +1,87 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+ <div class="container">
+    		<div class="row">
+    			<h3>Suppresion</h3>
+    		</div>
+{% for serveur in machine %}		
+			<div class="form-horizontal">
+				<div class="control-group">
+					    <label class="control-label">Adresse</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{serveur.ip}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">MAC</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.mac}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Hostname</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.hostname}}
+						    </label>
+					    </div>
+					  </div>
+					<div class="control-group">
+					    <label class="control-label">OS</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.os}}
+						    </label>
+					    </div>
+					  </div>
+					
+					   
+
+						<div class="control-group">
+					    <label class="control-label">Application</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.appli_nom}}
+						    </label>
+					    </div>
+					  </div>
+
+
+						<div class="control-group">
+					    <label class="control-label">Localisation</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.localisation}}
+						    </label>
+					    </div>
+					  </div>
+
+
+
+				&nbsp;
+				&nbsp;
+				<form class="form-horizontal" action="{% url 'serveurs:suppression' serveur.ip%}" method="post">
+					{% csrf_token %}
+					<div class="control-group">
+						<label class="control-label">Confirmer suppression</label>
+						<div class="controls">
+					      		<input name="confirmation" type="checkbox" />
+						</div>
+						{% if erreur %}
+						<strong>{{ erreur }}</strong>
+						{% endif %}
+					</div>
+
+					<div class="form-actions">
+						<input type="submit" class="btn btn-danger" value='Supprimer'>
+					</div>
+				</form>	
+			</div>
+{%endfor%}
+
+</div>
+{% endblock %}

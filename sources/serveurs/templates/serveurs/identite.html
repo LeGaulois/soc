@@ -1,0 +1,345 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+
+{% if graph %}
+{% load static %}
+<script type='text/javascript'>
+window.onload=function() {
+	var chart=new CanvasJS.Chart("chartContainer",
+	{
+	    title:{
+		text:""
+	    },
+	    exportFileName:"Pie Chart",
+	    exportEnabled:false,
+		animationEnabled:true,
+	    legend:{
+		verticalAlign: "bottom",
+		horizontalAlign:"center"
+	    },
+	    data: [
+	    {
+		type:"pie",
+		showInLegend: false,
+		toolTipContent: "NB: <strong>{legendText}</strong>",
+		indexLabel: "{label} {y}%",
+		dataPoints: [
+			{ y: {{graph.Critical}}, legendText: "{{graph.Criticalnb}}",color:'red',exploded: true,label:"Critique"},
+			{ y: {{graph.High}}, legendText: "{{graph.Highnb}}",color:"orange",label:"haute"},
+			{ y: {{graph.Medium}}, legendText: "{{graph.Mediumnb}}",color:'yellow',label:"moyenne"},
+			{ y: {{graph.Low}}, legendText: "{{graph.Lownb}}",color:'green',label:"basse"},
+			{ y: {{graph.Info}}, legendText: "{{graph.Infonb}}",color:'blue',label:"info"}
+		]
+	}
+	]
+	});
+	chart.render();
+}
+</script>
+<script type='text/javascript' src="{% static 'js/canvasjs.min.js' %}"></script>
+{%endif%}
+
+
+
+
+{% for serveur in machine %}
+    <div class="container">
+ 
+    			<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Informations générales</h3>
+		    		</div>
+		    		
+	    			<div class="form-horizontal" >
+					  <div class="control-group">
+					    <label class="control-label">Adresse</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{serveur.ip}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">MAC</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.mac}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Hostname</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.hostname}}
+						    </label>
+					    </div>
+					  </div>
+					<div class="control-group">
+					    <label class="control-label">OS</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.os}}
+						    </label>
+					    </div>
+					  </div>
+						<div class="control-group">
+					    <label class="control-label">NB vulns</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.nb_vulnerabilites}}
+						    </label>
+					    </div>
+					  </div>
+						<div class="control-group">
+					    <label class="control-label">NB services</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.nb_services}}
+						    </label>
+					    </div>
+					  </div>
+					   
+
+
+						<div class="control-group">
+					    <label class="control-label">Localisation</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.localisation}}
+						    </label>
+					    </div>
+					  </div>
+		
+					<div class="control-group">
+					    <label class="control-label">Environnement</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.environnement}}
+						    </label>
+					    </div>
+					  </div>
+
+
+					<div class="control-group">
+					    <label class="control-label">Vulnérabilité</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.vulnerabilite}}
+						    </label>
+					    </div>
+					  </div>
+
+					<div class="control-group">
+					    <label class="control-label">Commentaires</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{serveur.commentaires}}
+						    </label>
+					    </div>
+					  </div>
+					
+					
+					</div>
+				</div>
+				
+    </div> 
+{%endfor%}
+
+
+
+
+{% if appli %}
+	{% if backend %}
+		 <div class="container">
+ 
+    			<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Applications métiers</h3>
+		    		</div>
+
+				<div class="form-horizontal" >
+					Ce serveur fait office de serveur backend pour les applications suivantes:<br><br>
+					<div class="control-group">
+						<ul>
+						{% for app in appli %}
+						<li>{{app.nom}}</li>	
+									  
+						{%endfor%}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	{% else %}
+    <div class="container">
+ 
+    			<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Application métier</h3>
+		    		</div>
+		    		
+	    			<div class="form-horizontal" >
+					  <div class="control-group">
+					    <label class="control-label">Nom</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{appli.0.nom}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Criticite</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{appli.0.criticite}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Description</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{appli.0.description}}
+						    </label>
+					    </div>
+					  </div>
+					
+					
+					
+					</div>
+				</div>
+				
+    </div> 
+{%endif%}
+{%endif%}
+
+
+
+
+{%if liste_services%}
+ <div class="container">
+    		<div class="span10 offset1">
+    			<div class="row">
+    			<h3>Services démarrés</h3>
+    			</div>
+				
+				<table class="table table-striped table-bordered">
+		              <thead>
+		                <tr>
+		                  <th>Protocole</th>
+		                  <th>Port</th>
+				  <th>Type</th>
+		                  <th>Nom</th>
+				  <th>Version</th>
+		                </tr>
+		              </thead>
+		              <tbody>	          
+	 				   {% for service in liste_services %}
+						   	<tr>
+								<td>{{service.protocole}}</td>
+							   	<td>{{service.port}}</td>
+								<td>{{service.type}}</td>
+							   	<td>{{service.nom}}</td>
+								<td>{{service.version}}</td>
+							</tr>
+					 {%endfor%}
+				      </tbody>
+	            </table>
+		 		
+    	</div>
+    </div> <!-- /container -->
+{%endif%}
+
+
+
+{% if graph %}
+<div class="container">
+	<div class="span10 offset1">
+		<div class="row">
+    			<h3>Répartition des vulnérabilités</h3>
+    		</div>
+	</div>
+
+	<div class="span10 offset1">
+		<div id="chartContainer" style="height:300px;width:100%;"></div>
+	</div>
+</div>
+{%endif%}
+
+
+{%if liste_vulns %}
+ <div class="container">
+    		<div class="span10 offset1">
+    			<div class="row">
+    			<h3>Liste des vulnérabilités</h3>
+    			</div>
+				
+				<table class="table table-striped table-bordered">
+		              <thead>
+		                <tr>
+				  <th>Service</th>
+		                  <th>Nom</th>
+		                  <th>Infos</th>
+				  <th>Risque</th>
+				  <th>References</th>
+		                </tr>
+		              </thead>
+		              <tbody>	          
+	 				   {% for vuln in liste_vulns %}
+						   	<tr>
+								<td>{{vuln.service_nom}}</td>
+							   	<td>{{vuln.vuln_nom}}</td>
+							   	<td>{{vuln.description}}</td>
+								<td>{{vuln.criticite}}</td>
+								<td>
+								{% for element in vuln.ref_nom%}
+								{{element}} <br>
+								{%endfor%}
+								</td>
+							</tr>
+					 {%endfor%}
+				      </tbody>
+	            </table>
+		 		
+    	</div>
+    </div> <!-- /container -->
+{%endif%}
+
+{%if solutions %}
+ <div class="container">
+    		<div class="span10 offset1">
+    			<div class="row">
+    			<h3>Liste des actions correctrices</h3>
+    			</div>
+				
+				<table class="table table-striped table-bordered">
+		              <thead>
+		                <tr>
+				  <th>Nom vuln</th>
+		                  <th>Solution</th>
+		                  <th>Infos Complementaires</th>
+		                </tr>
+		              </thead>
+		              <tbody>	          
+	 				   {% for solution in solutions %}
+						   	<tr>
+								<td>{{solution.nom}}</td>
+							   	<td>{{solution.solution}}</td>
+								<td>
+								{% for lien in solution.infos_complementaires %}
+								<a href="{{lien}} ">{{lien}}</a><br>
+								{%endfor%}
+								</td>
+							</tr>
+					 {%endfor%}
+				      </tbody>
+	            </table>
+		 		
+    	</div>
+    </div> <!-- /container -->
+{%endif%}
+
+
+{% endblock %}

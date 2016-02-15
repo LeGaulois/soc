@@ -1,0 +1,78 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+ <div class="container">
+    		<div class="row">
+    			<h3>Suppresion</h3>
+    		</div>
+{% for scan in scans %}		
+			<div class="form-horizontal">
+				<div class="control-group">
+					    <label class="control-label">Nom</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{scan.nom}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Description</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.description}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Nmap</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nmap}}
+						    </label>
+					    </div>
+					  </div>
+					<div class="control-group">
+					    <label class="control-label">Nessus</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nessus}}
+						    </label>
+					    </div>
+					  </div>
+					
+					   
+
+						<div class="control-group">
+					    <label class="control-label">Policy_id</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nessus_policy_id}}
+						    </label>
+					    </div>
+					  </div>
+
+
+
+
+				&nbsp;
+				&nbsp;
+				<form class="form-horizontal" action="{% url 'scans:suppression' scan.id%}" method="post">
+					{% csrf_token %}
+					<div class="control-group">
+						<label class="control-label">Confirmer suppression</label>
+						<div class="controls">
+					      		<input name="confirmation" type="checkbox" />
+						</div>
+						{% if erreur %}
+						<strong>{{ erreur }}</strong>
+						{% endif %}
+					</div>
+
+					<div class="form-actions">
+						<input type="submit" class="btn btn-danger" value='Supprimer'>
+					</div>
+				</form>	
+			</div>
+{%endfor%}
+
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+ <div class="container">
+    		<div class="row">
+    			<h3>Suppresion</h3>
+    		</div>
+{% for appli in application %}		
+			<div class="form-horizontal">
+				<div class="control-group">
+					    <label class="control-label">Nom</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{appli.nom}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Criticite</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{appli.criticite}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Description</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{appli.description}}
+						    </label>
+					    </div>
+					  </div>
+				
+
+				&nbsp;
+				&nbsp;
+				<form class="form-horizontal" action="{% url 'applications:suppression' appli.id%}" method="post">
+					{% csrf_token %}
+					<div class="control-group">
+						<label class="control-label">Confirmer suppression</label>
+						<div class="controls">
+					      		<input name="confirmation" type="checkbox" />
+						</div>
+						{% if erreur %}
+						<strong>{{ erreur }}</strong>
+						{% endif %}
+					</div>
+
+					<div class="form-actions">
+						<input type="submit" class="btn btn-danger" value='Supprimer'>
+					</div>
+				</form>	
+			</div>
+{%endfor%}
+
+</div>
+{% endblock %}

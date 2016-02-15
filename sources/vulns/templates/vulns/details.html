@@ -1,0 +1,126 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+
+{% load static %} 
+<div class="container">
+ 
+    			<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Informations sur la Vulnérabilié</h3>
+		    		</div>
+		    		
+	    			<div class="form-horizontal" >
+					  <div class="control-group">
+					    <label class="control-label">Nom</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{vuln.0.nom}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Synopsis</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{vuln.0.synopsis}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Description</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{vuln.0.description}}
+						    </label>
+					    </div>
+					  </div>
+					<div class="control-group">
+					    <label class="control-label">Criticite</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{vuln.0.criticite}}
+						    </label>
+					    </div>
+					  </div>
+						<div class="control-group">
+					    <label class="control-label">Solution</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{vuln.0.solution}}
+						    </label>
+					    </div>
+					  </div>
+						<div class="control-group">
+					    <label class="control-label">Infos complemantaires</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{% if vuln.0.infos_complementaires %}
+								      <ul>	          
+									{% for lien in vuln.0.infos_complementaires %}
+										<li><a href="{{lien}} ">{{lien}}</a></li>
+									{%endfor%}
+									</ul>
+							{% endif %}
+						    </label>
+					    </div>
+					  </div>
+					   
+
+
+						<div class="control-group">
+					    <label class="control-label">Nombre hôtes affectés</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{vuln.0.nb}}
+						    </label>
+					    </div>
+					  </div>
+		
+					<div class="control-group">
+					    <label class="control-label">CVE associées</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{refs}}
+						    </label>
+					    </div>
+					  </div>
+					
+					</div>
+				</div>
+				
+    </div> 
+
+
+{% if hotes %}
+ <div class="container">
+    		<div class="span10 offset1">
+    			<div class="row">
+    			<h3>Liste des hôtes affectés</h3>
+    			</div>
+				
+				<table class="table table-striped table-bordered">
+		              <thead>
+		                <tr>
+				  <th>IP</th>
+		                  <th>Protocole</th>
+		                  <th>Port</th>
+				  <th>Retour Nessus</th>
+		                </tr>
+		              </thead>
+		              <tbody>	          
+	 				   {% for hote in hotes %}
+						   	<tr>
+								<td><a href="{% url 'serveurs:identite' hote.ip_hote %}"> {{hote.ip_hote}}</td>
+							   	<td>{{hote.protocole}}</td>
+							   	<td>{{hote.port}}</td>
+								<td>{{hote.retour_vuln}}</td>
+							</tr>
+					 {%endfor%}
+				      </tbody>
+	            </table>
+		 		
+    	</div>
+    </div> 
+{%endif%}
+
+{% endblock %}
