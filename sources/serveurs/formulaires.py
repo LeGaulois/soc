@@ -232,8 +232,8 @@ class formEditMachine(forms.Form):
 		
 		CHOIX_LOCALISATION=[ 
 			(None,'A definir'),
-			('sarcelles','Sarcelles'),
-			('valence','Valence')
+			('site_1','Site 1'),
+			('site_2','Site 2')
 		]
 
 		CHOIX_TYPE=[ 
