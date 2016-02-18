@@ -6,7 +6,9 @@ from time import sleep
 from scans.scanner import Scanner
 
 
-
+'''
+doit être appelé par une crontab pour déclencher le lancement des scans plannifiés pour la journée en cours
+'''
 
 
 
