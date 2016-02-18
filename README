@@ -1,0 +1,34 @@
+###########################################################################
+                          # SOC PROJECT #
+###########################################################################
+
+
+1) PRESENTATION
+  Projet de mise en place d'un SOC (Security Operating Center) alléger.
+  
+  Cette interface WEB développé en Python à l'aide du framework DJANGO s'interface avec:
+  - Nessus > Scanner de vulnérabilitées
+  - Nmap > scanner de port et détéection de versions des services et OS 
+  
+  Les résultats des scans servent à alimenter la base de données.
+  
+  L'interface permet de:
+    - avoir une vision de la vulnérabilitée de chaque appli métier et serveur
+    - génerer des rapports de vulnérabilitées pour des machines et/ou applications données
+    - déclencher des scans de vulnérabilitées de façon périodique
+  
+  
+2) Prérequis:
+  - PostgreSQL
+  - Nessus
+  - Apache configuré en frontal avec mod-wsgi
+  
+  
+3) Installation
+  A VENIR
+  
+  
+4) Reste à faire:
+  - Envoie des rapports par mail
+  - Gestion des erreurs
+  - Dockerization de l'infrastructure
