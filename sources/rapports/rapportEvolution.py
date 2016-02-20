@@ -11,6 +11,19 @@ import socket
 import ConfigParser
 import codecs
 
+
+'''
+La fonction permet de génerer un rapport PDF
+ce rapport d'évolution peut être généré à la suite de chaque scan
+
+Il montre l'évolution des vulnérabilités rencontrés, pour une même machine,
+depuis la date du dernier scan 
+
+Le rapport est généré à l'aide de Latex
+'''
+
+
+#Variables globales
 BASE='/var/www/html/soc/'
 REP_TRAVAIL=BASE+'rapports/generationRapports/rapportEvolution/'
 REP_RAPPORT=BASE+'rapports/rapports/'
@@ -123,6 +136,7 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
 	liste_arguments=[REP_TRAVAIL,nomUnique,chemin_rapport]
 
 	#Contrôle des arguments
+	#On s'assure qu'il n'y ait pas d'injection de codes tiers
 	for arg in liste_arguments:
 		error=re.search('[;|<>]',str(arg))
 
@@ -130,7 +144,7 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
 			raise Exception("Erreur de paramètres")
 
 
-	#Necessaire pour la creation des lien
+	#Necessaire pour la creation des liens dans le sommaire vers les différentes parties
 	for i in range(0,3):
 		try:
 			subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+nomUnique+'.tex >/dev/null'],shell=True)

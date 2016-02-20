@@ -49,6 +49,9 @@ def modifListeScan(tableauDict):
 
 
 def valideIP(adresse):
+	'''
+	Permet de valider une adresse IP
+	'''
 	try:
 		octet=str(adresse).split('.')
 		if (len(octet)!=4):
@@ -80,6 +83,11 @@ def valideMAC(mac):
 
 	
 def calculCriticite(ip):
+	'''
+	Permet de définir le niveau de vulnérabilité d'une machine en fonction
+	du nombre et du type de vulnérabilités auquelles elle est soumise
+	'''
+
 	try:
 		dicGraph={}	
 		cursor=connection.cursor()

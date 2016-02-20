@@ -2,6 +2,10 @@
 from fonctions import toString
 
 def tableauServices(dictServices,cheminFichier='./file.tex'):
+'''
+Cette fonction créer un tableau regroupant les différents services 
+'''
+
 	fichierLatex=open(cheminFichier,'a')
 	fichierLatex.write('''
 \\subsection{Nmap}

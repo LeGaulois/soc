@@ -3,6 +3,9 @@ from django import forms
 
 
 class getPDF_formulaire(forms.Form):
+	'''
+	Formulaire pour la demande de generation d'un rapport de vulnérabilités/solutions
+	'''
 	def __init__(self,*args,**kwargs):
 		liste_adresses=kwargs.pop('liste_ip')		
 
@@ -30,7 +33,6 @@ class getPDF_formulaire(forms.Form):
 		super(getPDF_formulaire,self).__init__(*args,**kwargs)
 		self.fields['nom']=forms.CharField(label="NomRapport",max_length=50,required=True)
 		self.fields['group_by']=forms.CharField(label="Group By",max_length=4,widget=forms.Select( choices=LISTE_GROUP_BY),required=True)
-		#self.fields['liste_ip']=forms.MultipleChoiceField(label='Adresses',choices=LISTE_IP,required=True, widget=forms.SelectMultiple(attrs={'size':'10'}))
 		self.fields['type_selection']=forms.CharField(label="Selection par",max_length=40,widget=forms.Select( choices=[('',''),('id_adresses','ip'),('id_applis','appli')],attrs={'onchange':'Selection()'}),required=True,initial='')
 		self.fields['adresses']=forms.MultipleChoiceField(label='Adresses',choices=LISTE_IP,required=False, widget=forms.SelectMultiple(attrs={'size':'10','style':'display:none'}))
 		self.fields['applis']=forms.MultipleChoiceField(label='Applis',choices=LISTE_APPLI,required=False, widget=forms.SelectMultiple(attrs={'size':'10','style':'display:none'}))

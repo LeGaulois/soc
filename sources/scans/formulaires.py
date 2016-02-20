@@ -5,6 +5,9 @@ import re
 
 ##############################################################################################################################"
 class scanPlannifie(forms.Form):
+	'''
+	Formulaire de création et d'éditions d'un scan Plannifié
+	'''
 	def __init__(self,*args,**kwargs):
 
 		try:
@@ -149,7 +152,6 @@ class scanPlannifie(forms.Form):
 		self.fields['nessus_policy']=forms.CharField(label="Nessus Policy",max_length=40,initial=self.nessus_policy,widget=forms.Select( choices=LISTE_POLICIES),required=True)
 		self.fields['jours']=forms.MultipleChoiceField(label='Jours',choices=self.LISTE_JOUR,required=False, widget=forms.SelectMultiple(attrs={'size':'7'}))
 		self.initial['jours']=JOURS_SELECTIONNES
-		#self.fields['adresses']=forms.MultipleChoiceField(label='Adresses',choices=LISTE_IP,required=False, widget=forms.SelectMultiple(attrs={'size':'10'}))
 
 		self.fields['type_selection']=forms.CharField(label="Selection par",max_length=40,widget=forms.Select( choices=[('',''),('id_adresses','adresses ip'),('id_applis','applications')],attrs={'onchange':'Selection()','onload':'Selection()'}),required=True,initial=selection_initiale)
 		self.fields['adresses']=forms.MultipleChoiceField(label='Adresses',choices=LISTE_IP,required=False, widget=forms.SelectMultiple(attrs={'size':'10','style':'display:none'}))
@@ -201,6 +203,9 @@ class scanPlannifie(forms.Form):
 
 ##############################################################################################################################"
 class scanManuel(forms.Form):
+	'''
+	Formulaire de création et d'éditions d'un scan manuel
+	'''
 	def __init__(self,*args,**kwargs):
 
 		ip=kwargs.pop('ip')

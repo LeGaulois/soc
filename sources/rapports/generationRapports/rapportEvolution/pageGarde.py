@@ -1,6 +1,10 @@
 #-*- coding: utf-8 -*-
 
 def pageGarde(titre,auteur,entreprise,cheminImage,cheminFichier='./file.tex'):
+'''
+Cette fonction permet de génerer la page de garde du fichier Latex
+'''
+
 	fichierLatex=open(cheminFichier,'a')
 	temp=titre.split('\n')
 	titre=temp[0]

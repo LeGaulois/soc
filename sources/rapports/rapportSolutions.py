@@ -12,6 +12,20 @@ import ConfigParser
 import codecs
 import re
 
+
+'''
+La fonction permet de génerer un rapport PDF
+ce rapport présente pour chaque serveur selectionné:
+	- la liste des vulnrébilités auquelles il est soumis
+	- les actions à adopter pour les corriger
+
+La sélection des IP peut se faire soit par adresse IP, ou bien par application.
+
+Le rapport est généré à l'aide de Latex
+'''
+
+
+#Variables globales
 BASE='/var/www/html/soc/'
 REP_TRAVAIL=BASE+'rapports/generationRapports/rapportSolutions/'
 REP_RAPPORT=BASE+'rapports/rapports/'
@@ -111,6 +125,7 @@ LEFT JOIN vulnerabilitees ON id_vuln=id WHERE criticite!='Info' ORDER BY ip_hote
 
 
 	#Mise en forme du titre
+	#Rappel: en latex les caractères spéciaux (_,& doivent être échappés), sinon erreur de compilation
 	titre=titre.replace('&','\&').replace('_','')
 
 
@@ -135,7 +150,7 @@ LEFT JOIN vulnerabilitees ON id_vuln=id WHERE criticite!='Info' ORDER BY ip_hote
 			raise Exception("Erreur de paramètres")
 
 
-	#Necessaire pour la creation des lien
+	#Necessaire pour la creation des liens dans le sommaire vers les différentes parties
 	for i in range(0,3):
 		try:
 			subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+titre+'.tex >/dev/null'],shell=True)

@@ -76,6 +76,9 @@ def liste(request):
 @login_required
 @ensure_csrf_cookie
 def ajout(request):
+	'''
+	cette vue permet d'ajouter une application en base
+	'''
 	cursor=connection.cursor()
 	cursor.execute('SELECT DISTINCT(nom) FROM application')
 	noms=dictfetchall(cursor)
@@ -111,6 +114,9 @@ def ajout(request):
 @login_required
 @ensure_csrf_cookie
 def edit(request,id_application):
+	'''
+	cette vue permet d'éditer une application présente en base
+	'''
 	cursor=connection.cursor()
 	cursor.execute('SELECT DISTINCT(nom) FROM application')
 	noms=dictfetchall(cursor)
@@ -150,6 +156,9 @@ def edit(request,id_application):
 
 @login_required
 def identite(request,id_application):
+	'''
+	cette vue permet d'afficher une description détaillée d'une application
+	'''
 	cursor=connection.cursor()
 
 	cursor.execute('SELECT * FROM application WHERE id=%s',[id_application])
@@ -169,6 +178,9 @@ WHERE id_application=%s''',[id_application])
 @login_required
 @ensure_csrf_cookie
 def suppression(request,id_application):
+	'''
+	cette vue permet de supprimer une application
+	'''
 	cursor=connection.cursor()
 
 	cursor.execute('SELECT * FROM application WHERE id=%s',[id_application])
@@ -177,6 +189,7 @@ def suppression(request,id_application):
 
 	if request.method == 'POST':
 		try:
+			#On vérifie que l'utilisateur ait bien coché la case de confirmation
 			confirmation=request.POST['confirmation']
 
 		except (KeyError):

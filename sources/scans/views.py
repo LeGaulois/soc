@@ -17,6 +17,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 @login_required
 def status_scans_manuels(request):
+	'''
+	Affiche le status de l'ensemble des scans démarrés manuellement
+	'''
 	cursor=connection.cursor()
 
 	cursor.execute('''SELECT date_lancement,date_fin,etat,scans_status.id,scan_manuel_status.id_scan_manuel FROM scans_status 
@@ -47,6 +50,10 @@ ORDER BY date_lancement DESC''')
 
 @login_required
 def status_scans_plannifies(request):
+	'''
+	Affiche le status de l'ensemble des scans plannifiés qui ont été démarré
+	'''
+	
 	cursor=connection.cursor()
 	cursor.execute('''SELECT scans_status.date_lancement,scans_status.date_fin,scans_status.etat,scans_plannifies.nom FROM scans_status 
 LEFT JOIN scan_plannifie_status ON scans_status.id=scan_plannifie_status.id_scans_status
@@ -61,6 +68,9 @@ ORDER BY scans_status.date_lancement DESC''')
 
 @login_required
 def liste_scans_plannifies(request):
+	'''
+	Liste l'ensemble des scans plannifiés
+	'''
 	cursor=connection.cursor()
 	cursor.execute('''SELECT * FROM (
 SELECT DISTINCT ON(scans_plannifies.id) nom,description,nmap,nessus,nessus_policy_id,scans_plannifies.id,scans_status.etat FROM scans_plannifies 
@@ -79,6 +89,9 @@ LEFT JOIN scans_plannifies ON scans_plannifies.id=scan_plannifie_status.id_scan_
 @login_required
 @ensure_csrf_cookie
 def ajoutScanPlannifie(request):
+	'''
+	Vue permettant l'ajout d'un nouveau scan  plannifié
+	'''
 	cursor=connection.cursor()
 	cursor.execute('SELECT DISTINCT(ip) FROM hotes ORDER BY ip')
 	liste_ip_existantes=dictfetchall(cursor)
@@ -159,6 +172,9 @@ def ajoutScanPlannifie(request):
 @login_required
 @ensure_csrf_cookie
 def editScanPlannifie(request,id_scan_plannifie):
+	'''
+	Permet d'éditer les paramètres d'un scan plannifié
+	'''
 	cursor=connection.cursor()
 	cursor.execute('SELECT DISTINCT(ip) FROM hotes ORDER BY ip')
 	liste_ip_existantes=dictfetchall(cursor)
@@ -249,6 +265,10 @@ WHERE id_scan_plannifie=%s''',[id_scan_plannifie])
 @login_required
 @ensure_csrf_cookie
 def suppression(request,id):
+	'''
+	Permet la suppression d'un scan plannifié
+	La vue attend la confirmation de l'utilisateur
+	'''
 	cursor=connection.cursor()
 
 	#Requete Info Host
@@ -276,6 +296,7 @@ def suppression(request,id):
 @login_required
 @ensure_csrf_cookie
 def ajoutScanManuel(request, ip=None):
+
 	cursor=connection.cursor()
 	cursor.execute('SELECT DISTINCT(ip) FROM hotes ORDER BY ip')
 	liste_ip=dictfetchall(cursor)

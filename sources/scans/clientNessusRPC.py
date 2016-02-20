@@ -6,6 +6,17 @@ import sys
 import ConfigParser
 import codecs
 
+
+'''
+Cette fonction permet d'appeler des fonctionnalités de Nessus
+Elle sera utilisé typiquement pour:
+	- lancer de nouveaux scans
+	- afficher la liste des policies définis (formulaire) 
+'''
+
+
+
+#Variables globales
 Config = ConfigParser.ConfigParser()
 Config.readfp(codecs.open("/var/www/html/soc/soc/default.cfg","r","utf-8"))
 

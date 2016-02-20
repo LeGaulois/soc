@@ -15,6 +15,14 @@ from rapportSolutions import creerRapportSolutions
 
 @login_required
 def getRapport(request,id_scan,type_scan,type_rapport):
+	'''
+	Cette vue permet d'obtenir un rapport d'évolution ou la rapport Nessus résultant d'un scan
+	Les rapports étant générés automatiquement à la fin de chaque scan réussi,
+	la fonction test si le rapport existe:
+		- si oui le renvoir
+		- si non renvoie vers la page approprié
+	'''
+
 	try:
 		id_scan=int(id_scan)
 	except:
@@ -82,6 +90,10 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
 
 @login_required
 def getPDF(request):
+	'''
+	Cette vue permet d'obtenir un rapport de vulnérabilités et solutions pour une liste de serveurs
+	La sélection se faisant via appel d'un formulaire 
+	'''
 	cursor=connection.cursor()
 	cursor.execute('SELECT DISTINCT(ip) FROM hotes ORDER BY ip')
 	liste_ip=dictfetchall(cursor)

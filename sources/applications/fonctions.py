@@ -8,7 +8,7 @@ from math import floor
 
 
 def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
+    "Retourne le resultat d'une requête SQL dans un tableau de dictionnaire"
     columns = [col[0] for col in cursor.description]
     return [
         dict(zip(columns, row))

@@ -2,6 +2,9 @@
 from django import forms
 
 class formFiltreApplis(forms.Form):
+'''
+Gère le formulaire de filtrage des applications
+'''
 	def __init__(self,*args,**kwargs):
 		self.criticite=kwargs.pop('criticite')
 
@@ -52,7 +55,9 @@ class formFiltreApplis(forms.Form):
 
 
 class formEditApplication(forms.Form):
-
+'''
+Gère le formulaire d'ajout et d'édition d'une application
+'''
 	def __init__(self,*args,**kwargs):
 		try:
 			appli=kwargs.pop('dic')

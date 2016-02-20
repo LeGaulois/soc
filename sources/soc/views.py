@@ -56,6 +56,10 @@ def logout_view(request):
 
 
 def view_locale(request):
+	'''
+	Cette vue permet de tester que framework soit bien 
+	en UTF8
+	'''
 	loc_info = "getlocale: " + str(locale.getlocale()) + \
         "<br/>getdefaultlocale(): " + str(locale.getdefaultlocale()) + \
         "<br/>fs_encoding: " + str(sys.getfilesystemencoding()) + \

@@ -49,6 +49,10 @@ class Scanner(threading.Thread):
 		tz = pytz.timezone('Europe/Paris')
 		d=datetime.datetime.now()
 		self.date_lancement=tz.localize(d)
+
+		#Le nom unique sera utilisé pour:
+		#	- le nom du rapport PDF
+		#	- l'instance de log 
 		self.nom_unique=str(id_scan)+'__'+str(self.date_lancement).replace(' ','_').split('.')[0]
 
 
@@ -102,16 +106,15 @@ class Scanner(threading.Thread):
 				ScannerNessus.lancerScan(id_nessus)
 
 
-				#while (ScannerNessus.statusScan(id_nessus))=='running':
-				#	time.sleep(10)
-				#Dans le cas ou le scan dure trop longtemps, la session passe en timeout
-				#On se reconnecte donc
+
 				while True:
 					try:
 						if (ScannerNessus.statusScan(id_nessus))!='running':
 							break
 
 					except Exception as e:
+						#Dans le cas ou le scan dure trop longtemps, la session passe en timeout
+						#On se reconnecte donc
 						if(str(e)=='Invalid Credentials'):
 							ScannerNessus.connexion()
 						else:
@@ -196,7 +199,6 @@ class Scanner(threading.Thread):
 						parserNessusCsv(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv',self.id_scan,False)
 						continuer=True
 						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nessus reussi','info')
-						#raise ErreurScanNessus('Service(s) non present(s) en base')
 
 
 				os.remove(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv')

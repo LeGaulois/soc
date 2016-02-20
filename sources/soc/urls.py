@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^vulns/', include('vulns.urls',app_name='vulns',namespace='vulns')),
     url(r'^accounts/login/', views.login_view,name='login_view'),
     url(r'^accounts/logout/', views.logout_view,name='logout_view'),
-    url(r'^codage/', views.view_locale,name='view_locale'),
+    #url(r'^codage/', views.view_locale,name='view_locale'),
 ]
 
 handler400='soc.views.erreur400'

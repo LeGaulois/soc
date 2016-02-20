@@ -1,6 +1,9 @@
 #-*- coding: utf-8 -*-
 
 def tableauVuln(dictVuln,cheminFichier='./file.tex'):
+'''
+Cette fonction créer un tableau regroupant les différentes vulnérabilitées 
+'''
 	fichierLatex=open(cheminFichier,'a')
 	fichierLatex.write('''
 \\subsection{Nessus}

@@ -3,6 +3,11 @@ import subprocess
 from fonctions import valideIP
 import re
 
+
+'''
+Cette fonction permet de lancer un scan nmap
+'''
+
 def lancerScanNmap(tableau_adresse,options,fichier_sortie):
 	adresse=''
 

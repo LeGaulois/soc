@@ -2,6 +2,9 @@
 from logging.handlers import RotatingFileHandler
 import logging
 
+'''
+Permet de logger les erreurs
+'''
 
 class log(object):
 	def __init__(self,fichier,instance):

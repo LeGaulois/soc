@@ -156,6 +156,11 @@ LEFT JOIN scans_status ON scan_hote.id_scan=scans_status.id '''
 			precedent=False
 			valeurs_filtres=[]
 
+			#L'ensemble des variables de filtres sont placés dans un tableau qui seran appelé
+			#par la session debian au moment de la requête. Cela permet:
+			#	- de réduire le code
+			#	- de profiter de la protection contre les injections SQL 
+
 			for filtre in liste_filtres.keys():
 				valeur_filtre=str(liste_filtres[filtre])
 
