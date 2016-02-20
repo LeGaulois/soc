@@ -194,15 +194,20 @@ class formEditMachine(forms.Form):
 			APPLIS_SELECTIONNEES=[]
 			application=None
 
-			if len(liste_applis)<=1:
+			taille_liste=len(liste_applis)
+
+			if taille_liste==1:
 				application=liste_applis[0]['nom']
+
+			elif taille_liste==0:
+				application=''
 
 			else:
 				selection_initiale='id_backend'
 				for appli in liste_applis:
 					APPLIS_SELECTIONNEES.append(appli['nom'])
-
-
+	
+			del taille_liste
 			del liste_applis
 			self.adresses=[]
 	

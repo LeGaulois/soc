@@ -82,30 +82,35 @@ LEFT JOIN scans_status ON (SELECT scan_manuel_status.id_scans_status FROM scan_m
 ORDER by hotes.ip) p ORDER BY ip''')
 
 	temp_liste_machines=dictfetchall(cursor)
-
-	precedent=temp_liste_machines[0]
-	premier=True
-	liste_machines=[]
 	taille=len(temp_liste_machines)
+	liste_machines=[]
+
+
+	if taille>1:
+		precedent=temp_liste_machines[0]
+		premier=True
 
 	
-	#Sert à obtenir une seule et unique entre par machine
-	#Pour les machines ayant un rôle dans plusieurs applis (ex BDD)
-	#on regroupe en uen seule entree avec pour nom d'appli Backend: appli1, appli2,....
-	for i in range(1,taille):
-		test=(temp_liste_machines[i]['ip'])==str(precedent['ip'])
+		#Sert à obtenir une seule et unique entre par machine
+		#Pour les machines ayant un rôle dans plusieurs applis (ex BDD)
+		#on regroupe en uen seule entree avec pour nom d'appli Backend: appli1, appli2,....
+		for i in range(1,taille):
+			test=(temp_liste_machines[i]['ip'])==str(precedent['ip'])
 
-		if test==True:
-			if premier==True:
-				precedent['nom']='Backend: '+str(temp_liste_machines[i]['nom'])+' ,'+str(precedent['nom'])
-				premier=False
-			else:
-				precedent['nom']+=' ,'+str(temp_liste_machines[i]['nom'])
+			if test==True:
+				if premier==True:
+					precedent['nom']='Backend: '+str(temp_liste_machines[i]['nom'])+' ,'+str(precedent['nom'])
+					premier=False
+				else:
+					precedent['nom']+=' ,'+str(temp_liste_machines[i]['nom'])
 
-		if (test==False) or (i==(taille-1)):
-			liste_machines.append(precedent)
-			precedent=temp_liste_machines[i]
-			premier=True
+			if (test==False) or (i==(taille-1)):
+				liste_machines.append(precedent)
+				precedent=temp_liste_machines[i]
+				premier=True
+
+	elif taille==1:
+		liste_machines.append(temp_liste_machines[0])
 			
 
 	cursor.execute('SELECT DISTINCT os FROM hotes ORDER BY os ASC')
