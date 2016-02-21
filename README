@@ -28,7 +28,12 @@
   A VENIR
   
   
-4) Reste à faire:
+4) Reste à faire "code":
   - Envoie des rapports par mail
   - Gestion des erreurs
-  - Dockerization de l'infrastructure
+  
+  
+5) Reste à faire "Docker":
+  - gestion SSL
+  - documentation installation (nessus et django)
+
