@@ -1,0 +1,1144 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'SQL_ASCII';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: application; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE application (
+    id integer NOT NULL,
+    nom character varying(50),
+    description character varying(65536),
+    criticite character varying(10),
+    nb_utilisateurs integer,
+    type character varying(50),
+    technologies character varying(250)
+);
+
+
+ALTER TABLE application OWNER TO django_db;
+
+--
+-- Name: application_hote; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE application_hote (
+    ip inet NOT NULL,
+    id_application integer NOT NULL
+);
+
+
+ALTER TABLE application_hote OWNER TO django_db;
+
+--
+-- Name: application_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE application_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE application_id_seq OWNER TO django_db;
+
+--
+-- Name: application_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE application_id_seq OWNED BY application.id;
+
+
+--
+-- Name: hotes; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE hotes (
+    ip inet NOT NULL,
+    mac macaddr,
+    hostname character varying(50),
+    os character varying(60),
+    famille_os character varying(30),
+    type_machine character varying(20),
+    localisation character varying(20),
+    environnement character varying(20),
+    vulnerabilite character varying(10),
+    nb_services integer,
+    nb_vulnerabilites integer,
+    scan_journalier boolean,
+    commentaires character varying(250)
+);
+
+
+ALTER TABLE hotes OWNER TO django_db;
+
+--
+-- Name: refs; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE refs (
+    nom character varying(20),
+    id integer NOT NULL
+);
+
+
+ALTER TABLE refs OWNER TO django_db;
+
+--
+-- Name: refs_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE refs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE refs_id_seq OWNER TO django_db;
+
+--
+-- Name: refs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE refs_id_seq OWNED BY refs.id;
+
+
+--
+-- Name: scan_hote; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scan_hote (
+    ip inet NOT NULL,
+    id_scan integer NOT NULL
+);
+
+
+ALTER TABLE scan_hote OWNER TO django_db;
+
+--
+-- Name: scan_manuel_hote; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scan_manuel_hote (
+    ip_hote inet NOT NULL,
+    id_scan_manuel integer NOT NULL
+);
+
+
+ALTER TABLE scan_manuel_hote OWNER TO django_db;
+
+--
+-- Name: scan_manuel_status; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scan_manuel_status (
+    id_scans_status integer NOT NULL,
+    id_scan_manuel integer NOT NULL
+);
+
+
+ALTER TABLE scan_manuel_status OWNER TO django_db;
+
+--
+-- Name: scan_plannifie_application; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scan_plannifie_application (
+    id_application integer NOT NULL,
+    id_scan_plannifie integer NOT NULL
+);
+
+
+ALTER TABLE scan_plannifie_application OWNER TO django_db;
+
+--
+-- Name: scan_plannifie_hote; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scan_plannifie_hote (
+    id_scan_plannifie integer NOT NULL,
+    ip_hote inet NOT NULL
+);
+
+
+ALTER TABLE scan_plannifie_hote OWNER TO django_db;
+
+--
+-- Name: scan_plannifie_status; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scan_plannifie_status (
+    id_scans_status integer NOT NULL,
+    id_scan_plannifie integer NOT NULL
+);
+
+
+ALTER TABLE scan_plannifie_status OWNER TO django_db;
+
+--
+-- Name: scans_status; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scans_status (
+    date_fin timestamp with time zone,
+    etat character varying(10),
+    type character varying(15),
+    id integer NOT NULL,
+    date_lancement timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE scans_status OWNER TO django_db;
+
+--
+-- Name: scans_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE scans_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE scans_id_seq OWNER TO django_db;
+
+--
+-- Name: scans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE scans_id_seq OWNED BY scans_status.id;
+
+
+--
+-- Name: scans_manuels; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scans_manuels (
+    id integer NOT NULL,
+    nmap boolean,
+    nmap_options character varying(50),
+    nessus boolean,
+    nessus_policy_id integer
+);
+
+
+ALTER TABLE scans_manuels OWNER TO django_db;
+
+--
+-- Name: scans_manuels_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE scans_manuels_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE scans_manuels_id_seq OWNER TO django_db;
+
+--
+-- Name: scans_manuels_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE scans_manuels_id_seq OWNED BY scans_manuels.id;
+
+
+--
+-- Name: scans_plannifies; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE scans_plannifies (
+    nom character varying(30),
+    description character varying(200),
+    nmap boolean,
+    nessus boolean,
+    nessus_policy_id integer,
+    id integer NOT NULL,
+    nmap_options character varying(50),
+    jours_execution character varying(51)
+);
+
+
+ALTER TABLE scans_plannifies OWNER TO django_db;
+
+--
+-- Name: scans_plannifies_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE scans_plannifies_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE scans_plannifies_id_seq OWNER TO django_db;
+
+--
+-- Name: scans_plannifies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE scans_plannifies_id_seq OWNED BY scans_plannifies.id;
+
+
+--
+-- Name: services; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE services (
+    protocole character varying(4) NOT NULL,
+    port integer,
+    etat character varying(15),
+    nom character varying(50),
+    type character varying(20),
+    version character varying(50),
+    ip_hote inet NOT NULL,
+    date_ajout timestamp with time zone NOT NULL,
+    date_retrait timestamp with time zone,
+    id integer NOT NULL,
+    CONSTRAINT services_port_check CHECK ((port > 0))
+);
+
+
+ALTER TABLE services OWNER TO django_db;
+
+--
+-- Name: services_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE services_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE services_id_seq OWNER TO django_db;
+
+--
+-- Name: services_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE services_id_seq OWNED BY services.id;
+
+
+--
+-- Name: vuln_hote_service; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE vuln_hote_service (
+    ip_hote inet NOT NULL,
+    id_service integer,
+    id_vuln integer NOT NULL,
+    date_detection timestamp with time zone NOT NULL,
+    date_correction timestamp with time zone,
+    retour_vuln character varying(65536)
+);
+
+
+ALTER TABLE vuln_hote_service OWNER TO django_db;
+
+--
+-- Name: vulnerabilitees; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE vulnerabilitees (
+    plugin_id integer,
+    criticite character varying(10),
+    nom character varying(255),
+    description character varying(65536),
+    synopsis character varying(255),
+    solution character varying(65536),
+    infos_complementaires character varying(500),
+    id integer NOT NULL
+);
+
+
+ALTER TABLE vulnerabilitees OWNER TO django_db;
+
+--
+-- Name: vulnerabilitees_id_seq; Type: SEQUENCE; Schema: public; Owner: django_db
+--
+
+CREATE SEQUENCE vulnerabilitees_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE vulnerabilitees_id_seq OWNER TO django_db;
+
+--
+-- Name: vulnerabilitees_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: django_db
+--
+
+ALTER SEQUENCE vulnerabilitees_id_seq OWNED BY vulnerabilitees.id;
+
+
+--
+-- Name: vulns_refs; Type: TABLE; Schema: public; Owner: django_db; Tablespace: 
+--
+
+CREATE TABLE vulns_refs (
+    vuln_id integer NOT NULL,
+    ref_id integer NOT NULL
+);
+
+
+ALTER TABLE vulns_refs OWNER TO django_db;
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY application ALTER COLUMN id SET DEFAULT nextval('application_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY refs ALTER COLUMN id SET DEFAULT nextval('refs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scans_manuels ALTER COLUMN id SET DEFAULT nextval('scans_manuels_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scans_plannifies ALTER COLUMN id SET DEFAULT nextval('scans_plannifies_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scans_status ALTER COLUMN id SET DEFAULT nextval('scans_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY services ALTER COLUMN id SET DEFAULT nextval('services_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY vulnerabilitees ALTER COLUMN id SET DEFAULT nextval('vulnerabilitees_id_seq'::regclass);
+
+
+--
+-- Data for Name: application; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY application (id, nom, description, criticite, nb_utilisateurs, type, technologies) FROM stdin;
+\.
+
+
+--
+-- Data for Name: application_hote; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY application_hote (ip, id_application) FROM stdin;
+\.
+
+
+--
+-- Name: application_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('application_id_seq', 50, true);
+
+
+--
+-- Data for Name: hotes; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY hotes (ip, mac, hostname, os, famille_os, type_machine, localisation, environnement, vulnerabilite, nb_services, nb_vulnerabilites, scan_journalier, commentaires) FROM stdin;
+\.
+
+
+--
+-- Data for Name: refs; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY refs (nom, id) FROM stdin;
+\.
+
+
+--
+-- Name: refs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('refs_id_seq', 247, true);
+
+
+--
+-- Data for Name: scan_hote; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scan_hote (ip, id_scan) FROM stdin;
+\.
+
+
+--
+-- Data for Name: scan_manuel_hote; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scan_manuel_hote (ip_hote, id_scan_manuel) FROM stdin;
+\.
+
+
+--
+-- Data for Name: scan_manuel_status; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scan_manuel_status (id_scans_status, id_scan_manuel) FROM stdin;
+\.
+
+
+--
+-- Data for Name: scan_plannifie_application; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scan_plannifie_application (id_application, id_scan_plannifie) FROM stdin;
+\.
+
+
+--
+-- Data for Name: scan_plannifie_hote; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scan_plannifie_hote (id_scan_plannifie, ip_hote) FROM stdin;
+\.
+
+
+--
+-- Data for Name: scan_plannifie_status; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scan_plannifie_status (id_scans_status, id_scan_plannifie) FROM stdin;
+\.
+
+
+--
+-- Name: scans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('scans_id_seq', 185, true);
+
+
+--
+-- Data for Name: scans_manuels; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scans_manuels (id, nmap, nmap_options, nessus, nessus_policy_id) FROM stdin;
+\.
+
+
+--
+-- Name: scans_manuels_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('scans_manuels_id_seq', 31, true);
+
+
+--
+-- Data for Name: scans_plannifies; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scans_plannifies (nom, description, nmap, nessus, nessus_policy_id, id, nmap_options, jours_execution) FROM stdin;
+\.
+
+
+--
+-- Name: scans_plannifies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('scans_plannifies_id_seq', 11, true);
+
+
+--
+-- Data for Name: scans_status; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY scans_status (date_fin, etat, type, id, date_lancement) FROM stdin;
+\.
+
+
+--
+-- Data for Name: services; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY services (protocole, port, etat, nom, type, version, ip_hote, date_ajout, date_retrait, id) FROM stdin;
+\.
+
+
+--
+-- Name: services_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('services_id_seq', 1790, true);
+
+
+--
+-- Data for Name: vuln_hote_service; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY vuln_hote_service (ip_hote, id_service, id_vuln, date_detection, date_correction, retour_vuln) FROM stdin;
+\.
+
+
+--
+-- Data for Name: vulnerabilitees; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY vulnerabilitees (plugin_id, criticite, nom, description, synopsis, solution, infos_complementaires, id) FROM stdin;
+\.
+
+
+--
+-- Name: vulnerabilitees_id_seq; Type: SEQUENCE SET; Schema: public; Owner: django_db
+--
+
+SELECT pg_catalog.setval('vulnerabilitees_id_seq', 462, true);
+
+
+--
+-- Data for Name: vulns_refs; Type: TABLE DATA; Schema: public; Owner: django_db
+--
+
+COPY vulns_refs (vuln_id, ref_id) FROM stdin;
+\.
+
+
+--
+-- Name: application_hote_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY application_hote
+    ADD CONSTRAINT application_hote_pkey PRIMARY KEY (ip, id_application);
+
+
+--
+-- Name: application_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY application
+    ADD CONSTRAINT application_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: hotes_mac_key; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY hotes
+    ADD CONSTRAINT hotes_mac_key UNIQUE (mac);
+
+
+--
+-- Name: hotes_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY hotes
+    ADD CONSTRAINT hotes_pkey PRIMARY KEY (ip);
+
+
+--
+-- Name: refs_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY refs
+    ADD CONSTRAINT refs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scan_hote_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scan_hote
+    ADD CONSTRAINT scan_hote_pkey PRIMARY KEY (ip, id_scan);
+
+
+--
+-- Name: scan_manuel_hote_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scan_manuel_hote
+    ADD CONSTRAINT scan_manuel_hote_pkey PRIMARY KEY (ip_hote, id_scan_manuel);
+
+
+--
+-- Name: scan_manuel_status_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scan_manuel_status
+    ADD CONSTRAINT scan_manuel_status_pkey PRIMARY KEY (id_scans_status, id_scan_manuel);
+
+
+--
+-- Name: scan_plannifie_application_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scan_plannifie_application
+    ADD CONSTRAINT scan_plannifie_application_pkey PRIMARY KEY (id_application, id_scan_plannifie);
+
+
+--
+-- Name: scan_plannifie_hote_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scan_plannifie_hote
+    ADD CONSTRAINT scan_plannifie_hote_pkey PRIMARY KEY (id_scan_plannifie, ip_hote);
+
+
+--
+-- Name: scan_plannifie_status_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scan_plannifie_status
+    ADD CONSTRAINT scan_plannifie_status_pkey PRIMARY KEY (id_scans_status, id_scan_plannifie);
+
+
+--
+-- Name: scans_manuels_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scans_manuels
+    ADD CONSTRAINT scans_manuels_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scans_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scans_status
+    ADD CONSTRAINT scans_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scans_plannifies_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY scans_plannifies
+    ADD CONSTRAINT scans_plannifies_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: services_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY services
+    ADD CONSTRAINT services_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: vulnerabilitees_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY vulnerabilitees
+    ADD CONSTRAINT vulnerabilitees_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: vulns_refs_pkey; Type: CONSTRAINT; Schema: public; Owner: django_db; Tablespace: 
+--
+
+ALTER TABLE ONLY vulns_refs
+    ADD CONSTRAINT vulns_refs_pkey PRIMARY KEY (vuln_id, ref_id);
+
+
+--
+-- Name: application_hote_id_application_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY application_hote
+    ADD CONSTRAINT application_hote_id_application_fkey FOREIGN KEY (id_application) REFERENCES application(id) ON DELETE CASCADE;
+
+
+--
+-- Name: application_hote_ip_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY application_hote
+    ADD CONSTRAINT application_hote_ip_fkey FOREIGN KEY (ip) REFERENCES hotes(ip) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_hote_id_scan_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_hote
+    ADD CONSTRAINT scan_hote_id_scan_fkey FOREIGN KEY (id_scan) REFERENCES scans_status(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_hote_ip_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_hote
+    ADD CONSTRAINT scan_hote_ip_fkey FOREIGN KEY (ip) REFERENCES hotes(ip) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_manuel_hote_id_scan_manuel_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_manuel_hote
+    ADD CONSTRAINT scan_manuel_hote_id_scan_manuel_fkey FOREIGN KEY (id_scan_manuel) REFERENCES scans_manuels(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_manuel_hote_ip_hote_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_manuel_hote
+    ADD CONSTRAINT scan_manuel_hote_ip_hote_fkey FOREIGN KEY (ip_hote) REFERENCES hotes(ip) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_manuel_status_id_scan_manuel_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_manuel_status
+    ADD CONSTRAINT scan_manuel_status_id_scan_manuel_fkey FOREIGN KEY (id_scan_manuel) REFERENCES scans_manuels(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_manuel_status_id_scans_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_manuel_status
+    ADD CONSTRAINT scan_manuel_status_id_scans_status_fkey FOREIGN KEY (id_scans_status) REFERENCES scans_status(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_plannifie_application_id_application_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_plannifie_application
+    ADD CONSTRAINT scan_plannifie_application_id_application_fkey FOREIGN KEY (id_application) REFERENCES application(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_plannifie_application_id_scan_plannifie_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_plannifie_application
+    ADD CONSTRAINT scan_plannifie_application_id_scan_plannifie_fkey FOREIGN KEY (id_scan_plannifie) REFERENCES scans_plannifies(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_plannifie_hote_id_scan_plannifie_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_plannifie_hote
+    ADD CONSTRAINT scan_plannifie_hote_id_scan_plannifie_fkey FOREIGN KEY (id_scan_plannifie) REFERENCES scans_plannifies(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_plannifie_hote_ip_hote_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_plannifie_hote
+    ADD CONSTRAINT scan_plannifie_hote_ip_hote_fkey FOREIGN KEY (ip_hote) REFERENCES hotes(ip) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_plannifie_status_id_scan_plannifie_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_plannifie_status
+    ADD CONSTRAINT scan_plannifie_status_id_scan_plannifie_fkey FOREIGN KEY (id_scan_plannifie) REFERENCES scans_plannifies(id) ON DELETE CASCADE;
+
+
+--
+-- Name: scan_plannifie_status_id_scans_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY scan_plannifie_status
+    ADD CONSTRAINT scan_plannifie_status_id_scans_status_fkey FOREIGN KEY (id_scans_status) REFERENCES scans_status(id) ON DELETE CASCADE;
+
+
+--
+-- Name: services_ip_hote_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY services
+    ADD CONSTRAINT services_ip_hote_fkey FOREIGN KEY (ip_hote) REFERENCES hotes(ip) ON DELETE CASCADE;
+
+
+--
+-- Name: vuln_hote_service_id_service_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY vuln_hote_service
+    ADD CONSTRAINT vuln_hote_service_id_service_fkey FOREIGN KEY (id_service) REFERENCES services(id) ON DELETE CASCADE;
+
+
+--
+-- Name: vuln_hote_service_id_vuln_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY vuln_hote_service
+    ADD CONSTRAINT vuln_hote_service_id_vuln_fkey FOREIGN KEY (id_vuln) REFERENCES vulnerabilitees(id) ON DELETE CASCADE;
+
+
+--
+-- Name: vuln_hote_service_ip_hote_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY vuln_hote_service
+    ADD CONSTRAINT vuln_hote_service_ip_hote_fkey FOREIGN KEY (ip_hote) REFERENCES hotes(ip) ON DELETE CASCADE;
+
+
+--
+-- Name: vulns_refs_ref_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY vulns_refs
+    ADD CONSTRAINT vulns_refs_ref_id_fkey FOREIGN KEY (ref_id) REFERENCES refs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: vulns_refs_vuln_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: django_db
+--
+
+ALTER TABLE ONLY vulns_refs
+    ADD CONSTRAINT vulns_refs_vuln_id_fkey FOREIGN KEY (vuln_id) REFERENCES vulnerabilitees(id) ON DELETE CASCADE;
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: application; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE application FROM PUBLIC;
+REVOKE ALL ON TABLE application FROM django_db;
+GRANT ALL ON TABLE application TO django_db;
+
+
+--
+-- Name: application_hote; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE application_hote FROM PUBLIC;
+REVOKE ALL ON TABLE application_hote FROM django_db;
+GRANT ALL ON TABLE application_hote TO django_db;
+
+
+--
+-- Name: application_id_seq; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON SEQUENCE application_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE application_id_seq FROM django_db;
+GRANT ALL ON SEQUENCE application_id_seq TO django_db;
+
+
+--
+-- Name: hotes; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE hotes FROM PUBLIC;
+REVOKE ALL ON TABLE hotes FROM django_db;
+GRANT ALL ON TABLE hotes TO django_db;
+
+
+--
+-- Name: refs; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE refs FROM PUBLIC;
+REVOKE ALL ON TABLE refs FROM django_db;
+GRANT ALL ON TABLE refs TO django_db;
+
+
+--
+-- Name: refs_id_seq; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON SEQUENCE refs_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE refs_id_seq FROM django_db;
+GRANT ALL ON SEQUENCE refs_id_seq TO django_db;
+
+
+--
+-- Name: scan_hote; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE scan_hote FROM PUBLIC;
+REVOKE ALL ON TABLE scan_hote FROM django_db;
+GRANT ALL ON TABLE scan_hote TO django_db;
+
+
+--
+-- Name: scan_plannifie_hote; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE scan_plannifie_hote FROM PUBLIC;
+REVOKE ALL ON TABLE scan_plannifie_hote FROM django_db;
+GRANT ALL ON TABLE scan_plannifie_hote TO django_db;
+
+
+--
+-- Name: scan_plannifie_status; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE scan_plannifie_status FROM PUBLIC;
+REVOKE ALL ON TABLE scan_plannifie_status FROM django_db;
+GRANT ALL ON TABLE scan_plannifie_status TO django_db;
+
+
+--
+-- Name: scans_status; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE scans_status FROM PUBLIC;
+REVOKE ALL ON TABLE scans_status FROM django_db;
+GRANT ALL ON TABLE scans_status TO django_db;
+
+
+--
+-- Name: scans_id_seq; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON SEQUENCE scans_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE scans_id_seq FROM django_db;
+GRANT ALL ON SEQUENCE scans_id_seq TO django_db;
+
+
+--
+-- Name: scans_plannifies; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE scans_plannifies FROM PUBLIC;
+REVOKE ALL ON TABLE scans_plannifies FROM django_db;
+GRANT ALL ON TABLE scans_plannifies TO django_db;
+
+
+--
+-- Name: scans_plannifies_id_seq; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON SEQUENCE scans_plannifies_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE scans_plannifies_id_seq FROM django_db;
+GRANT ALL ON SEQUENCE scans_plannifies_id_seq TO django_db;
+
+
+--
+-- Name: services; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE services FROM PUBLIC;
+REVOKE ALL ON TABLE services FROM django_db;
+GRANT ALL ON TABLE services TO django_db;
+
+
+--
+-- Name: services_id_seq; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON SEQUENCE services_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE services_id_seq FROM django_db;
+GRANT ALL ON SEQUENCE services_id_seq TO django_db;
+
+
+--
+-- Name: vuln_hote_service; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE vuln_hote_service FROM PUBLIC;
+REVOKE ALL ON TABLE vuln_hote_service FROM django_db;
+GRANT ALL ON TABLE vuln_hote_service TO django_db;
+
+
+--
+-- Name: vulnerabilitees; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE vulnerabilitees FROM PUBLIC;
+REVOKE ALL ON TABLE vulnerabilitees FROM django_db;
+GRANT ALL ON TABLE vulnerabilitees TO django_db;
+
+
+--
+-- Name: vulnerabilitees_id_seq; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON SEQUENCE vulnerabilitees_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE vulnerabilitees_id_seq FROM django_db;
+GRANT ALL ON SEQUENCE vulnerabilitees_id_seq TO django_db;
+
+
+--
+-- Name: vulns_refs; Type: ACL; Schema: public; Owner: django_db
+--
+
+REVOKE ALL ON TABLE vulns_refs FROM PUBLIC;
+REVOKE ALL ON TABLE vulns_refs FROM django_db;
+GRANT ALL ON TABLE vulns_refs TO django_db;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

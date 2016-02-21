@@ -1,0 +1,19 @@
+postgresql:
+    build: ./postgresql/install
+    ports:
+        - "5432:5432"
+
+nessus:
+    build: ./nessus/install
+    ports:
+        - "8834:8834" 
+
+django:
+    build: ./django/install
+    volumes:
+        - ./django/data:/var/www/html/soc/
+    ports:
+        - "80:80"
+    links:
+        - postgresql
+        - nessus
