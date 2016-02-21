@@ -31,4 +31,8 @@
 4) Reste à faire:
   - Envoie des rapports par mail
   - Gestion des erreurs
-  - Dockerization de l'infrastructure
+
+
+5) Reste à faire "Docker":
+  - gestion SSL
+  - documentation installation (nessus et django)
