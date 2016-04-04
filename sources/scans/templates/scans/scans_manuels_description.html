@@ -64,7 +64,6 @@
 </div>
 </div>
 
-{% if scan.nessus == True %}
 <div class="container">
 	<div class="span10 offset1">
     				<div class="row">
@@ -73,7 +72,7 @@
 
 	
 	<div class="form-horizontal">
-				{% if scan.etat == "fini" %}
+				{% if scan.etat == "completed" %}
 				<div class="control-group">
 					
 					    <label class="control-label">Rapport Nessus</label>
@@ -92,7 +91,7 @@
 					    </div>
 				 	</div>
 
-				{% elif scan.etat == "encours" %}
+				{% elif scan.etat == "running" %}
 				<div class="control-group">
 				Scan toujours en cours
 				</div>
@@ -110,5 +109,4 @@
 	
 </div>
 </div>
-{% endif %}
 {% endblock %}

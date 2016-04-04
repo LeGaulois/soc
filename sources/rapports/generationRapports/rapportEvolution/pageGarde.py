@@ -1,18 +1,18 @@
 #-*- coding: utf-8 -*-
 
 def pageGarde(titre,auteur,entreprise,cheminImage,cheminFichier='./file.tex'):
-'''
-Cette fonction permet de génerer la page de garde du fichier Latex
-'''
+    '''
+    Cette fonction permet de génerer la page de garde du fichier Latex
+    '''
 
-	fichierLatex=open(cheminFichier,'a')
-	temp=titre.split('\n')
-	titre=temp[0]
+    fichierLatex=open(cheminFichier,'a')
+    temp=titre.split('\n')
+    titre=temp[0]
 
-	for i in range(1,len(temp)):
-		titre+='\\\[+0mm]'+str(temp[i])
+    for i in range(1,len(temp)):
+        titre+='\\\[+0mm]'+str(temp[i])
 
-	fichierLatex.write('''
+    fichierLatex.write('''
 \pagestyle{fancy}
 
 \\renewcommand{\headrulewidth}{1pt}
@@ -34,7 +34,7 @@ Cette fonction permet de génerer la page de garde du fichier Latex
 \\rule{15cm}{1pt}
 \\medskip
 '''
-+titre+
++str(titre)+
 '''
 \\rule{15cm}{1pt}
 \end{center}
@@ -51,5 +51,5 @@ Cette fonction permet de génerer la page de garde du fichier Latex
 \\tableofcontents
 \\newpage''')
 
-	fichierLatex.close()
-	
+    fichierLatex.close()
+    

@@ -22,12 +22,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 #YOU NEED REGENERATE THIS SECRET-KEY VIA:
 # "python manage.py generate_secret_key"
-SECRET_KEY = 'REGENERATE-IT'
+SECRET_KEY = '(xqpofq&165ro4ygchi(1uddv1w%5d+c$fpj-0s4jf*+!@ufb2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['YOUR-FQDN']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,11 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_ajax',
     'serveurs',
     'applications',
     'scans',
     'rapports',
     'vulns',
+    'maintenance',
+    'formtools',
     'django_extensions',
 ]
 
@@ -63,7 +66,7 @@ ROOT_URLCONF = 'soc.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['html/soc/templates/'],
+        'DIRS': [BASE_DIR+'/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,23 +85,14 @@ WSGI_APPLICATION = 'soc.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-'''
-
 DATABASES = {
     'default': {	
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django',
-        'USER': 'django_db',
-	'PASSWORD': 'Django_DB_Pa$$Word',
-        'HOST': 'postgresql',
-        'PORT': '5432',
+		'NAME':'django',
+		'USER':'django_db',
+		'PASSWORD':'',
+		'HOST':'127.0.0.1',
+		'PORT':'5432',
     }
 }
 
@@ -139,4 +133,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')

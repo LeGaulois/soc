@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^scans/', include('scans.urls',app_name='scans',namespace='scans')),
     url(r'^rapports/', include('rapports.urls',app_name='rapports',namespace='rapports')),
     url(r'^vulns/', include('vulns.urls',app_name='vulns',namespace='vulns')),
+    url(r'^maintenance/', include('maintenance.urls',app_name='maintenance',namespace='maintenance')),
     url(r'^accounts/login/', views.login_view,name='login_view'),
     url(r'^accounts/logout/', views.logout_view,name='logout_view'),
     #url(r'^codage/', views.view_locale,name='view_locale'),

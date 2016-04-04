@@ -1,0 +1,23 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+{% load static %}
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.ajax.min.js' %}"></script>
+<script src="{% static 'js/jquery.circliful.js' %}"></script>
+<link href="{% static 'css/jquery.circliful.css' %}" rel="stylesheet" type="text/css" />
+
+
+<div class="container">
+    <div class="row">
+        <h3>Liste des scans en cours</h3>
+    </div>
+
+    <div class="row">
+        <div id='scans_en_cours'>
+        </div>
+
+        <script> $(document).ready(updateScans())</script>
+    </div>
+</div>
+{% endblock %}

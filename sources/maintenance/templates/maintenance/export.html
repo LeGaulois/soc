@@ -1,0 +1,28 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+ <div class="container">
+    		<div class="row">
+    			<h3>Export de configuration</h3>
+    		</div>
+
+    Cette page permet d'exporter la configuration du projet contenant:
+    <ul>
+        <li>le fichier de configuration de django (settings.py)</li>
+        <li>le fichier de configuration du projet (default.cfg)</li>
+        <li>un dump de la base</li>
+    </ul>
+
+    <br><FONT color="red">Attention, les mots de passes sont stockés en clair dans les fichiers !!</FONT>
+
+
+				<form class="form-horizontal" action="{% url 'maintenance:export'%}" method="post">
+					{% csrf_token %}
+
+					<div class="form-actions">
+						<input type="submit" class="btn btn-defaut" value='Exporter'>
+					</div>
+				</form>	
+
+
+</div>
+{% endblock %}

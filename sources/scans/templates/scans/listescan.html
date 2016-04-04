@@ -30,11 +30,11 @@
 	{% if scan.etat == "encours" %}
 	<td><center><img src="{% static 'img/progress.gif' %}" alt="en cours" style="width:30px;height:30px;"></center></td>
 	{% elif scan.etat == "fini" %}
-	<td><center><img src="{% static 'img/ok-reduit.png' %}" alt="fini" style="width:30px;height:30px;"></center></td>
+	<td><center><img src="{% static 'img/ok.png' %}" alt="fini" style="width:30px;height:30px;"></center></td>
 	{%else%}
-	<td><center><img src="{% static 'img/error-reduit.png' %}" alt="erreur" style="width:30px;height:30px;"></center></td>
+	<td><center><img src="{% static 'img/error.png' %}" alt="erreur" style="width:30px;height:30px;"></center></td>
 	{%endif%}
-	<td><a class="btn btn-primary" href="{% url 'scans:parametresScanManuel' scan.id %}">Infos</a></td>
+	<td><a class="btn btn-primary" href="{% url 'scans:parametresScan' scan.id %}">Infos</a></td>
 	</tr>
 {% endfor %}
 </tbody>

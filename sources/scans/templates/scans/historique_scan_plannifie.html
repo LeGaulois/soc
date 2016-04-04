@@ -20,13 +20,22 @@
 </tr>
 </thead>
 <tbody>
-{% for scan in histoScan %}
+{% for scan in scans %}
 	<tr>
 	<td>{{scan.etat}}</td>
 	<td>{{scan.date_lancement}}</td>
 	<td>{{scan.date_fin}}</td>
-	<td><a href="{% url 'rapports:getRapport' scan.id type_scan nessus %}">pdf</a></td>
-	<td><a href="{% url 'rapports:getRapport' scan.id type_scan autre %}">pdf</a></td>
+    {% if scan.nessus %}
+	    <td><a href="{% url 'rapports:getRapport' scan.id type_scan nessus %}">pdf</a></td>
+    {% else %}
+        <td>Indisponible</td>
+    {% endif %}
+
+    {% if scan.evolution %}
+	    <td><a href="{% url 'rapports:getRapport' scan.id type_scan autre %}">pdf</a></td>
+    {% else %}
+        <td>Indisponible</td>
+    {% endif %}
 	</tr>
 {% endfor %}
 </tbody>

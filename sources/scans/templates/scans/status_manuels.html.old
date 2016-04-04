@@ -1,0 +1,83 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+{% load static %}
+<meta http-equiv="refresh" content="20" >
+ <div class="container">
+    		<div class="row">
+    			<h3>Liste des scans manuels</h3>
+    		</div>
+			<div class="row">
+
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.circliful.js' %}"></script>
+<link href="{% static 'css/jquery.circliful.css' %}" rel="stylesheet" type="text/css" />
+
+
+<div class="row">
+    <div class="col-lg-2">
+        <div id="test-circle"></div>
+    </div>
+</div>
+
+
+{%if scans %}
+    <table class="table table-striped table-bordered">
+    <thead>
+    <tr>
+	    <th><center>Nmap Status</center></th>
+	    <th><center>Nmap Progress</center></th>
+	    <th><center>Nmap Import</center></th>
+	    <th><center>Nessus Status</center></th>
+	    <th><center>Nessus Progress</center></th>
+	    <th><center>Nessus Import</center></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for scan in scans %}
+    <tr>
+        <td><center>{{scan.nmap.status}}</center></td>
+        <td class='graph'><center>
+        <div id="{{scan.id_scan}}-nmap"></div>
+            <script>
+            $( document ).ready(function() {
+            $("#{{scan.id_scan}}-nmap").circliful({
+            animationStep: 50,
+            percentageTextSize:30,
+            percent: "{{scan.nmap.progress}}",
+            backgroundBorderWidth: 15,
+            foregroundBorderWidth: 15
+            });
+            });
+            </script>
+        </center></td>
+        <td><center>{{scan.nmap.import}}</center></td>
+        <td><center>{{scan.nessus.status}}</center></td>
+        <td class="graph"><center>
+            <div id="{{scan.id_scan}}-nessus"></div>
+            <script>
+            $( document ).ready(function() {
+            $("#{{scan.id_scan}}-nessus").circliful({
+            animationStep: 50,
+            percentageTextSize:30,
+            percent: "{{scan.nessus.progress}}",
+            backgroundBorderWidth: 15,
+            foregroundBorderWidth: 15
+            });
+            });
+            </script>
+        </center></td>
+        <td><center>{{scan.nessus.import}}</center></td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{%else%}
+Aucun Scan n'a été lancé
+{%endif%}
+
+
+
+</div>
+</div>
+{% endblock %}

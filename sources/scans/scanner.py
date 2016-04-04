@@ -1,255 +1,349 @@
 #-*- coding: utf-8 -*-
-import threading
+from client_nmap import scanNmap
 from django.db import connection
-from fonctions import dictfetchall,calculCriticite
-import datetime
-import pytz
-import sys
 import os
-import time
 import re
-from erreurs import ErreurScanNessus
 from transformationRapport import *
-from clientNessusRPC import *
-from clientNmap import *
-from logger import log
-from rapports.rapportEvolution import *
+from django.conf import settings
+from observable import Observable
+from time import sleep
+from fonctions import calculCriticite
+from erreurs import ErreurImport
 
 
-BASE='/var/www/html/django/soc/'
+BASE=settings.BASE_DIR+'/'
 CHEMIN_TEMP=BASE+'scans/temp/'
-CHEMIN_RAPPORT=BASE+'rapports/rapports/'
-CHEMIN_LOGS=BASE+'scans/logs/'
+TIMEOUT=60 
+#Temps max d'attente pour le téléchargement d'un rapport
 
-class Scanner(threading.Thread):
-	'''
-	Permet le lancement de scans Nmap et Nessus
-	'''
+class Scan(Observable):
+    '''
+    Cette class correspond à un scan nmap et/ou nessus
+    '''
 
-	def __init__(self,tableau_ip,id_scan,type_scan='manuel'):
-		cursor=connection.cursor()
+    def __init__(self,id_scan,nom_unique,date_lancement,type_scan,chemin_rapport,liste_adresses,nmap_options=None,nessus_policy_id=None):
+        Observable.__init__(self)
+        self.nmap={'enable':False,'options':None,'instance':None,'status':'disable','progress':0,'import':'disable'}
+        self.nessus={'enable':False,'id':-1,'policy_id':None,'status':'disable','progress':0,'import':'disable'}
+        self.erreurs=[]
+        self.cibles=liste_adresses
+        self.date_lancement=date_lancement
+        self.nom_unique=nom_unique
+        self.chemin_rapport=chemin_rapport
+        self.id_scan=id_scan
+        self.tache_attente=[]
+        self.compteur_erreur_nessus=0
+        self.type_scan=type_scan
 
-		if type_scan=='manuel':
-			cursor.execute('SELECT * FROM scans_manuels WHERE id=%s LIMIT 1',[id_scan])
-			dictScan=dictfetchall(cursor)
-
-		else:
-			cursor.execute('SELECT * FROM scans_plannifies WHERE id=%s LIMIT 1',[id_scan])
-			dictScan=dictfetchall(cursor)
-
-	
-		self.policy_id=dictScan[0]['nessus_policy_id']
-		self.tableau_ip=tableau_ip
-		self.nmap=dictScan[0]['nmap']
-		self.nessus=dictScan[0]['nessus']
-		self.type_scan=type_scan
-		self.nmapOptions=dictScan[0]['nmap_options']
-		
-
-		tz = pytz.timezone('Europe/Paris')
-		d=datetime.datetime.now()
-		self.date_lancement=tz.localize(d)
-
-		#Le nom unique sera utilisé pour:
-		#	- le nom du rapport PDF
-		#	- l'instance de log 
-		self.nom_unique=str(id_scan)+'__'+str(self.date_lancement).replace(' ','_').split('.')[0]
+        if nmap_options!=None:
+            self.nmap['enable']=True
+            self.nmap['options']=nmap_options
+            self.nmap['status']='ready'
+            self.nmap['import']='ready'
+            self.nmap['instance']=scanNmap(self.cibles,self.nmap['options'],CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
 
 
-		threading.Thread.__init__(self)
-		self.num_thread=self.nom_unique
-		self.log=log(CHEMIN_LOGS+'scan.log','scanner.'+str(self.num_thread))
+        if nessus_policy_id!=None:
+            self.nessus['enable']=True
+            self.nessus['policy_id']=nessus_policy_id
+            self.nessus['status']='ready'
+            self.nessus['import']='ready'
 
-		cursor.execute('INSERT INTO scans_status (date_lancement,etat,type) VALUES (%s,\'encours\',%s)',[self.date_lancement,str(type_scan)])
-		cursor.execute('SELECT id FROM scans_status WHERE date_lancement=%s AND etat=%s AND type=%s LIMIT 1',[self.date_lancement,'encours',str(type_scan)])
-		id=dictfetchall(cursor)
-		self.id_scan=id[0]['id']
+    
+    def getObject(self):
+        '''
+        retourne les élements importants sous forme de dictionnaire
+        '''
+        reponse={
+            'nmap':{
+                    'status':self.nmap['status'],
+                    'progress':self.nmap['progress'],
+                    'import':self.nmap['import']},
+            'nessus':{        
+                    'status':self.nessus['status'],
+                    'progress':self.nessus['progress'],
+                    'import':self.nessus['import']},
+            'erreurs':self.erreurs,
+            'cibles':self.cibles,
+            'id_scan':self.id_scan,
+            'type_scan':self.type_scan,
+            'nom_unique':self.nom_unique}
 
-		if type_scan=='manuel':
-			cursor.execute('INSERT INTO scan_manuel_status (id_scans_status,id_scan_manuel) VALUES(%s,%s)',[str(self.id_scan),id_scan])
-			self.CHEMIN_RAPPORT=CHEMIN_RAPPORT+'ScansManuels/'+str(self.id_scan)+'/'
-			os.makedirs(self.CHEMIN_RAPPORT)
+        return reponse
+ 
+    def nessusGetID(self):
+        return self.nessus['id']
 
+    def nessusSetID(self,nessus_id):
+        self.nessus['id']=int(nessus_id)
 
-		else:
-			for ip in tableau_ip:
-				cursor.execute('INSERT INTO scan_hote (id_scan,ip) VALUES(%s,%s)',[str(self.id_scan),ip])
+    def nessusGetStatus(self):
+        return self.nessus['status']
 
-			cursor.execute('INSERT INTO scan_plannifie_status (id_scan_plannifie,id_scans_status) VALUES(%s,%s)',[id_scan,str(self.id_scan)])
+    def nessusGetProgress(self):
+        return self.nessus['progress']
 
-			self.CHEMIN_RAPPORT=CHEMIN_RAPPORT+'ScansPlannifies/'+str(id_scan)+'/'+str(self.id_scan)+'/'
+    def nessusGetImport(self):
+        return self.nessus['import']
 
-			os.makedirs(self.CHEMIN_RAPPORT)
-
-
-		cursor.close()
-
-
-			
-	def run(self):
-		try:
-			if self.nmap==True:
-				self.log.ecrire('['+str(self.id_scan)+']= Demmarage du scan nmap','info')
-				lancerScanNmap(self.tableau_ip,self.nmapOptions,CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
-				self.log.ecrire('['+str(self.id_scan)+']= Scan nmap realise avec success','info')
-				self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nmap','info')
-				parserNmapXml(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml',self.date_lancement,self.id_scan)
-				self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nmap reussi','info')
-				os.remove(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
-
-			if self.nessus==True:
-				ScannerNessus=Nessus()
-				ScannerNessus.connexion()
-
-				id_nessus=ScannerNessus.nouveauScan(self.policy_id,self.tableau_ip,'scan_'+self.nom_unique,description='Scan DJANGO')
-				self.log.ecrire('['+str(self.id_scan)+']= Demarrage du scan Nessus','info')
-				ScannerNessus.lancerScan(id_nessus)
-
-
-
-				while True:
-					try:
-						if (ScannerNessus.statusScan(id_nessus))!='running':
-							break
-
-					except Exception as e:
-						#Dans le cas ou le scan dure trop longtemps, la session passe en timeout
-						#On se reconnecte donc
-						if(str(e)=='Invalid Credentials'):
-							ScannerNessus.connexion()
-						else:
-							raise Exception(e)
-
-					time.sleep(10)
+    def relancerNmap(self,tableau_ip,options):
+            self.nmap['options']=options
+            self.nmap['status']='ready'
+            self.nmap['import']='ready'
+            sc_nmap=scanNmap(self.cibles,self.nmap['options'],CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
+            self.nmap['instance']=sc_nmap
+            self.demarrerScanNmap()
 
 
-				self.log.ecrire('['+str(self.id_scan)+']= Scan Nessus reussi','info')
-				ScannerNessus.getRapport(id_nessus,'csv',CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv')
+    def setErreur(self,type_scan,erreur):
+        dict_erreur={'type':str(type_scan),'description':str(erreur)}
+        self.erreurs.append(dict_erreur)
+    
 
-				#On crée une boucle, car lors du traitement du rapport nessus, il peut arriver
-				#qu'une vulnerabilite ne soit pas prise en compte, du fait que le service concerne ne soit pas présent en base
-				#On relance alors un scan nmap sur l'hote 
-				continuer=False
-				max_essai=3
-				nb_essai=0
-				while (continuer==False):
-					try:
-						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nessus en cours...','info')
-						parserNessusCsv(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv',self.id_scan,True)
-						continuer=True
-						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nessus reussi','info')
+    def nessusUpdateImport(self,nessus_import):
+        self.nessus['import']=nessus_import
+        self.notify_observers('dispatcher',status_import={'scan':'nessus','status':self.nessus['import']})
 
+    def nmapGetProgress(self):
+        return str(self.nmap['progress'])
 
-					except ErreurScanNessus as e:
-						adresse=''
-						dict_erreur=e.getData()
+    def nmapGetStatus(self):
+        return self.nmap['status']
 
-						for ip in dict_erreur['ip']: 
-							adresse+=' '+str(ip)
+    def nmapUpdateStatus(self,status):
+        self.nmap['status']=status
+        self.notify_observers('dispatcher',status={'scan':'nmap','status':self.nmap['status']})
 
-						optionsNmap='-Pn -sV '
+    def nmapUpdateImport(self,nmap_import):
+        self.nmap['import']=nmap_import
+        self.notify_observers('dispatcher',status_import={'scan':'nmap','status':self.nmap['import']})
 
-						if len(dict_erreur['ports_tcp'])!=0:
-							optionsNmap+='-sS -pT:'
-						
-							for portTcp in dict_erreur['ports_tcp']:
-								optionsNmap+=str(portTcp)
-								
-								if portTcp!=dict_erreur['ports_tcp'][-1]:
-									optionsNmap+=','
+    def getScanID(self):
+        return self.id_scan
 
-						if len(dict_erreur['ports_udp'])!=0:
-							if(re.search('-pT:',optionsNmap)!=None):
-								optionsNmap+=',U:'
+    def demarrerScanNmap(self):     
+        sc_nmap=self.nmap['instance']
+        sc_nmap.start()
+        sc_nmap.add_observer(self,'scan')
+        self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Demmarage du scan nmap','type':'info'})
 
-							else:
-								optionsNmap+='-pU:'
-			
-							for portUdp in dict_erreur['ports_udp']:
-								optionsNmap+=str(portUdp)
-					
-								if portUdp!=dict_erreur['ports_udp'][-1]:
-									optionsNmap+=','
+    
 
-							optionsNmap+=' -sU'
+    def notify(self, emetteur,*args,**kwargs):
+        #On verifie qu'il s'agise de nmap
+        if isinstance(emetteur,scanNmap):
+            if kwargs.has_key('progress'):
+                self.nmap['progress']=int(kwargs.pop('progress'))
 
-						
-						self.log.ecrire("["+str(self.id_scan)+"]= lancement d'un scan nmap  suite a une erreur d'importation du scan Nessus",'error')
-						self.log.ecrire("["+str(self.id_scan)+"]="+str(optionsNmap),"error")
-						self.log.ecrire("["+str(self.id_scan)+"]="+str(adresse),"error") 
-						nb_essai+=1
-						lancerScanNmap(dict_erreur['ip'],str(optionsNmap),CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
-						self.log.ecrire('['+str(self.id_scan)+']= Scan nmap realise avec success','info')
-						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nmap en cours...','info')
-						parserNmapXml(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml',self.date_lancement,self.id_scan)
-						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nmap reussi ;)','info')
-						os.remove(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
+            if kwargs.has_key('status'):
+                self.nmapUpdateStatus(str(kwargs.pop('status')))
 
-					except Exception as e:
-						if(str(e)=='Invalid Credentials'):
-							ScannerNessus.connexion()
-							nb_essai+=1
-							continue
-						else:
-							pass
+                #si le scan est fini, on lance l'importation du rapport
+                if self.nmap['status']=='completed':
+                    self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Scan nmap realise avec success','type':'info'})
+                    self.parserNmap()
+                    os.remove(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml')
 
-					if continuer==False and nb_essai==max_essai+1:
-						self.log.ecrire('['+str(self.id_scan)+']= Le scan Nmap a echoué','warning')
-						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nessus en mode Non Strict','warning')
-						parserNessusCsv(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv',self.id_scan,False)
-						continuer=True
-						self.log.ecrire('['+str(self.id_scan)+']= Parsage du rapport Nessus reussi','info')
+                    #Puis on verifie s'il y a des tâches en attente
+                    #Typiquement, une erreur d'importation du scan Nessus entraine la relance d'un nouveau scan
+                    for job in self.tache_attente:
+                        if job['type']=='nmap':
+                            param=job['parametres']
+                            self.nmapUpdateImport('ready')
+                            self.relancerNmap(param['cibles'],param['options'])
+                            del self.tache_attente[0]
+                            break
+        
+                        elif job['type']=='import_nessus':
+                            del self.tache_attente[0]
+                            self.parserNessus()
+                            break
 
+                #En cas d'erreur avec Nmap, on desactive l'importation du rapport
+                elif self.nmap['status']=='error':
+                    self.nmapUpdateImport('disable')
 
-				os.remove(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv')
+  
+        #Sinon, il s'agit du dispatcher qui nous informe d'une evolution sur le scan Nessus
+        else:
+            if kwargs.has_key('progress'):
+                self.nessus['progress']=int(kwargs.pop('progress'))
 
-				try:
-					self.log.ecrire('['+str(self.id_scan)+']= DL du rapport nessus en cours...','info')
-					ScannerNessus.getRapport(id_nessus,'pdf',self.CHEMIN_RAPPORT+str(self.nom_unique)+'_nessus.pdf')
-					self.log.ecrire('['+str(self.id_scan)+']= DL du rapport nessus accompli','info')
-				except:
-					ScannerNessus.connexion()
-					ScannerNessus.getRapport(id_nessus,'pdf',self.CHEMIN_RAPPORT+str(self.nom_unique)+'_nessus.pdf')
-					self.log.ecrire('['+str(self.id_scan)+']= DL du rapport nessus accompli','info')
-				
-				ScannerNessus.deconnexion()
+            if kwargs.has_key('status'):
+                self.nessus['status']=str(kwargs.pop('status'))
 
-				for ip in self.tableau_ip:
-					calculCriticite(ip)
+                if self.nessus['status']=='completed':
+                    try:
+                        self.parserNessus()
 
-			
-			self.log.ecrire('['+str(self.id_scan)+']= Generation du rapport devolution en cours...','info')
-			
-			try:
-				creerRapportEvolution(self.nom_unique,self.id_scan,self.type_scan)
-				self.log.ecrire('['+str(self.id_scan)+']= Generation du rapport devolution reussi ;)','info')
-			except Exception as e:
-				self.log.ecrire('['+str(self.id_scan)+']= Erreur lors de la creation du rapport devolution, '+str(e),'warning')	
+                    except ErreurImport as e:
+                        dict_erreur=e.getData()
+                        self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= '+str(dict_erreur['message']),'type':dict_erreur['type']})
+                        self.setErreur('nessus',str(dict_erreur['message']))
+                        self.nessusUpdateImport('ready')
 
-			tz = pytz.timezone('Europe/Paris')
-			d=datetime.datetime.now()
-			date_fin=tz.localize(d)
+                    except Exception as e:
+                        erreur=str(e)
+                        self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= '+erreur,'type':'critical'})
+                        self.setErreur('nessus',erreur)
+                        self.nessusUpdateImport('error')
 
-			cursor=connection.cursor()
-			cursor.execute('UPDATE scans_status SET etat=\'fini\', date_fin=%s WHERE id=%s', [date_fin,self.id_scan])
-			cursor.close()
-			self.log.ecrire('['+str(self.id_scan)+']= Scan termine avec success','info')
-			self.log.fermer()
+                elif self.nessus['status']=='error':
+                    self.nessusUpdateImport('disable')
 
-		except Exception as f:
-			tz = pytz.timezone('Europe/Paris')
-			d=datetime.datetime.now()
-			date_fin=tz.localize(d)
-			cursor=connection.cursor()
-			cursor.execute('UPDATE scans_status SET etat=\'abandon\', date_fin=%s WHERE id=%s', [date_fin,self.id_scan])
-			cursor.close()
-			self.log.ecrire('['+str(self.id_scan)+']= '+str(f),'critical')
-			self.log.fermer()
-		
+                elif self.nessus['status']=='stopping':
+                    self.nessusUpdateImport('stopping')
+
+                elif self.nessus['status']=='canceled':
+                    self.nessusUpdateImport('canceled')
+                        
 
 
+    def parserNmap(self):
+        self.nmapUpdateImport('running')
+
+        try:
+            parserNmapXml(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml',self.date_lancement)
+            self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Parsage du rapport Nmap reussi','type':'info'})
+            self.nmapUpdateImport('completed')
+
+        except Exception as e:
+            self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Erreur lors du parsage du scan Nmap '+str(e),'type':'critical'})
+            self.setErreur('nmap','le parsage du rapport a échoué')
+            self.nmapUpdateImport('error')
 
 
-		
-		
-		
+    def parserNessus(self):
+        self.nessusUpdateImport('running')
+        self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= DL du rapport Nessus au format CSV en cours...','type':'info'})   
+        self.notify_observers('dispatcher',tache={'param':{'id':self.nessus['id'],'format':'csv','localisation':CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv'},'action':'nessus_getRapport'})
+
+        timer=0
+        #Tant que le rapport n'a pas été téléchargé, on attend
+        while (os.path.exists(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv'))==False:
+            sleep(2)
+            timer+=2
+
+            if timer>=TIMEOUT:
+                self.nessusUpdateImport('error')
+                raise Exception("délai d'attente pour le téléchargement du rapport dépassé")
+
+
+        self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= le DL du rapport Nessus au format CSV a réussi','type':'info'})
+
+    
+        #Une fois le rapport télécharger, on le parse
+        try:
+            if self.compteur_erreur_nessus==2:
+                mode_degrade=True
+                self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Parsage du rapport Nessus en mode dégradé','type':'error'})
+                parserNessusCsv(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv',self.id_scan,False)
+                self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Parsage du rapport Nessus en mode dégradé a réussi','type':'error'})
+
+            else:
+                mode_degrade=False
+                self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Parsage du rapport Nessus en cours...','type':'info'})
+                parserNessusCsv(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv',self.id_scan,True)
+                self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Parsage du rapport Nessus réussi ;)','type':'info'})
+               
+
+        except ErreurScanNessus as e:
+            if mode_degrade==True:
+                self.nessusUpdateImport('error')
+                raise Exception("echec de l'import du scan Nessus")
+
+                
+            erreur='Erreur lors du parsage du rapport Nessus'
+            self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= '+erreur,'type':'error'})
+            self.setErreur('nessus',erreur)
+
+            self.compteur_erreur_nessus+=1
+            adresse=''
+            dict_erreur=e.getData()
+
+            for ip in dict_erreur['ip']: 
+                adresse+=' '+str(ip)
+                optionsNmap='-Pn -sV '
+
+            if len(dict_erreur['ports_tcp'])!=0:
+                optionsNmap+='-sS -pT:'
+                            
+                for portTcp in dict_erreur['ports_tcp']:
+                    optionsNmap+=str(int(portTcp))
+                                    
+                    if portTcp!=dict_erreur['ports_tcp'][-1]:
+                        optionsNmap+=','
+
+            if len(dict_erreur['ports_udp'])!=0:
+                if(re.search('-pT:',optionsNmap)!=None):
+                    optionsNmap+=',U:'
+
+                else:
+                    optionsNmap+='-pU:'
+                
+                for portUdp in dict_erreur['ports_udp']:
+                    optionsNmap+=str(int(portUdp))
+                        
+                    if portUdp!=dict_erreur['ports_udp'][-1]:
+                        optionsNmap+=','
+
+                optionsNmap+=' -sU'
+
+            #On essaye de replannifier un scan Nmap
+        
+            #Si un scan Nmap est déjà en cours, on met les 
+            #tâches en file d'attente
+            #Elles seront alors traîtés lors de la fin du scan Nmap
+            if self.nmap['status']=='running':
+                self.tache_attente.append({'type':'nmap','parametres':{'cibles':dict_erreur['ip'],'options':optionsNmap}})
+                self.tache_attente.append({'type':'import_nessus'})
+                raise ErreurImport({'message':"scan Nmap toujours en cours, ajout des tâches en file d'attente",'type':'error'})
+
+            else:
+                self.tache_attente.append({'type':'import_nessus'})
+                self.relancerNmap(dict_erreur['ip'],optionsNmap)
+                raise ErreurImport({"message":"creation du nouveau scan Nmap en vue d'une nouvelle importation du rapport Nessus: "+str(optionsNmap)+'\n'+str(self.tache_attente),"type":"error"})
+
+        os.remove(CHEMIN_TEMP+'nessus/'+str(self.nom_unique)+'.csv')
+
+
+        #On telecharge d'abord le rapport au format PDF
+        #Si il y a une erreur on la note mais on continue (non-bloquant)  
+        self.notify_observers('dispatcher',tache={'param':{'id':self.nessus['id'],'format':'pdf','localisation':self.chemin_rapport+str(self.nom_unique)+'_nessus.pdf'},'action':'nessus_getRapport'})
+
+        #Tant que le rapport n'a pas été téléchargé, on attend
+        timer=0
+        while (os.path.exists(self.chemin_rapport+str(self.nom_unique)+'_nessus.pdf'))==False:
+            sleep(2)
+            timer+=2
+
+            if timer>=TIMEOUT:
+                break
+
+        if os.path.exists(self.chemin_rapport+str(self.nom_unique)+'_nessus.pdf'):
+            self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= le DL du rapport Nessus au format PDF a réussi','type':'info'})
+
+        else:
+            erreur='le DL du rapport Nessus au format PDF a échoué'
+            self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= '+erreur,'type':'warning'})
+            self.setErreur('nessus',erreur)
+
+
+
+        #Pour tous les hotes scannés, on met à jour leur vulnérabilitée
+        for ip in self.cibles:
+            calculCriticite(ip)
+
+        import_ok=True
+
+        #On parcourt la liste des erreurs 
+        for erreur in self.erreurs:
+            if erreur['type']=='nessus':
+                self.nessusUpdateImport('completed_with_error')
+                import_ok=False
+                break
+
+
+        if import_ok:
+            self.nessusUpdateImport('completed')
+            del import_ok

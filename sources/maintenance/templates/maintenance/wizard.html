@@ -1,0 +1,74 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+
+    {% load static %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'js/jquery.ajax.min.js' %}"></script>
+<script src="{% static 'js/maintenance.js' %}"></script>
+<link   href="{% static 'css/jquery-ui/jquery-ui.css' %}" rel="stylesheet">
+
+<div class="container">
+	<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Initialisation du Projet SOC</h3>
+                        <h5>Etape {{ wizard.steps.step1 }} sur {{ wizard.steps.count }}: {{wizard.form.titre}}</h5>
+		    		</div>
+
+    <form class="form-horizontal" action="" method="post" enctype="multipart/form-data">
+
+        {% csrf_token %}
+        {{ wizard.form.media }}
+        {{ wizard.management_form }}
+
+        {% if wizard.form.erreur %}
+            <FONT color="red"><strong>{{wizard.form.erreur}}</FONT></strong><br>
+        {%endif%}
+
+        {% for elem in  wizard.form %}
+            {{ elem.label_tag }}
+            {{elem.errors}} 
+            {{elem.help_text|safe}} 
+            {{ elem }}
+            <br><br>
+        {%endfor%}
+
+
+        <div id=popup></div>
+        <script>
+        $(document).ready( function() {
+	        var popup=$("#popup").dialog({ autoOpen: false });
+        });
+        </script>
+
+
+        <div class="form-actions">
+
+        {% if wizard.form.button %}
+        <a class="btn btn-primary" onclick={{wizard.form.button}}>Test</a>
+        {% endif %}
+
+        {% if wizard.steps.prev %}
+            <button class="btn btn-default" name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">Première étape</button>
+            <button class="btn btn-default" name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">Etape précédente</button>
+        {% endif %}
+
+        {% if wizard.steps.step1 == wizard.steps.count %} 
+            <input type="submit" class="btn btn-success" value='Initialiser'>
+        {%elif wizard.form.button %}
+            <input id='suivant' disabled type="submit" class="btn btn-success" value='suivant'>
+        {%else%}
+            <input id='suivant' type="submit" class="btn btn-success" value='suivant'>
+        {% endif %}
+        </div>
+    </form>
+</div>
+</div>
+{% if wizard.steps.step1 == wizard.steps.count or  wizard.steps.step1 == 1 %}
+    {% if already_init == 'YES' %}
+        <script>
+        alertAlreadyInit()
+        </script>
+    {% endif %}
+{% endif %}
+{% endblock %}

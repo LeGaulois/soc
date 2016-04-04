@@ -1,6 +1,10 @@
 {% extends "serveurs/app_base.html" %}
 {% block content %}
 {% load static %}
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.ajax.min.js' %}"></script>
+
  <div class="container">
     		<div class="row">
     			<h3>Liste des scans plannifies</h3>
@@ -17,21 +21,34 @@
 	<th><center>Date de début</center></th>
 	<th><center>Date Fin</center></th>
 	<th><center>Etat</center></th>
+    <th><center>Actions</center></th>
 </tr>
 </thead>
-<tbody>
+<tbody id=tableau_scans>
 {% for scan in scans %}
-	<tr>
+	<tr id={{scan.id}}>
 	<td>{{scan.nom}}</td>
 	<td>{{scan.date_lancement}}</td>
 	<td>{{scan.date_fin}}</td>
-	{% if scan.etat == "encours" %}
-	<td><center><img src="{% static 'img/progress.gif' %}" alt="en cours" style="width:30px;height:30px;"></center></td>
-	{% elif scan.etat == "fini" %}
-	<td><center><img src="{% static 'img/ok-reduit.png' %}" alt="fini" style="width:30px;height:30px;"></center></td>
+	{% if scan.etat == "running" %}
+	<td><center><img src="{% static 'img/progress.gif' %}" alt="running" style="width:30px;height:30px;"></center></td>
+    {% elif scan.etat == "ready" %}
+	<td><center><img src="{% static 'img/progress.gif' %}" alt="ready" style="width:30px;height:30px;"></center></td>
+	{% elif scan.etat == "completed" %}
+	<td><center><img src="{% static 'img/ok.png' %}" alt="completed" style="width:30px;height:30px;"></center></td>
+    {% elif scan.etat == "completed_with_error" %}
+	<td><center><img src="{% static 'img/error.png' %}" alt="completed_with_error" style="width:30px;height:30px;"></center></td>
 	{%else%}
-	<td><center><img src="{% static 'img/error-reduit.png' %}" alt="erreur" style="width:30px;height:30px;"></center></td>
+	<td><center><img src="{% static 'img/critical.jpg' %}" alt="error" style="width:30px;height:30px;"></center></td>
 	{%endif%}
+    	<td>
+        <a class="btn btn-primary" href="{% url 'scans:parametresScan' scan.id %}">Infos</a>
+        {% if scan.etat == "running" %}
+        <a class="btn btn-danger" disabled onclick="supprimerEntreeHistorique({{scan.id}})">Supprimer</a>
+        {%else%}
+        <a class="btn btn-danger" onclick="supprimerEntreeHistorique({{scan.id}})">Supprimer</a>
+        {% endif %}
+    </td>
 	</tr>
 {% endfor %}
 </tbody>

@@ -1,0 +1,115 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+<div class="container">
+	<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Description du scan</h3>
+		    		</div>
+
+	<div class="form-horizontal">
+				<div class="control-group">
+					    <label class="control-label">Nmap</label>
+					    <div class="controls">
+						    <label class="checkbox">
+						     	{{scan.nmap}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Nmap Options</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nmap_options}}
+						    </label>
+					    </div>
+					  </div>
+					  <div class="control-group">
+					    <label class="control-label">Nessus</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nessus}}
+						    </label>
+					    </div>
+					  </div>
+					<div class="control-group">
+					    <label class="control-label">Nessus Policy ID</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nessus_policy_id}}
+						    </label>
+					    </div>
+					  </div>
+					
+					   
+
+						<div class="control-group">
+					    <label class="control-label">Policy_id</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.nessus_policy_id}}
+						    </label>
+					    </div>
+					  </div>
+
+					
+						<div class="control-group">
+					    <label class="control-label">Adresses Scannees</label>
+					    <div class="controls">
+					      	<label class="checkbox">
+						     	{{scan.ip_hote}}
+						    </label>
+					    </div>
+					  </div>
+</div>
+</div>
+</div>
+
+<div class="container">
+	<div class="span10 offset1">
+    				<div class="row">
+		    			<h3>Rapports du scan</h3>
+		    		</div>
+
+	
+	<div class="form-horizontal">
+				{% if scan.etat != "running" %}
+                    {% if nessus %}
+				    <div class="control-group">
+					        <label class="control-label">Rapport Nessus</label>
+					        <div class="controls">
+						        <label class="checkbox">
+						         	<a href="{% url 'rapports:getRapport' scan.id_scans_status  type_scan 'nessus' %}">pdf</a>
+						        </label>
+					        </div>
+					      </div>
+                    {% endif %}
+                    {% if evolution %}
+			        <div class="control-group">
+				        <label class="control-label">Rapport de changement</label>
+					        <div class="controls">
+					          	<label class="checkbox">
+						         	<a href="{% url 'rapports:getRapport' scan.id_scans_status type_scan 'evolution' %}">pdf</a>
+						        </label>
+					        </div>
+				    </div>
+                    {% endif %}
+
+                    {% if not nessus and not evolution %}
+                    <div class="control-group">
+				        Aucun rapport disponible
+				    </div>
+                    {% endif %}
+				{% else %}
+				<div class="control-group">
+				Scan toujours en cours
+				</div>
+				{% endif %}
+		
+				
+	</div>
+	
+
+	
+</div>
+</div>
+{% endblock %}

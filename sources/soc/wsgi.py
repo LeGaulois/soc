@@ -13,8 +13,8 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "soc.settings")
+
 os.environ["LC_LANG"] = 'fr_FR.UTF-8'
 os.environ["LANG"] = 'fr_FR.UTF-8'
 os.environ["LC_ALL"] = 'fr_FR.UTF-8'

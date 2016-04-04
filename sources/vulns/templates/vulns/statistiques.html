@@ -1,9 +1,11 @@
 {% extends "serveurs/app_base.html" %}
 {% block content %}
 
-
 {% load static %} 
 
+<br><br><br>
+
+{% if top_10_vuln.data %}
 <script type="text/javascript">
 	window.onload = function () {
 	var tableau=[      
@@ -15,7 +17,7 @@
         { y: {{top_10_vuln.data.4.nb}}, click:function(e){window.open("{% url 'vulns:details' top_10_vuln.data.4.id %}");}, label: "{{top_10_vuln.data.4.nom}}"},
         { y: {{top_10_vuln.data.3.nb}}, click:function(e){window.open("{% url 'vulns:details' top_10_vuln.data.3.id %}");}, label: "{{top_10_vuln.data.3.nom}}"},
         { y: {{top_10_vuln.data.2.nb}}, click:function(e){window.open("{% url 'vulns:details' top_10_vuln.data.2.id %}");}, label: "{{top_10_vuln.data.2.nom}}"},
-	{ y: {{top_10_vuln.data.1.nb}}, click:function(e){window.open("{% url 'vulns:details' top_10_vuln.data.1.id %}");}, label: "{{top_10_vuln.data.1.nom}}"},
+	    { y: {{top_10_vuln.data.1.nb}}, click:function(e){window.open("{% url 'vulns:details' top_10_vuln.data.1.id %}");}, label: "{{top_10_vuln.data.1.nom}}"},
         { y: {{top_10_vuln.data.0.nb}}, click:function(e){window.open("{% url 'vulns:details' top_10_vuln.data.0.id %}");}, label: "{{top_10_vuln.data.0.nom}}"},
 
         ];
@@ -57,13 +59,205 @@
 chart.render();
 }
 </script>
- 
 
 <script type='text/javascript' src="{% static 'js/canvasjs.min.js' %}"></script>
 
- 	<br><br><br>
 	<div class="span10 offset1">
 		<div id="chartContainer" style="height:500px;width:100%;"></div>
 	</div>
+
+{% endif %}
+
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/highcharts.js' %}"></script>
+<script src="{% static 'js/highcharts-more.js' %}"></script>
+<script src="{% static 'js/exporting.js' %}"></script>
+
+<div class="span10 offset1">
+    <div id="radar1" style="width: 40%; height: 800px; align:left;position: absolute"></div>
+    <div id="radar2" style="width: 40%; height: 800px;position: absolute;align:right;margin-left:50%"></div>
+</div>
+
+
+
+<script type='text/javascript'>
+$(function () {
+
+    $('#radar1').highcharts({
+
+        chart: {
+            polar: true,
+            type: 'line'
+        },
+
+        title: {
+            text: 'Nombre de vulnérabilitées par catégorie',
+            x: -80
+        },
+
+        pane: {
+            size: '80%'
+        },
+
+        xAxis: {
+            categories: ["{{spyder.0.nom}}","{{spyder.1.nom}}","{{spyder.2.nom}}","{{spyder.3.nom}}","{{spyder.4.nom}}","{{spyder.5.nom}}",
+                "{{spyder.6.nom}}","{{spyder.7.nom}}","{{spyder.8.nom}}","{{spyder.9.nom}}","{{spyder.10.nom}}","{{spyder.11.nom}}","{{spyder.12.nom}}",
+                "{{spyder.13.nom}}","{{spyder.14.nom}}"],
+            tickmarkPlacement: 'on',
+            lineWidth: 0
+        },
+
+        yAxis: {
+            gridLineInterpolation: 'polygon',
+            lineWidth: 0,
+            min: 0
+        },
+
+        tooltip: {
+            shared: true,
+            pointFormat: '<span style="color:{series.color}">{point.y:,.0f}</b><br/>'
+        },
+
+        legend: {
+            align: 'right',
+            verticalAlign: 'top',
+            y: 70,
+            layout: 'vertical'
+        },
+
+
+    plotOptions: {
+        series: {
+            allowPointSelect: true,
+            point: {
+                events: {
+                    select: function (event) {
+                        var chart = this.series.chart;
+
+                        var selectedPointsStr = "";
+                        if (event.accumulate) {
+                            selectedPoints.push(this);
+                        } else {
+                            selectedPoints = [this];
+                        }
+                        
+                        var index=parseInt(selectedPoints[0].index);
+                        json="{{spyder | safe}}";
+                        json=json.split("'").join('"');
+                        test=JSON.parse(json);
+
+                        var nom_categorie=test[index].nom.split(' ').join('_')
+
+                        window.open("{% url 'vulns:liste_cve_famille' type_cve='nom_categorie' %}".replace("nom_categorie", nom_categorie))
+                        
+                    }
+                }
+            }
+        }
+    },
+
+
+
+
+        series: [{
+            data: [{{spyder.0.nb_vulns}}, {{spyder.1.nb_vulns}}, {{spyder.2.nb_vulns}}, {{spyder.3.nb_vulns}}, {{spyder.4.nb_vulns}}, {{spyder.5.nb_vulns}},{{spyder.6.nb_vulns}},
+                {{spyder.7.nb_vulns}}, {{spyder.8.nb_vulns}}, {{spyder.9.nb_vulns}}, {{spyder.10.nb_vulns}}, {{spyder.11.nb_vulns}},
+                {{spyder.12.nb_vulns}},{{spyder.13.nb_vulns}},{{spyder.14.nb_vulns}}],
+            pointPlacement: 'on',
+            showInLegend:false
+        }]
+
+    });
+});
+</script>
+
+<script type='text/javascript'>
+$(function () {
+
+    $('#radar2').highcharts({
+
+        chart: {
+            polar: true,
+            type: 'line'
+        },
+
+        title: {
+            text: 'Nombre de vulnérabilitées par catégorie',
+            x: -80
+        },
+
+        pane: {
+            size: '80%'
+        },
+
+        xAxis: {
+            categories: ["{{spyder.0.nom}}","{{spyder.1.nom}}","{{spyder.2.nom}}","{{spyder.3.nom}}","{{spyder.4.nom}}","{{spyder.5.nom}}",
+                "{{spyder.6.nom}}","{{spyder.7.nom}}","{{spyder.8.nom}}","{{spyder.9.nom}}","{{spyder.10.nom}}","{{spyder.11.nom}}","{{spyder.12.nom}}",
+                "{{spyder.13.nom}}","{{spyder.14.nom}}"],
+            tickmarkPlacement: 'on',
+            lineWidth: 0
+        },
+
+        yAxis: {
+            gridLineInterpolation: 'polygon',
+            lineWidth: 0,
+            min: 0
+        },
+
+        tooltip: {
+            shared: true,
+            pointFormat: '<span style="color:{series.color}">{point.y:,.0f}</b><br/>'
+        },
+
+        legend: {
+            align: 'right',
+            verticalAlign: 'top',
+            y: 70,
+            layout: 'vertical'
+        },
+
+
+    plotOptions: {
+        series: {
+            allowPointSelect: true,
+            point: {
+                events: {
+                    select: function (event) {
+                        var chart = this.series.chart;
+
+                        var selectedPointsStr = "";
+                        if (event.accumulate) {
+                            selectedPoints.push(this);
+                        } else {
+                            selectedPoints = [this];
+                        }
+                        
+                        var index=parseInt(selectedPoints[0].index);
+                        json="{{spyder | safe}}";
+                        json=json.split("'").join('"');
+                        test=JSON.parse(json);
+
+                        var nom_categorie=test[index].nom.split(' ').join('_')
+
+                        window.open("{% url 'vulns:liste_cve_famille' type_cve='nom_categorie' %}".replace("nom_categorie", nom_categorie))
+                        
+                    }
+                }
+            }
+        }
+    },
+
+        series: [{
+            data: [{{spyder.0.nb_refs}}, {{spyder.1.nb_refs}}, {{spyder.2.nb_refs}}, {{spyder.3.nb_refs}}, {{spyder.4.nb_refs}}, {{spyder.5.nb_refs}},{{spyder.6.nb_refs}},
+                {{spyder.7.nb_refs}}, {{spyder.8.nb_refs}}, {{spyder.9.nb_refs}}, {{spyder.10.nb_refs}}, {{spyder.11.nb_refs}},
+                {{spyder.12.nb_refs}},{{spyder.13.nb_refs}},{{spyder.14.nb_refs}}],
+            pointPlacement: 'on',
+            showInLegend:false
+        }]
+
+    });
+});
+</script>
 
 {% endblock %}

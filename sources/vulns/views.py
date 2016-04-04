@@ -12,121 +12,226 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 @login_required
 def stats_vulns(request):
-	cursor=connection.cursor()
+    cursor=connection.cursor()
 
-	cursor.execute('''SELECT id,nom,description,criticite, (SELECT count(DISTINCT(ip_hote)) from vuln_hote_service WHERE id=id_vuln and date_correction IS NULL) AS nb FROM vulnerabilitees WHERE criticite!='Info' ORDER BY nb DESC LIMIT 10''')
-	top10_vuln_data=dictfetchall(cursor)
+    #TOP10
+    cursor.execute('''SELECT id,nom,description,criticite, (SELECT count(DISTINCT(ip_hote)) from vuln_hote_service WHERE id=id_vuln and date_correction IS NULL) AS nb FROM vulnerabilitees WHERE criticite!='Info' ORDER BY nb DESC LIMIT 10''')
+    top10_vuln_data=dictfetchall(cursor)
+    top_10_vuln={'data':top10_vuln_data,'titre':'TOP 10 Vulnérabilitées'}
+    
+    #Graph radar
+    #1) la première famille du graphique a pour but de montrer pour chaque catégorie 
+    #   le nombre de vulnérabilitées présentes
+    cursor.execute('''SELECT refs.type AS categorie, COUNT(refs.type) AS nb FROM refs
+        JOIN (SELECT COUNT(ip_hote),refs.id FROM refs
+                LEFT JOIN vulns_refs ON refs.id=vulns_refs.ref_id
+                LEFT JOIN vulnerabilitees ON vulns_refs.vuln_id=vulnerabilitees.id
+                LEFT JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
+                WHERE vuln_hote_service.date_correction IS NULL GROUP BY refs.id
+        ) count
+        ON refs.id=count.id AND count>0
+        WHERE refs.type IS NOT NULL
+        GROUP BY refs.type''')
+    refs_categorie=dictfetchall(cursor)
 
-	top_10_vuln={'data':top10_vuln_data,'titre':'TOP 10 Vulnérabilitées'}
-	
-	
-	cursor.execute('''SELECT id,nom,description,criticite, (SELECT count(DISTINCT(ip_hote)) from vuln_hote_service WHERE id=id_vuln and date_correction IS NULL) AS nb FROM vulnerabilitees ORDER BY nb DESC LIMIT 10''')
-	top10_vuln_critique=dictfetchall(cursor)
-	
-
-	cursor.execute('SELECT DISTINCT(criticite) FROM vulnerabilitees')
-	liste_vulns=dictfetchall(cursor)
-
-	repartition_vulns=[]
-
-	for vuln in liste_vulns:
-		cursor.execute('''
-SELECT COUNT(ip_hote) FROM vuln_hote_service 
-LEFT JOIN vulnerabilitees ON vulnerabilitees.id=vuln_hote_service.id_vuln
-WHERE date_correction is NULL and criticite=%s''',[vuln['criticite']])
-		temp=dictfetchall(cursor)
-		repartition_vulns.append({'type':vuln['criticite'],'nb':temp[0]['count']})
+    #2) la seconde categorie a pour but de montrer pour chaque catégorie
+    #   la somme de (CVE_1:>nb_hotes_touches) + (CVE_2>nb_hotes_touches)
+    cursor.execute("""
+        SELECT COUNT(ip_hote) AS nb,refs.type AS categorie FROM refs
+        LEFT JOIN vulns_refs ON refs.id=vulns_refs.ref_id
+        LEFT JOIN vulnerabilitees ON vulns_refs.vuln_id=vulnerabilitees.id
+        LEFT JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
+        WHERE vuln_hote_service.date_correction IS NULL AND refs.type IS NOT NULL
+        GROUP BY refs.type
+    """)
+    refs_nb_vulns=dictfetchall(cursor)
+    cursor.close()
 
 
-	return render(request,'vulns/statistiques.html',{'top_10_vuln':top_10_vuln,'repartition_vulns':repartition_vulns})
+    spyder=[]    
+
+    noms_categories=[
+        "Vulnerabilities with exploits",
+        "Code execution",
+        "Overflows",
+        "CSRF",
+        "File inclusion",
+        "Gain privilege",
+        "Sql injection",
+        "Cross Site Scripting",
+        "Directory traversal",
+        "Memory corruption",
+        "Http response splitting",
+        "Bypass a restriction or similar",
+        "Obtain Information",
+        "Denial of service",
+        "Execute Code"
+    ]
+
+    for categorie in noms_categories:
+        spyder.append({
+            "nom":categorie,
+            "nb_refs":int(get_value_from_liste_dict(refs_categorie,'categorie',str(categorie),'nb')),
+            "nb_vulns":int(get_value_from_liste_dict(refs_nb_vulns,'categorie',str(categorie),'nb'))
+        })
+
+    return render(request,'vulns/statistiques.html',{'top_10_vuln':top_10_vuln,'spyder':spyder})
 
 
 
 @login_required
 def details(request,vuln_id):
-	cursor=connection.cursor()
-	cursor.execute('SELECT * FROM vulnerabilitees WHERE id=%s LIMIT 1',[vuln_id])
-	vuln=dictfetchall(cursor)
+    cursor=connection.cursor()
+    cursor.execute('SELECT * FROM vulnerabilitees WHERE id=%s LIMIT 1',[vuln_id])
+    vuln=dictfetchall(cursor)
 
-	vuln=prepareListeSolution(vuln)
+    vuln=prepareListeSolution(vuln)
 
-	cursor.execute('''SELECT vuln_hote_service.ip_hote,services.protocole,services.port,retour_vuln FROM vuln_hote_service
+    cursor.execute('''SELECT vuln_hote_service.ip_hote,services.protocole,services.port,retour_vuln FROM vuln_hote_service
 LEFT JOIN services ON services.id=vuln_hote_service.id_service
 WHERE id_vuln=%s''',[vuln_id])
-	hotes=dictfetchall(cursor)
+    hotes=dictfetchall(cursor)
 
-	cursor.execute('''SELECT DISTINCT(refs.nom) FROM refs 
+    cursor.execute('''SELECT DISTINCT(refs.nom) FROM refs 
 LEFT JOIN vulns_refs ON refs.id=vulns_refs.ref_id
 LEFT JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id 
 WHERE vulnerabilitees.id=%s''',[vuln_id])
-	liste_refs=dictfetchall(cursor)
+    liste_refs=dictfetchall(cursor)
+    cursor.close()
+    refs=''
 
-	refs=''
+    for ref in liste_refs:
+        refs+=ref['nom']
 
-	for ref in liste_refs:
-		refs+=ref['nom']
+        if ref!=liste_refs[-1]:
+            refs+=', '
 
-		if ref!=liste_refs[-1]:
-			refs+=', '
+    if len(hotes)>0:
+        vuln[0]['nb']=len(hotes)
 
-	if len(hotes)>0:
-		vuln[0]['nb']=len(hotes)
+        return render(request,'vulns/details.html',{'vuln':vuln,'hotes':hotes,'refs':refs})
 
-		return render(request,'vulns/details.html',{'vuln':vuln,'hotes':hotes,'refs':refs})
-
-	return HttpResponse('oups')
+    return HttpResponse('oups')
 
 
+@login_required
 def liste(request):
-	cursor=connection.cursor()
-	cursor.execute('SELECT id,nom,criticite,synopsis FROM vulnerabilitees')
-	liste_vulns=dictfetchall(cursor)
+    cursor=connection.cursor()
+    cursor.execute('SELECT id,nom,criticite,synopsis FROM vulnerabilitees')
+    liste_vulns=dictfetchall(cursor)
 
-	cursor.execute('SELECT DISTINCT(criticite) FROM vulnerabilitees')
-	liste_criticite=dictfetchall(cursor)
-	cursor.close()
-	
+    cursor.execute('SELECT DISTINCT(criticite) FROM vulnerabilitees')
+    liste_criticite=dictfetchall(cursor)
+    cursor.close()
+    
 
-	if request.method == 'POST':
-		form = formFiltreVulns(request.POST,criticite=liste_criticite)
+    if request.method == 'POST':
+        form = formFiltreVulns(request.POST,criticite=liste_criticite)
 
- 	
-		if form.is_valid():
-			liste_filtres={}
-			liste_filtres['criticite']=form.cleaned_data['criticite']
+     
+        if form.is_valid():
+            liste_filtres={}
+            liste_filtres['criticite']=form.cleaned_data['criticite']
 
-			requete='''SELECT id,nom,criticite,synopsis FROM vulnerabilitees '''
-			
-			precedent=False
-			valeurs_filtres=[]
+            requete='''SELECT id,nom,criticite,synopsis FROM vulnerabilitees '''
+            
+            precedent=False
+            valeurs_filtres=[]
 
-			for filtre in liste_filtres.keys():
-				valeur_filtre=str(liste_filtres[filtre])
+            for filtre in liste_filtres.keys():
+                valeur_filtre=str(liste_filtres[filtre])
 
-				if(valeur_filtre!=None and valeur_filtre!=''):
-					if(precedent==True):
-						requete+=" AND "
-					else:
-						requete+=" WHERE " 
+                if(valeur_filtre!=None and valeur_filtre!=''):
+                    if(precedent==True):
+                        requete+=" AND "
+                    else:
+                        requete+=" WHERE " 
 
-					requete+=str(filtre)+"=%s"
-					valeurs_filtres.append(valeur_filtre)
-					precedent=True			
-				
-			
-			cursor=connection.cursor()
-           		cursor.execute(str(requete),valeurs_filtres)
-			liste_vulns=dictfetchall(cursor)
-			cursor.close()
-			return render(request, 'vulns/liste.html', locals())
-
-
-		else:	
-			form = formFiltreVulns(criticite=liste_criticite)
-			return render(request, 'vulns/liste.html', locals())
+                    requete+=str(filtre)+"=%s"
+                    valeurs_filtres.append(valeur_filtre)
+                    precedent=True            
+                
+            
+            cursor=connection.cursor()
+            cursor.execute(str(requete),valeurs_filtres)
+            liste_vulns=dictfetchall(cursor)
+            cursor.close()
+            return render(request, 'vulns/liste.html', locals())
 
 
-	else:
-		form = formFiltreVulns(criticite=liste_criticite)
+        else:    
+            form = formFiltreVulns(criticite=liste_criticite)
+            return render(request, 'vulns/liste.html', locals())
 
-    		return render(request, 'vulns/liste.html', locals())
+
+    else:
+        form = formFiltreVulns(criticite=liste_criticite)
+        return render(request, 'vulns/liste.html', locals())
+
+
+@login_required
+def details_cve(request,cve):
+    """
+    Cette fonction permet de lister toutes les CVE
+    """
+
+    cve=cve.replace('_','-')
+    cursor=connection.cursor()
+    cursor.execute('SELECT * from refs WHERE nom=%s',[cve])
+    cve_details=dictfetchall(cursor)
+
+    if len(cve_details)==0:
+        return HTTPResponse(status=404)
+
+    cursor.execute("""
+        SELECT vuln_hote_service.ip_hote,protocole,port,services.nom FROM refs
+        LEFT JOIN vulns_refs ON vulns_refs.ref_id=refs.id
+        LEFT JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id
+        LEFT JOIN vuln_hote_service ON vulnerabilitees.id=id_vuln
+        LEFT JOIN services ON vuln_hote_service.id_service=services.id     
+        WHERE refs.nom=%s AND date_correction IS NULL ORDER BY ip_hote ASC
+    """,[cve])
+
+    hotes_associes=dictfetchall(cursor)
+
+    cursor.close()
+
+    return render(request, 'vulns/details_cve.html',{'cve':cve_details,'hotes_associes':hotes_associes})
+
+
+@login_required
+def liste_cve_famille(request,type_cve):
+    '''
+    Retourne la liste des CVE associés à une famille
+    (injection SQL, execution code)
+    '''
+
+    type_cve=type_cve.replace('_',' ')
+
+    cursor=connection.cursor()
+    cursor.execute('''
+    SELECT refs.id,nom,cvss_score,count.count FROM refs
+        JOIN (SELECT COUNT(ip_hote),refs.id FROM refs
+                LEFT JOIN vulns_refs ON refs.id=vulns_refs.ref_id
+                LEFT JOIN vulnerabilitees ON vulns_refs.vuln_id=vulnerabilitees.id
+                LEFT JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
+                WHERE vuln_hote_service.date_correction IS NULL GROUP BY refs.id
+        ) count
+        ON refs.id=count.id AND count>0
+        WHERE refs.type=%s ORDER BY nom ASC
+    ''',[type_cve])
+    liste_cve=dictfetchall(cursor)
+
+    for cve in liste_cve:
+        cve['nom_url']=cve['nom'].replace('-','_')
+
+    if len(liste_cve)==0:
+        return HTTPResponse(status=404)
+
+    return render(request, 'vulns/liste_cve_famille.html',{'type_cve':type_cve,'liste_cve':liste_cve,'type':type_cve} )
+  
+
+    
+        
+
+    

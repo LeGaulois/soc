@@ -1,0 +1,90 @@
+************************************************************
+{'status': 'completed'}
+************************************************************
+{'progress': 100}
+************************************************************
+{'status_import': {'status': 'running', 'scan': 'nessus'}}
+************************************************************
+{'log': {'message': '[5]= DL du rapport Nessus au format CSV en cours...', 'type': 'info'}}
+************************************************************
+{'tache': {'action': 'nessus_getRapport', 'param': {'localisation': '/var/www/html/django/sources/scans/temp/nessus/5__2016-04-04_13:23:08.csv', 'id': 123, 'format': 'csv'}}}
+************************************************************
+{'log': {'message': '[5]= le DL du rapport Nessus au format CSV a r\xc3\xa9ussi', 'type': 'info'}}
+************************************************************
+{'log': {'message': '[5]= Parsage du rapport Nessus en cours...', 'type': 'info'}}
+************************************************************
+{'log': {'message': '[5]= Parsage du rapport Nessus r\xc3\xa9ussi ;)', 'type': 'info'}}
+************************************************************
+{'tache': {'action': 'nessus_getRapport', 'param': {'localisation': '/var/www/html/django/sources/rapports/rapports/ScansManuels/5/5__2016-04-04_13:23:08_nessus.pdf', 'id': 123, 'format': 'pdf'}}}
+************************************************************
+{'log': {'message': '[5]= le DL du rapport Nessus au format PDF a r\xc3\xa9ussi', 'type': 'info'}}
+************************************************************
+{'status_import': {'status': 'completed', 'scan': 'nessus'}}
+************************************************************
+{'status': 'running'}
+************************************************************
+{'status': 'completed'}
+************************************************************
+{'status_import': {'status': 'running', 'scan': 'nessus'}}
+************************************************************
+{'progress': 100}
+************************************************************
+{'log': {'message': '[6]= DL du rapport Nessus au format CSV en cours...', 'type': 'info'}}
+************************************************************
+{'tache': {'action': 'nessus_getRapport', 'param': {'localisation': '/var/www/html/django/sources/scans/temp/nessus/6__2016-04-04_13:31:32.csv', 'id': 125, 'format': 'csv'}}}
+************************************************************
+{'log': {'message': '[6]= le DL du rapport Nessus au format CSV a r\xc3\xa9ussi', 'type': 'info'}}
+************************************************************
+{'log': {'message': '[6]= Parsage du rapport Nessus en cours...', 'type': 'info'}}
+************************************************************
+{'log': {'message': '[6]= Parsage du rapport Nessus r\xc3\xa9ussi ;)', 'type': 'info'}}
+************************************************************
+{'tache': {'action': 'nessus_getRapport', 'param': {'localisation': '/var/www/html/django/sources/rapports/rapports/ScansManuels/6/6__2016-04-04_13:31:32_nessus.pdf', 'id': 125, 'format': 'pdf'}}}
+************************************************************
+{'log': {'message': '[6]= le DL du rapport Nessus au format PDF a r\xc3\xa9ussi', 'type': 'info'}}
+************************************************************
+{'status_import': {'status': 'completed', 'scan': 'nessus'}}
+************************************************************
+{'log': {'message': '[7]= Demmarage du scan nmap', 'type': 'info'}}
+************************************************************
+{'status': 'running'}
+************************************************************
+{'status': {'status': 'running', 'scan': 'nmap'}}
+************************************************************
+{'progress': 100}
+************************************************************
+{'status': 'completed'}
+************************************************************
+{'status': {'status': 'completed', 'scan': 'nmap'}}
+************************************************************
+{'log': {'message': '[7]= Scan nmap realise avec success', 'type': 'info'}}
+************************************************************
+{'status_import': {'status': 'running', 'scan': 'nmap'}}
+************************************************************
+{'log': {'message': '[7]= Parsage du rapport Nmap reussi', 'type': 'info'}}
+************************************************************
+{'status_import': {'status': 'completed', 'scan': 'nmap'}}
+************************************************************
+{'status': 'running'}
+************************************************************
+{'status': 'completed'}
+************************************************************
+{'status_import': {'status': 'running', 'scan': 'nessus'}}
+************************************************************
+{'progress': 100}
+************************************************************
+{'log': {'message': '[7]= DL du rapport Nessus au format CSV en cours...', 'type': 'info'}}
+************************************************************
+{'tache': {'action': 'nessus_getRapport', 'param': {'localisation': '/var/www/html/django/sources/scans/temp/nessus/7__2016-04-04_13:41:16.csv', 'id': 127, 'format': 'csv'}}}
+************************************************************
+{'log': {'message': '[7]= le DL du rapport Nessus au format CSV a r\xc3\xa9ussi', 'type': 'info'}}
+************************************************************
+{'log': {'message': '[7]= Parsage du rapport Nessus en cours...', 'type': 'info'}}
+************************************************************
+{'log': {'message': '[7]= Parsage du rapport Nessus r\xc3\xa9ussi ;)', 'type': 'info'}}
+************************************************************
+{'tache': {'action': 'nessus_getRapport', 'param': {'localisation': '/var/www/html/django/sources/rapports/rapports/ScansManuels/7/7__2016-04-04_13:41:16_nessus.pdf', 'id': 127, 'format': 'pdf'}}}
+************************************************************
+{'log': {'message': '[7]= le DL du rapport Nessus au format PDF a r\xc3\xa9ussi', 'type': 'info'}}
+************************************************************
+{'status_import': {'status': 'completed', 'scan': 'nessus'}}

@@ -1,14 +1,14 @@
 #-*- coding: utf-8 -*-
 
 def pageGarde(titre,auteur,entreprise,cheminImage,cheminFichier='./file.tex'):
-	fichierLatex=open(cheminFichier,'a')
-	temp=titre.split('\n')
-	titre=temp[0]
+    fichierLatex=open(cheminFichier,'a')
+    temp=titre.split('\n')
+    titre=temp[0]
 
-	for i in range(1,len(temp)):
-		titre+='\\\[+0mm]'+str(temp[i])
+    for i in range(1,len(temp)):
+        titre+='\\\[+0mm]'+str(temp[i])
 
-	fichierLatex.write('''
+    fichierLatex.write('''
 \pagestyle{fancy}
 \\renewcommand{\headrulewidth}{1pt}
 \\fancyhead[C]{\\textbf{page \\thepage}} 
@@ -46,5 +46,5 @@ def pageGarde(titre,auteur,entreprise,cheminImage,cheminFichier='./file.tex'):
 \\tableofcontents
 \\newpage''')
 
-	fichierLatex.close()
-	
+    fichierLatex.close()
+    
