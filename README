@@ -31,17 +31,10 @@
 4) Reste à faire "code":
   - Envoie des rapports par mail
   - Gestion des erreurs
-<<<<<<< HEAD
 
 
 5) Reste à faire "Docker":
   - gestion SSL
   - documentation installation (nessus et django)
-=======
-  
-  
-5) Reste à faire "Docker":
-  - gestion SSL
-  - documentation installation (nessus et django)
 
->>>>>>> 77d7d335c0423f3acf402bcfdb9eb9fa68942f68
+
