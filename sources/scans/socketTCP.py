@@ -22,7 +22,19 @@ class socketTCP():
         return self.sock.recv(buff)
 
     def envoyer(self,data):
-        self.sock.send(data)
+        data+='[>END<]'
+
+        MSGLEN=len(data)
+        d=MSGLEN/4096
+        nb_tour=d if MSGLEN%4096==0 else d+1    
+        total_envoye=0
+   
+        for i in range(0,nb_tour):
+            taille_paquet=min(MSGLEN-total_envoye,4096)
+            self.sock.send(data[total_envoye:total_envoye+taille_paquet])
+            total_envoye+=taille_paquet
+
+
 
     def recevoir(self):
         resultats= []

@@ -8,15 +8,14 @@ from scanner import Scan
 from time import sleep
 from django.db import connection
 from fonctions import dictfetchall
-import datetime
-import pytz
-import time
+import datetime,pytz,time
 from erreurs import ErreurScanNessus
 from logger import log
 from rapports.rapportEvolution import *
 from django.conf import settings
 from observable import Observable
 import ConfigParser
+from socketTCP import socketTCP
 
 buf=4096
 BASE=settings.BASE_DIR+'/'
@@ -31,14 +30,14 @@ DIRECTORY_ID=Config.get('Nessus','Directory_Id')
 class dialogueClient(Thread):
     def __init__(self, client,srv,lock):
         Thread.__init__(self)
-        self.client=client
+        self.client=socketTCP(client)
         self.srv=srv
         self.lock=lock
 
 
     def run(self):
         while True:
-            request=self.client.recv(buf).rstrip()
+            request=self.client.recevoir()
 
             if not request:
                 self.client.close()
@@ -53,19 +52,19 @@ class dialogueClient(Thread):
                         param=a_dict['parametres']
                         with self.lock:
                             self.srv.addScan(param['cibles'],param['id_scan'],param['type_scan'])
-                            self.client.send('done'+'[>END<]')
+                            self.client.envoyer("done")
 
                     except Exception as e:
-                        self.client.send('error: '+str(e))
+                        self.client.envoyer('error: '+str(e))
 
                 
                 elif fonction=='listeScan':
                     try:
                         rep=self.srv.getListeScan()
-                        self.client.sendall(json.dumps(rep)+'[>END<]')
+                        self.client.envoyer(json.dumps(rep))
 
                     except Exception as e:
-                        self.client.send('error: '+str(e))
+                        self.client.envoyer('error: '+str(e))
                 
 
 
@@ -163,9 +162,9 @@ class serveurTache(Thread,Observable):
         status_completed=['disable','completed']
         status_completed_with_error=['disable','completed','completed_with_error']
         status_error=['disable','error','completed','completed_with_error','stopping','canceled']
-        tz = pytz.timezone('Europe/Paris')
-        d=datetime.datetime.now()
-        date_fin=tz.localize(d)
+        #tz = pytz.timezone('Europe/Paris')
+        date_fin=datetime.datetime.now()
+        #date_fin=tz.localize(d)
 
 
         if nessus_status=='running' or nmap_status=='running':
@@ -206,10 +205,7 @@ class serveurTache(Thread,Observable):
             self.log.ecrire('['+str(id_scan)+"]= La génération du rapport d'évolution a réussi",'info')
 
         except Exception as e:
-            f=open(BASE+'errors.log','w',0)
             erreur="La génération du rapport d'évolution a échoué "+str(e)
-            traceback.print_exc(file=f)
-            f.close()
             self.log.ecrire('['+str(id_scan)+"]= "+str(erreur),'info')
 
 
@@ -233,9 +229,9 @@ class serveurTache(Thread,Observable):
         nmapOptions=dictScan[0]['nmap_options'] if nmap==True else None
         policy_id=dictScan[0]['nessus_policy_id'] if nessus==True else None
 
-        tz = pytz.timezone('Europe/Paris')
-        d=datetime.datetime.now()
-        date_lancement=tz.localize(d)
+        #tz = pytz.timezone('Europe/Paris')
+        date_lancement=datetime.datetime.now()
+        #date_lancement=tz.localize(d)
 
         
 
@@ -285,8 +281,9 @@ class serveurTache(Thread,Observable):
                 nessus_id=self.ScannerNessus.nouveauScan(policy_id,tableau_ip,nom_unique,'Scan DJANGO')
                 scan.nessusSetID(int(nessus_id))
                 self.ScannerNessus.lancerScan(int(nessus_id))
+                self.log.ecrire('['+str(id_scan_status)+']= Demmarage du scan nessus','info')
             except:
-                self.attenteNessus.append({'scan':scan,'policy_id':policy_id,'tableau_ip':tableau_ip,'nom_unique':nom_unique,'info':'Scan DJANGO'})
+                self.attenteNessus.append({'id_scan_status':id_scan_status,'scan':scan,'policy_id':policy_id,'tableau_ip':tableau_ip,'nom_unique':nom_unique,'info':'Scan DJANGO'})
 
         if nmap==True:
             scan.demarrerScanNmap()
@@ -398,10 +395,12 @@ class serveurTache(Thread,Observable):
                         tableau_ip=scan_en_attente['tableau_ip']
                         nom_unique=scan_en_attente['nom_unique']
                         info=scan_en_attente['info']
+                        id_scan_status=scan_en_attente['id_scan_status']
 
                         nessus_id=self.ScannerNessus.nouveauScan(policy_id,tableau_ip,nom_unique,'Scan DJANGO')
                         scan.nessusSetID(int(nessus_id))
                         self.ScannerNessus.lancerScan(int(nessus_id))
+                        self.log.ecrire('['+str(id_scan_status)+']= Demmarage du scan nessus','info')
                 except:    
                     pass
 
@@ -429,8 +428,11 @@ class srvTCP(Thread):
             self.srv_tache.start()
             self.lock=RLock()
 
-
         except Exception as e:
+            f=open(BASE+'errors.log','w',0)
+            traceback.print_exc(file=f)
+            f.write(str(e))
+            f.close()
             sys.exit(-1)
 
     def run(self):

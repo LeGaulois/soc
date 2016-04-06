@@ -91,13 +91,20 @@ class InitWizard(CookieWizardView):
         return context
 
     def get_template_names(self):
+        '''
+        Cette fonction permet de renvoyer le template
+        2 templates existes:
+            - 1 sans menu > utiliser lors de la toute premiere connexion
+            - 2 le second > utiliser une fois le site initialiser
+        '''
         try:
-            if (self.request.user.is_authenticated() or self.initialiser=='NO'):
+            if (self.request.user.is_authenticated()): 
                 return 'maintenance/wizard.html'
+            elif self.initialiser=='NO':
+                return 'maintenance/wizard_zero.html'
         except:
-            return 'maintenance/wizard.html'
-        else:
-            raise ('INTERDIT')
+            return 'maintenance/wizard_zero.html'
+
 
     def done(self,form_list, **kwargs):
         #Modification du fichier settings.py
@@ -134,6 +141,23 @@ class InitWizard(CookieWizardView):
         tempFile.close()
         del dic
         os.rename(BASE+'soc/settings.tmp',BASE+'soc/settings.py')
+
+
+        #Cette etape permet de mettr een page principale la page d'authentification
+        tempFile = open(BASE+'soc/urls.tmp', 'w')
+        texte_remplacement="url(r'^$',views.login_view,name='login_view'),"
+        texte_recherche="url(r'^$',include('maintenance.urls',app_name='maintenance',namespace='maintenance')),"
+
+        for line in fileinput.input(BASE+'soc/urls.py'):
+            if texte_recherche in line:
+                tempFile.write(line.replace(line,texte_remplacement))
+
+            else:
+                tempFile.write(line)
+
+        tempFile.close()
+        os.rename(BASE+'soc/urls.tmp',BASE+'soc/urls.py')
+
 
         initialiserPG(BASE+'maintenance/django.pg',host,port,database,user,password)
 

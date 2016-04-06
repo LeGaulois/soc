@@ -54,7 +54,7 @@ def historiqueScansManuels(request):
     cursor=connection.cursor()
 
     cursor.execute('''SELECT date_lancement,date_fin,etat,scans_status.id,scan_manuel_status.id_scan_manuel FROM scans_status 
-LEFT JOIN scan_manuel_status ON scans_status.id=scan_manuel_status.id_scans_status
+INNER JOIN scan_manuel_status ON scans_status.id=scan_manuel_status.id_scans_status
 WHERE type='manuel'
 ORDER BY date_lancement DESC''')
     scans=dictfetchall(cursor)
@@ -116,8 +116,8 @@ def status_scans_plannifies(request):
 
     cursor=connection.cursor()
     cursor.execute('''SELECT scans_status.date_lancement,scans_status.date_fin,scans_status.etat,scans_plannifies.nom,scans_status.id FROM scans_status 
-LEFT JOIN scan_plannifie_status ON scans_status.id=scan_plannifie_status.id_scans_status
-LEFT JOIN scans_plannifies ON scan_plannifie_status.id_scan_plannifie=scans_plannifies.id
+INNER JOIN scan_plannifie_status ON scans_status.id=scan_plannifie_status.id_scans_status
+INNER JOIN scans_plannifies ON scan_plannifie_status.id_scan_plannifie=scans_plannifies.id
 WHERE scans_status.type='plannifie'
 ORDER BY scans_status.date_lancement DESC''')
     scans=dictfetchall(cursor)
@@ -134,9 +134,9 @@ def liste_scans_plannifies(request):
     cursor=connection.cursor()
     cursor.execute('''SELECT * FROM (
 SELECT DISTINCT ON(scans_plannifies.id) nom,description,nmap,nessus,nessus_policy_id,scans_plannifies.id,scans_status.etat FROM scans_plannifies 
-LEFT JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
-LEFT JOIN scans_status ON (SELECT scan_plannifie_status.id_scans_status FROM scan_plannifie_status
-LEFT JOIN scans_plannifies ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie ORDER BY scans_status.id DESC LIMIT 1)=scans_status.id) p
+INNER JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
+INNER JOIN scans_status ON (SELECT scan_plannifie_status.id_scans_status FROM scan_plannifie_status
+INNER JOIN scans_plannifies ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie ORDER BY scans_status.id DESC LIMIT 1)=scans_status.id) p
 ''')
     scans_plannifies=dictfetchall(cursor)
     cursor.close()
@@ -249,7 +249,7 @@ def editScanPlannifie(request,id_scan_plannifie):
     infoScan=infoScan[0]
 
     cursor.execute('''SELECT application.id,nom FROM scan_plannifie_application
-LEFT JOIN application ON application.id=id_application
+INNER JOIN application ON application.id=id_application
 WHERE id_scan_plannifie=%s''',[id_scan_plannifie])
     liste_applis_selectionnees=dictfetchall(cursor)
 
@@ -514,9 +514,9 @@ def parametresScan(request,id_scan):
 
     cursor=connection.cursor()
     cursor.execute('''SELECT ip_hote,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_manuel_status.id_scans_status FROM scans_manuels
-LEFT JOIN scan_manuel_status ON scans_manuels.id=scan_manuel_status.id_scan_manuel
-LEFT JOIN scan_manuel_hote ON scan_manuel_hote.id_scan_manuel=scans_manuels.id
-LEFT JOIN scans_status ON scans_status.id=scan_manuel_status.id_scans_status
+INNER JOIN scan_manuel_status ON scans_manuels.id=scan_manuel_status.id_scan_manuel
+INNER JOIN scan_manuel_hote ON scan_manuel_hote.id_scan_manuel=scans_manuels.id
+INNER JOIN scans_status ON scans_status.id=scan_manuel_status.id_scans_status
 WHERE scan_manuel_status.id_scans_status=%s''',[id_scan])
     infoScan=dictfetchall(cursor)
     type_scan='manuel'
@@ -526,9 +526,9 @@ WHERE scan_manuel_status.id_scans_status=%s''',[id_scan])
     #Dans ce cas il s'agit d'un scan plannifie
     if len(infoScan)==0:
         cursor.execute('''SELECT ip_hote,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_plannifie_status.id_scans_status,scans_plannifies.id FROM scans_plannifies
-LEFT JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
-LEFT JOIN scan_plannifie_hote ON scan_plannifie_hote.id_scan_plannifie=scans_plannifies.id
-LEFT JOIN scans_status ON scans_status.id=scan_plannifie_status.id_scans_status
+INNER JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
+INNER JOIN scan_plannifie_hote ON scan_plannifie_hote.id_scan_plannifie=scans_plannifies.id
+INNER JOIN scans_status ON scans_status.id=scan_plannifie_status.id_scans_status
 WHERE id_scans_status=%s''',[id_scan])
         infoScan=dictfetchall(cursor)
         type_scan='plannifie'
@@ -572,7 +572,7 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
 def historiqueScanPlannifie(request,id_scan_plannifie):
     cursor=connection.cursor()
     cursor.execute('''SELECT etat,date_lancement,date_fin,scans_status.id FROM scans_status
-LEFT JOIN scan_plannifie_status ON scan_plannifie_status.id_scans_status=scans_status.id
+INNER JOIN scan_plannifie_status ON scan_plannifie_status.id_scans_status=scans_status.id
 WHERE id_scan_plannifie=%s ORDER BY date_lancement DESC''',[id_scan_plannifie])
     scans=dictfetchall(cursor)
     cursor.close()

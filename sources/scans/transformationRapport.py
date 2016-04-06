@@ -320,19 +320,28 @@ def parserNessusCsv(fichierCSV,scans_status_id,modeStrict=False):
         temp=dictfetchall(cursor)
         id_vuln=temp[0]['id']
 
-        
+
+        #Gestion des références associées à la vulnérabilitée rencontrée (CVE)        
         for reference in cve.split(','):
             if reference !='':
                 cursor.execute('SELECT id FROM refs WHERE nom=%s',[reference])
                 temp=dictfetchall(cursor)
 
+                #On ajoute la reference à un tableau si elle n'y est pas présente
+                #A la fin d el'importation, chaque reference sera interrogé sur le site (cvedetails)
+                # afin de récupérer diverse informations (facilité, impact sur la dispo,confidentialité,...)
                 if reference not in cve_a_interroger:
                     cve_a_interroger.append(reference)
 
-                cursor.execute('SELECT id FROM refs WHERE nom=%s',[reference])
-                temp=dictfetchall(cursor)
+                #Si la reference n'existe pas on la cree
+                if len(temp)==0:
+                    cursor.execute('INSERT INTO refs (nom) VALUES(%s)',[reference])
+                    cursor.execute('SELECT id FROM refs WHERE nom=%s',[reference])
+                    temp=dictfetchall(cursor)
+ 
                 id_ref=temp[0]['id']
     
+                #On verifie si la vulnerabilite possede déjà une association avec la référence
                 cursor.execute('SELECT vuln_id,ref_id FROM vulns_refs WHERE vuln_id=%s AND ref_id=%s',[str(id_vuln),str(id_ref)])
                 nb=dictfetchall(cursor)
                 

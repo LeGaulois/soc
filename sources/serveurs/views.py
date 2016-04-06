@@ -187,11 +187,11 @@ def liste(request):
             liste_filtres['environnement']=form.cleaned_data['environnement']
 
             requete='''SELECT * FROM (
-SELECT DISTINCT ON (hotes.ip) hotes.ip,application.nom AS nom,application.criticite AS criticite,vulnerabilite,localisation,scans_status.etat FROM hotes 
-LEFT JOIN application_hote ON hotes.ip=application_hote.ip 
-LEFT JOIN application ON application_hote.id_application=application.id
-LEFT JOIN scan_hote ON hotes.ip=application_hote.ip 
-LEFT JOIN scans_status ON scan_hote.id_scan=scans_status.id '''
+                SELECT DISTINCT ON (hotes.ip) hotes.ip,application.nom AS nom,application.criticite AS criticite,vulnerabilite,localisation,scans_status.etat FROM hotes 
+                LEFT JOIN application_hote ON hotes.ip=application_hote.ip 
+                LEFT JOIN application ON application_hote.id_application=application.id
+                LEFT JOIN scan_hote ON hotes.ip=application_hote.ip 
+                LEFT JOIN scans_status ON scan_hote.id_scan=scans_status.id'''
 
             #Cette variable sert a l'ajout du mot AND 
             precedent=False
@@ -252,7 +252,7 @@ def identite(request,ip):
 
     #Requete Info application
     cursor.execute('''SELECT nom,description,criticite FROM application_hote
-    LEFT JOIN application ON application_hote.id_application=application.id
+    INNER JOIN application ON application_hote.id_application=application.id
     WHERE application_hote.ip = %s''', [ip])
     infoAppli=dictfetchall(cursor)
 
@@ -269,17 +269,17 @@ def identite(request,ip):
 
     #Requetes vulnerabilites
     cursor.execute('''SELECT vulnerabilitees.nom AS vuln_nom, description, criticite, services.nom AS service_nom, refs.nom AS ref_nom FROM vulnerabilitees
-INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id  
-LEFT JOIN vulns_refs ON vulnerabilitees.id=vulns_refs.vuln_id
-LEFT JOIN refs ON refs.id=vulns_refs.ref_id
-LEFT JOIN services ON services.id=vuln_hote_service.id_service
-WHERE vuln_hote_service.ip_hote=%s AND vuln_hote_service.date_correction IS NULL ORDER BY vulnerabilitees.criticite ASC''', [ip])
+    INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id  
+    INNER JOIN vulns_refs ON vulnerabilitees.id=vulns_refs.vuln_id
+    INNER JOIN refs ON refs.id=vulns_refs.ref_id
+    INNER JOIN services ON services.id=vuln_hote_service.id_service
+    WHERE vuln_hote_service.ip_hote=%s AND vuln_hote_service.date_correction IS NULL ORDER BY vulnerabilitees.criticite ASC''', [ip])
     infoVulns=dictfetchall(cursor)
     infoVulns=modifvulns(infoVulns)
 
     cursor.execute('''SELECT nom,solution,infos_complementaires FROM vuln_hote_service 
-LEFT JOIN vulnerabilitees ON vulnerabilitees.id=vuln_hote_service.id_vuln
-WHERE ip_hote=%s and solution is NOT NULL and solution!='n/a' ''',[ip])
+    INNER JOIN vulnerabilitees ON vulnerabilitees.id=vuln_hote_service.id_vuln
+    WHERE ip_hote=%s and solution is NOT NULL and solution!='n/a' ''',[ip])
     infoSolutions=dictfetchall(cursor)
     cursor.close()
 
@@ -306,15 +306,15 @@ def edit(request,ip):
 
     cursor=connection.cursor()
     cursor.execute('''SELECT hotes.ip,mac,hostname,os,localisation,type_machine,commentaires,environnement FROM hotes 
-WHERE hotes.ip = %s LIMIT 1''', [ip])
+    WHERE hotes.ip = %s LIMIT 1''', [ip])
     serv=dictfetchall(cursor)
 
     cursor.execute('SELECT DISTINCT(nom) FROM application ORDER BY nom ASC')
     applis=dictfetchall(cursor)
 
     cursor.execute('''SELECT DISTINCT(nom) FROM application_hote 
-LEFT JOIN application ON application.id=application_hote.id_application
-WHERE ip=%s ORDER BY nom ASC''',[ip])
+    INNER JOIN application ON application.id=application_hote.id_application
+    WHERE ip=%s ORDER BY nom ASC''',[ip])
     appli_hote=dictfetchall(cursor)
     cursor.close()
 
@@ -379,8 +379,8 @@ def suppression(request,ip):
 
     #Requete Info Host
     cursor.execute('''SELECT hotes.ip,mac,hostname,os,localisation,type_machine,commentaires,application.nom AS appli_nom FROM hotes 
-    LEFT JOIN application_hote ON application_hote.ip=hotes.ip
-    LEFT JOIN application ON application.id=application_hote.id_application
+    INNER JOIN application_hote ON application_hote.ip=hotes.ip
+    INNER JOIN application ON application.id=application_hote.id_application
     WHERE hotes.ip = %s LIMIT 1''', [ip])
     infoHost=dictfetchall(cursor)
     cursor.close()

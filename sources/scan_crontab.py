@@ -8,8 +8,13 @@ from django.conf import settings
 from serveurs.fonctions import dictfetchall
 from django.db import connection
 import subprocess
-from scans.clientTCP import clientTCP
+from scans.socketTCP import socketTCP
 import json
+
+
+#Ce script sert a lancer les scans plannifies prevus pour la journee en cours
+#Son execution devra donc etre plannifie a laide dune crontab
+
 
 ojd=subprocess.check_output(['date'],shell=True).split(' ')[0]
 cursor=connection.cursor()

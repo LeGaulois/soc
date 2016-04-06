@@ -4,6 +4,7 @@ from views import *
 from formulaires import *
 
 urlpatterns = [
+    url(r'^$', InitWizard.as_view([postgreSQL, Nessus,Variables,rapport,utilisateurs])),
     url(r'^initialisation/$', InitWizard.as_view([postgreSQL, Nessus,Variables,rapport,utilisateurs])),
     url(r'testConnectionSQL/$',connectionSQL,name='connectionSQL'),
     url(r'testConnectionNessus/$',connectionNessus,name='connectionNessus'),

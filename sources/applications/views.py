@@ -162,7 +162,7 @@ def identite(request,id_application):
     appli=dictfetchall(cursor)
 
     cursor.execute('''SELECT application_hote.ip,hotes.hostname,environnement FROM application_hote 
-LEFT JOIN hotes ON application_hote.ip=hotes.ip
+INNER JOIN hotes ON application_hote.ip=hotes.ip
 WHERE id_application=%s''',[id_application])
     serveurs=dictfetchall(cursor)
     cursor.close()

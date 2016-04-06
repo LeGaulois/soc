@@ -80,7 +80,13 @@
 					    <label class="control-label">CVE associées</label>
 					    <div class="controls">
 					      	<label class="checkbox">
-						     	{{refs}}
+					     	{% if liste_refs %}
+								      <ul>	          
+									{% for ref in liste_refs %}
+										<li><a href="{% url 'vulns:details_cve' ref.url %}">{{ref.nom}}</a></li>
+									{%endfor%}
+									</ul>
+							{% endif %}
 						    </label>
 					    </div>
 					  </div>

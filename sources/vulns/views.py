@@ -18,6 +18,8 @@ def stats_vulns(request):
     cursor.execute('''SELECT id,nom,description,criticite, (SELECT count(DISTINCT(ip_hote)) from vuln_hote_service WHERE id=id_vuln and date_correction IS NULL) AS nb FROM vulnerabilitees WHERE criticite!='Info' ORDER BY nb DESC LIMIT 10''')
     top10_vuln_data=dictfetchall(cursor)
     top_10_vuln={'data':top10_vuln_data,'titre':'TOP 10 Vulnérabilitées'}
+
+    top_10_vuln['data']=None if len(top10_vuln_data)!=10 else top10_vuln_data
     
     #Graph radar
     #1) la première famille du graphique a pour but de montrer pour chaque catégorie 
@@ -88,30 +90,35 @@ def details(request,vuln_id):
     vuln=prepareListeSolution(vuln)
 
     cursor.execute('''SELECT vuln_hote_service.ip_hote,services.protocole,services.port,retour_vuln FROM vuln_hote_service
-LEFT JOIN services ON services.id=vuln_hote_service.id_service
-WHERE id_vuln=%s''',[vuln_id])
+    INNER JOIN services ON services.id=vuln_hote_service.id_service
+    WHERE id_vuln=%s''',[vuln_id])
     hotes=dictfetchall(cursor)
 
     cursor.execute('''SELECT DISTINCT(refs.nom) FROM refs 
-LEFT JOIN vulns_refs ON refs.id=vulns_refs.ref_id
-LEFT JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id 
-WHERE vulnerabilitees.id=%s''',[vuln_id])
-    liste_refs=dictfetchall(cursor)
+    INNER JOIN vulns_refs ON refs.id=vulns_refs.ref_id
+    INNER JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id 
+    WHERE vulnerabilitees.id=%s''',[vuln_id])
+    temp=dictfetchall(cursor)
     cursor.close()
-    refs=''
 
-    for ref in liste_refs:
-        refs+=ref['nom']
+    if len(temp)==0:
+        liste_refs=None
 
-        if ref!=liste_refs[-1]:
-            refs+=', '
+    else:
+        liste_refs=[]
+
+        for ref in temp:
+            liste_refs.append({
+                    'nom':ref['nom'],
+                    'url':ref['nom'].replace('-','_')
+            })
 
     if len(hotes)>0:
         vuln[0]['nb']=len(hotes)
 
-        return render(request,'vulns/details.html',{'vuln':vuln,'hotes':hotes,'refs':refs})
+    return render(request,'vulns/details.html',{'vuln':vuln,'hotes':hotes,'liste_refs':liste_refs})
 
-    return HttpResponse('oups')
+
 
 
 @login_required
@@ -185,10 +192,10 @@ def details_cve(request,cve):
 
     cursor.execute("""
         SELECT vuln_hote_service.ip_hote,protocole,port,services.nom FROM refs
-        LEFT JOIN vulns_refs ON vulns_refs.ref_id=refs.id
-        LEFT JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id
-        LEFT JOIN vuln_hote_service ON vulnerabilitees.id=id_vuln
-        LEFT JOIN services ON vuln_hote_service.id_service=services.id     
+        INNER JOIN vulns_refs ON vulns_refs.ref_id=refs.id
+        INNER JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id
+        INNER JOIN vuln_hote_service ON vulnerabilitees.id=id_vuln
+        INNER JOIN services ON vuln_hote_service.id_service=services.id     
         WHERE refs.nom=%s AND date_correction IS NULL ORDER BY ip_hote ASC
     """,[cve])
 
