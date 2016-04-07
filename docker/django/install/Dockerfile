@@ -3,7 +3,7 @@ FROM debian:jessie
 ##### INSTALLATION ######
 RUN apt-get update \
 && apt-get upgrade -y \
-&& apt-get install -y apache2 libapache2-mod-wsgi python-pip nmap python2.7 libcap2-bin python-psycopg2 python-dnspython python-dns texlive-latex-base
+&& apt-get install -y apache2 libapache2-mod-wsgi python-pip nmap python2.7 libcap2-bin python-psycopg2 python-dnspython python-dns texlive-latex-base texlive-lang-french
 
 
 ###### NMAP ######
@@ -15,11 +15,7 @@ RUN chgrp adm /usr/bin/nmap \
 
 ###### DJANGO ######
 RUN pip install --upgrade pip \
-&& pip install django \
-&& pip install django-extensions \
-&& pip install configparser \
-&& pip install pytz \
-&& pip install dnspython 
+&& pip install django django-extensions configparser pytz dnspython django-ajax
 
 
 ##### CONF APACHE ####
