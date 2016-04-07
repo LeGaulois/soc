@@ -11,7 +11,7 @@ nessus:
 django:
     build: ./django/install
     volumes:
-        - ./django/data:/var/www/html/soc/
+        - ../sources:/var/www/html/soc/
     ports:
         - "80:80"
     links:
