@@ -15,13 +15,13 @@ RUN chgrp adm /usr/bin/nmap \
 
 ###### DJANGO ######
 RUN pip install --upgrade pip \
-&& pip install django django-extensions configparser pytz dnspython django-ajax
+&& pip install django django-extensions configparser pytz dnspython djangoajax django-formtools passlib
 
 
 ##### CONF APACHE ####
 COPY 000-default.conf /etc/apache2/sites-available/
 #Certificats
-RUN chown -R www-data /var/www
+RUN chown -R www-data /var/www/
 
 VOLUME  ["/var/www/html/soc/"]
 
