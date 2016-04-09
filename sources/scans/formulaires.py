@@ -3,7 +3,7 @@ from django import forms
 from fonctions import valideIP,valideMAC
 import re
 
-##############################################################################################################################"
+
 class scanPlannifie(forms.Form):
     '''
     Formulaire de création et d'éditions d'un scan Plannifié
@@ -144,8 +144,8 @@ class scanPlannifie(forms.Form):
         
 
         super(scanPlannifie,self).__init__(*args,**kwargs)
-        self.fields['nom']=forms.CharField(label="Nom",max_length=50,initial=self.nom,required=True)
-        self.fields['description']=forms.CharField(label='Description',initial=self.description,max_length=250,required=False)
+        self.fields['nom']=forms.CharField(label="Nom",max_length=50,initial=self.nom,required=True,max_length=30)
+        self.fields['description']=forms.CharField(label='Description',initial=self.description,max_length=200,required=False)
         self.fields['nmap']=forms.BooleanField(label="Scan Nmap",initial=self.nmap,required=False)
         self.fields['nmapOptions']=forms.CharField(label='Options Nmap',initial=self.nmapOptions,required=False,max_length=50)
         self.fields['nessus']=forms.BooleanField(label="Scan Nessus",initial=self.nessus,required=False)
@@ -201,7 +201,6 @@ class scanPlannifie(forms.Form):
 
 
 
-##############################################################################################################################"
 class scanManuel(forms.Form):
     '''
     Formulaire de création et d'éditions d'un scan manuel
@@ -236,7 +235,6 @@ class scanManuel(forms.Form):
 
         del liste_appli
         del liste_ip
-        ##########
 
         LISTE_POLICIES=[]
 
@@ -287,17 +285,3 @@ class scanManuel(forms.Form):
                                 self.errors[field].as_text()
                         )
             return is_valid
-
-
-######################################################################################################
-######################################################################################################
-
-
-
-
-
-
-
-
-
-

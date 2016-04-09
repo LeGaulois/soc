@@ -38,4 +38,5 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 
 
 
-CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
+CMD ["chown", "-R", "www-data:www-data", "/var/www/html/soc/", "&&", "/usr/sbin/apache2", "-D", "FOREGROUND"]
+

@@ -88,11 +88,11 @@ class formEditApplication(forms.Form):
         self.mode=kwargs.pop('mode')
 
         super(formEditApplication,self).__init__(*args,**kwargs)
-        self.fields['nom']=forms.CharField(label="Nom",initial=self.nom,required=True)
-        self.fields['criticite']=forms.CharField(label='Criticite',initial=criticite,widget=forms.Select( choices=self.CHOIX_CRITICITE),required=True)
+        self.fields['nom']=forms.CharField(label="Nom",initial=self.nom,required=True,max_length=50)
+        self.fields['criticite']=forms.CharField(label='Criticite',initial=criticite,widget=forms.Select( choices=self.CHOIX_CRITICITE),required=True,max_length=10)
         self.fields['desc']=forms.CharField(label="Description",widget=forms.Textarea,initial=desc,max_length=65536,required=False)
         self.fields['nb_utilisateurs']=forms.IntegerField(label="Nombre Utilisateurs",initial=nb_utilisateurs,required=False)
-        self.fields['type_appli']=forms.CharField(label="Type",initial=type_appli,max_length=50,required=False)
+        self.fields['type_appli']=forms.CharField(label="Type",initial=type_appli,max_length=50,required=False,max_length=50)
         self.fields['technologies']=forms.CharField(label="Technologies",widget=forms.Textarea,initial=technologies,max_length=250,required=False)
 
 

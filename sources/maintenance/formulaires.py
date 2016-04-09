@@ -62,9 +62,9 @@ class Nessus(forms.Form):
 
 class Variables(forms.Form):
     legende="<span class='helptext'><p>Tuples séparés par des ;<br>Un tuple par ligne<br>Valeur_ajoutée_en_base;valeur_affichée<br><br>Ces données seront utilisées par les différents formulaires de l'application</p></span>"
-    localisation=forms.CharField(label="Localisation",widget=forms.Textarea(attrs={'rows': 7,'cols': 50,'style': 'height: 7em;'}),help_text=mark_safe(legende),max_length=100,required=False)
-    environnement=forms.CharField(label="Environnement",widget=forms.Textarea(attrs={'rows': 7,'cols': 50,'style': 'height: 7em;'}),help_text=legende,max_length=100,required=False)
-    type_machine=forms.CharField(label="Type Machine",widget=forms.Textarea(attrs={'rows': 7,'cols': 50,'style': 'height: 7em;'}),help_text=legende,max_length=100,required=False)
+    localisation=forms.CharField(label="Localisation",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em;'}),help_text=mark_safe(legende),max_length=100,required=False)
+    environnement=forms.CharField(label="Environnement",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em;'}),help_text=legende,max_length=100,required=False)
+    type_machine=forms.CharField(label="Type Machine",widget=forms.Textarea(attrs={'rows': 15,'cols': 80,'style': 'height: 7em;'}),help_text=legende,max_length=100,required=False)
 
 
     def clean_localisation(self):

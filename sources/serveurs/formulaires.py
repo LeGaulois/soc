@@ -8,7 +8,7 @@ from django.conf import settings
 class formUploadXML(forms.Form):
         file = forms.FileField()
 
-##############################################################################################################################"
+
 class formFiltreMachines(forms.Form):
     def __init__(self,*args,**kwargs):
         self.os=kwargs.pop('os')        
@@ -57,8 +57,8 @@ class formFiltreMachines(forms.Form):
 
         super(formFiltreMachines,self).__init__(*args,**kwargs)
         self.fields['os']=forms.CharField(label="OS",max_length=60,initial=None,widget=forms.Select( choices=CHOIX_OS),required=False)
-        self.fields['type_machine']=forms.CharField(label='Type machine',initial='',widget=forms.Select( choices=CHOIX_TYPE),required=False)
-        self.fields['environnement']=forms.CharField(label='Environnement',initial='',widget=forms.Select( choices=CHOIX_ENVIRONNEMENT),required=False)
+        self.fields['type_machine']=forms.CharField(label='Type machine',initial='',widget=forms.Select( choices=CHOIX_TYPE),required=False,max_length=20)
+        self.fields['environnement']=forms.CharField(label='Environnement',initial='',widget=forms.Select( choices=CHOIX_ENVIRONNEMENT),required=False,max_length=20)
         self.fields['appli']=forms.CharField(label="Application",initial=None,widget=forms.Select( choices=CHOIX_APPLI),required=False)
         self.fields['criticite']=forms.CharField(label='Criticite',initial=None,widget=forms.Select(choices=CHOIX_CRITICITE),required=False)
         self.fields['vulnerabilite']=forms.CharField(label='Vulnerabilite',initial=None,widget=forms.Select(choices=CHOIX_VULNERABILITE),required=False)
@@ -258,8 +258,8 @@ class formEditMachine(forms.Form):
         self.fields['mac']=forms.CharField(label="Adresse MAC",initial=mac,max_length=17,required=False)
         self.fields['hostname']=forms.CharField(label="Hostname",initial=hostname,max_length=50,required=False)
         self.fields['os']=forms.CharField(label="OS",initial=os,max_length=60)
-        self.fields['type_machine']=forms.CharField(label='Type machine',initial=type_machine,widget=forms.Select( choices=self.CHOIX_TYPE),required=False)
-        self.fields['environnement']=forms.CharField(label='Environnement',initial=environnement,widget=forms.Select( choices=self.CHOIX_ENVIRONNEMENT),required=False)
+        self.fields['type_machine']=forms.CharField(label='Type machine',initial=type_machine,widget=forms.Select( choices=self.CHOIX_TYPE),required=False,max_length=20)
+        self.fields['environnement']=forms.CharField(label='Environnement',initial=environnement,widget=forms.Select( choices=self.CHOIX_ENVIRONNEMENT),required=False,max_length=20)
         
 
         self.fields['type_selection']=forms.CharField(label="Backend",widget=forms.Select(choices=[('id_backend','oui'),('id_appli','non')],attrs={'onchange':'Selection()','onload':'Selection()'}),required=True,initial=selection_initiale)
