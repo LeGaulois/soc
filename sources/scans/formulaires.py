@@ -144,7 +144,7 @@ class scanPlannifie(forms.Form):
         
 
         super(scanPlannifie,self).__init__(*args,**kwargs)
-        self.fields['nom']=forms.CharField(label="Nom",max_length=50,initial=self.nom,required=True,max_length=30)
+        self.fields['nom']=forms.CharField(label="Nom",initial=self.nom,required=True,max_length=30)
         self.fields['description']=forms.CharField(label='Description',initial=self.description,max_length=200,required=False)
         self.fields['nmap']=forms.BooleanField(label="Scan Nmap",initial=self.nmap,required=False)
         self.fields['nmapOptions']=forms.CharField(label='Options Nmap',initial=self.nmapOptions,required=False,max_length=50)

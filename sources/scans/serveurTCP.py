@@ -16,6 +16,8 @@ from django.conf import settings
 from observable import Observable
 import ConfigParser
 from socketTCP import socketTCP
+import requests
+
 
 buf=4096
 BASE=settings.BASE_DIR+'/'
@@ -68,20 +70,6 @@ class dialogueClient(Thread):
                 
 
 
-class initialiserConnexionNessus(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-        self.nessus=Nessus()
-
-    def run(self):
-        while True:
-            try:
-                self.nessus.connexion()
-                self.nessus.deconnexion()
-                break
-            except:
-                pass
-
 
 class serveurTache(Thread,Observable):
     def __init__(self):
@@ -89,12 +77,11 @@ class serveurTache(Thread,Observable):
         Observable.__init__(self)
         self.scanListe=[]
         self.ScannerNessus=Nessus()
-        self.nessusready=False
         self.attenteNessus=[]
 
         try:
             self.ScannerNessus.connexion()
-            self.nessusready=True
+
         except:
             pass
       
@@ -381,12 +368,11 @@ class serveurTache(Thread,Observable):
             #En cas de perte de la connexion avec Nessus
             except requests.exceptions.ConnectionError:
                 time.sleep(10)
-                self.nessusready=False
 
                 #On attend et on reassaye de se connecter
                 try:
                     self.ScannerNessus.connexion()
-                    self.nessusready=True
+
 
                     #si la connexion reussi on verifie si des scans sont en attente d'ajout
                     for scan_en_attente in self.attenteNessus:
@@ -429,10 +415,6 @@ class srvTCP(Thread):
             self.lock=RLock()
 
         except Exception as e:
-            f=open(BASE+'errors.log','w',0)
-            traceback.print_exc(file=f)
-            f.write(str(e))
-            f.close()
             sys.exit(-1)
 
     def run(self):

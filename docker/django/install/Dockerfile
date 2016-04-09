@@ -24,7 +24,7 @@ COPY 000-default.conf /etc/apache2/sites-available/
 RUN chown -R www-data /var/www/
 
 VOLUME  ["/var/www/html/soc/"]
-
+USER www-data
 
 ###### APACHE ######
 EXPOSE 80
