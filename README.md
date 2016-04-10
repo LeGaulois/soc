@@ -14,9 +14,10 @@
   
   
 # Prérequis:
-  - PostgreSQL
-  - Nessus
-  - Apache configuré en frontal avec mod-wsgi
+Votre machine doit posséder les paquets suivants: 
+-git
+-[docker](https://docs.docker.com/engine/installation/)
+-[docker-compose](https://docs.docker.com/compose/install/)
   
   
 # Installation
@@ -28,7 +29,6 @@ L'application s'appuie sur 3 containers:
     - nessus: pour le scanner de vulnérabilités
 
 
-Prérequis: votre machine doit posséder les paquets suivants: git, [docker](https://docs.docker.com/engine/installation/), [docker-compose](https://docs.docker.com/compose/install/) 
 
 Téléchargement du dépôt github:
 ```
@@ -41,7 +41,7 @@ cd soc/docker
 docker-compose build
 ```
 
-Création et démarrage des contrôleurs:
+Création et démarrage des containers:
 ```
 docker-compose up
 ```
