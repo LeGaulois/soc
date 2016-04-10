@@ -4,7 +4,8 @@ Projet de mise en place d'un SOC (Security Operating Center) alléger.
 Cette interface WEB développé en Python à l'aide du framework DJANGO s'interface avec:
   - Nessus > Scanner de vulnérabilitées
   - Nmap > scanner de port et détéection de versions des services et OS 
-  
+
+
 Les résultats des scans servent à alimenter la base de données.
   
 L'interface permet de:
@@ -84,6 +85,6 @@ Ces 2 initialisations se font simplement à l'aide d'un wizard
 
   
 # Reste à faire:
-    - gestion des mails
-    - manuel technique
+  - gestion des mails
+  - manuel technique
 
