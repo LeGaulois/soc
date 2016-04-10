@@ -31,45 +31,47 @@ L'application s'appuie sur 3 containers:
 Prérequis: votre machine doit posséder les paquets suivants: git, [docker](https://docs.docker.com/engine/installation/), [docker-compose](https://docs.docker.com/compose/install/) 
 
 Téléchargement du dépôt github:
-'''
+```
 git clone https://github.com/LeGaulois/soc.git
-'''
+```
 
 Construction des images:
-'''
+```
 cd soc/docker
 docker-compose build
-'''
+```
 
 Création et démarrage des contrôleurs:
-'''
+```
 docker-compose up
-'''
+```
 
 Normalement vous devriez-voir une erreur:
-'''
+```
 django_1     | (13)Permission denied: AH00072: make_sock: could not bind to address [::]:80
 django_1     | (13)Permission denied: AH00072: make_sock: could not bind to address 0.0.0.0:80
 django_1     | no listening sockets available, shutting down
 django_1     | AH00015: Unable to open logs
 docker_django_1 exited with code 1
-'''
+```
+
 Cette erreur est due au fait que apache n'est pas propriétaire de l'arborescence /var/www/html/soc/
 
+
 Lancement des containers:
-'''
+```
 docker-compose start
-'''
+```
 
 Modification du propriétaire de l'arborescence:
-'''
+```
 docker exec -i -t `docker ps | awk 'BEGIN {OFS="\t"} $NF=="docker_django_1" {print $1}'` chown -R www-data:www-data /var/www/html/soc
-'''
+```
 
 Redémarrer le container django:
-'''
+```
 docker-compose restart django
-'''
+```
 
 
 L'initialisation du projet se fait en 2 étapes:
