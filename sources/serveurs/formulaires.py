@@ -257,7 +257,7 @@ class formEditMachine(forms.Form):
         self.fields['adresse']=forms.GenericIPAddressField(label="Adresse IP",initial=self.adresse)
         self.fields['mac']=forms.CharField(label="Adresse MAC",initial=mac,max_length=17,required=False)
         self.fields['hostname']=forms.CharField(label="Hostname",initial=hostname,max_length=50,required=False)
-        self.fields['os']=forms.CharField(label="OS",initial=os,max_length=60)
+        self.fields['os']=forms.CharField(label="OS",initial=os,max_length=60,required=False)
         self.fields['type_machine']=forms.CharField(label='Type machine',initial=type_machine,widget=forms.Select( choices=self.CHOIX_TYPE),required=False,max_length=20)
         self.fields['environnement']=forms.CharField(label='Environnement',initial=environnement,widget=forms.Select( choices=self.CHOIX_ENVIRONNEMENT),required=False,max_length=20)
         

@@ -20,11 +20,7 @@ RUN pip install --upgrade pip \
 
 ##### CONF APACHE ####
 COPY 000-default.conf /etc/apache2/sites-available/
-#Certificats
-RUN chown -R www-data /var/www/
-
 VOLUME  ["/var/www/html/soc/"]
-USER www-data
 
 ###### APACHE ######
 EXPOSE 80
@@ -38,5 +34,5 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 
 
 
-CMD ["chown", "-R", "www-data:www-data", "/var/www/html/soc/", "&&", "/usr/sbin/apache2", "-D", "FOREGROUND"]
+CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
 
