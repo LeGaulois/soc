@@ -12,11 +12,24 @@ class postgreSQL(forms.Form):
         
 
         super(postgreSQL,self).__init__(*args,**kwargs)
-        self.fields['pg_ip']=forms.GenericIPAddressField(label="Adresse IP")
+        self.fields['pg_ip']=forms.CharField(label="Adresse IP")
         self.fields['pg_port']=forms.IntegerField(label="Port",required=True)
         self.fields['pg_base']=forms.CharField(label="Nom base",max_length=17,required=True)
         self.fields['pg_user']=forms.CharField(label="Login",required=True)
         self.fields['pg_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput)
+
+    def clean_pg_ip(self):
+        ip=self.cleaned_data['pg_ip']
+
+        if ip=='postgresql':
+            return 'postgresql'
+
+        try:
+            ip=valideIP(ip)
+            return ip
+        except:
+            raise forms.ValidationError('adresse IP non valide')
+
 
     def is_valid(self):
         is_valid = super(postgreSQL,self).is_valid()
@@ -40,10 +53,23 @@ class Nessus(forms.Form):
         self.button="testNessus()"
     
         super(Nessus,self).__init__(*args,**kwargs)
-        self.fields['nessus_ip']=forms.GenericIPAddressField(label="Adresse IP")
+        self.fields['nessus_ip']=forms.CharField(label="Adresse IP")
         self.fields['nessus_port']=forms.IntegerField(label="Port",required=True)
         self.fields['nessus_user']=forms.CharField(label="Login",required=True)
         self.fields['nessus_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput)
+
+    def clean_nessus_ip(self):
+        ip=self.cleaned_data['nessus_ip']
+
+        if ip=='nessus':
+            return 'nessus'
+
+        try:
+            ip=valideIP(ip)
+            return ip
+        except:
+            raise forms.ValidationError('adresse IP non valide')
+
 
     def is_valid(self):
         is_valid = super(Nessus,self).is_valid()

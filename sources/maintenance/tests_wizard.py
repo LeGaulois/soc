@@ -20,6 +20,9 @@ def testConnectionSQL(host,port,database,login,password):
         if re.search('Connection refused',erreur)!=None:
             raise ValueError('Connection impossible')
 
+        elif re.search('the database system is starting up', erreur)!=None:
+            raise ValueError("Database en cours d'initialisation...<br>Veuillez patienter")
+
         elif re.search('FATAL',erreur)!=None:
             raise ValueError("Erreur d'authentification")
 

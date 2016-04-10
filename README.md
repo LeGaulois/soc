@@ -47,18 +47,6 @@ Création et démarrage des containers:
 docker-compose up
 ```
 
-Normalement vous devriez-voir une erreur:
-```
-django_1     | (13)Permission denied: AH00072: make_sock: could not bind to address [::]:80
-django_1     | (13)Permission denied: AH00072: make_sock: could not bind to address 0.0.0.0:80
-django_1     | no listening sockets available, shutting down
-django_1     | AH00015: Unable to open logs
-docker_django_1 exited with code 1
-```
-
-Cette erreur est due au fait que apache n'est pas propriétaire de l'arborescence /var/www/html/soc/
-
-
 Lancement des containers:
 ```
 docker-compose start
