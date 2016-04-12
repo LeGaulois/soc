@@ -2,17 +2,12 @@
 from xml.dom.minidom import parse, parseString
 import csv
 from django.db import connection
-from fonctions import dictfetchall
+from fonctions import dictfetchall,getIP
 import datetime
 import pytz
 from erreurs import ErreurScanNessus
-import dns.resolver
 import re
 from cvedetails import get_CVE_details
-
-def getIP(hostname):
-    reponse=dns.resolver.query(str(hostname),'a')
-    return str(reponse[0])
 
 
 def getPlagePorts(listeArgumentsNmap):

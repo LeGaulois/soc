@@ -3,7 +3,7 @@ import re
 import psycopg2
 from django.conf import settings
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from fonctions import dictfetchall,desatanize,valideIP
+from fonctions import dictfetchall,desatanize,valideIP,getIP
 import os
 import shutil
 import datetime
@@ -131,5 +131,12 @@ def initialiserPG(dump_file,host,port,database,login,password):
 
     
     os.putenv('PGPASSWORD',password)
+
+    #On recupère l'adresse IP si l'utilisateur nous envoie le hostname
+    try:
+        host=valideIP(host)
+    except:
+        host=getIP(host)
+
     subprocess.check_output('psql -h '+desatanize(host)+' -p '+str(port)+' -d '+desatanize(database)+' -U '+desatanize(login)+' < '+dump_file, shell=True)
     
