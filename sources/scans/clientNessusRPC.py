@@ -21,7 +21,8 @@ BASE=settings.BASE_DIR+'/'
 Config = ConfigParser.ConfigParser()
 Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 
-
+ADRESSE=Config.get('Nessus','adresse')
+PORT=Config.get('Nessus','port')
 LOGIN=Config.get('Nessus','Login')
 PASSWORD=Config.get('Nessus','Password')
 DIRECTORY_ID=Config.get('Nessus','Directory_Id')
@@ -37,7 +38,7 @@ CUSTOM_TEMPLATE_UUID=Config.get('Nessus','Custom_Template_UUID')
 
 class Nessus(object):
 
-    def __init__(self,adresse='localhost',port=8834):
+    def __init__(self,adresse=ADRESSE,port=PORT):
         self.adresse=adresse
         self.port=port
         self.url='https://'+str(self.adresse)+':'+str(self.port)+'/'
@@ -145,6 +146,10 @@ class Nessus(object):
         '''
 
         res=self.envoyer('GET','policies/')
+    
+        if res['policies'] is None:
+            res['policies']=[]
+
         return res
 
 

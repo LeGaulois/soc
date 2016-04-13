@@ -105,6 +105,7 @@ def supprimerEntreeHistorique(request,id_scan):
 
 
 
+
 @login_required
 def status_scans_plannifies(request):
     '''
@@ -362,24 +363,40 @@ def ajoutScanManuel(request, ip=None):
 
     cursor.execute('SELECT nom,id FROM application')
     liste_appli=dictfetchall(cursor)
-    
-    ScannerNessus=Nessus()
-    ScannerNessus.connexion()
-    dict_policies=ScannerNessus.listePolicies()
-    liste_policies=dict_policies['policies']
-    ScannerNessus.deconnexion()
-    ip=ip
+
+    error_nessus={
+            'indisponible':False,
+            'policy':False
+    }
+
+    try:    
+        ScannerNessus=Nessus()
+        ScannerNessus.connexion()
+        dict_policies=ScannerNessus.listePolicies()
+        liste_policies=dict_policies['policies']
+        ScannerNessus.deconnexion()
+    except:
+        error_nessus['indisponible']=True
+        liste_policies=[]
+
+    error_nessus['policy']=True if len(liste_policies)==0 else False
+
     cursor.close()
     
     if request.method == 'POST':
-        form = scanManuel(request.POST,liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli)
+        form = scanManuel(request.POST,liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli,errors=error_nessus)
             
         if form.is_valid():
             type_scan='manuel'
             Nmap=form.cleaned_data['nmap']
             nmapOptions=form.cleaned_data['nmapOptions']
-            nessus=form.cleaned_data['nessus']
-            nessusPolicy_id=form.cleaned_data['nessus_policy']
+
+            try:
+                nessus=form.cleaned_data['nessus']
+                nessusPolicy_id=form.cleaned_data['nessus_policy']
+            except:
+                nessus=False
+                nessusPolicy_id=None
             
 
             if ip==None:
@@ -452,7 +469,7 @@ def ajoutScanManuel(request, ip=None):
 
 
     else:
-        form = scanManuel(liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli)
+        form = scanManuel(liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli,errors=error_nessus)
 
         return render(request, 'scans/ajout_manuel.html', locals())
 

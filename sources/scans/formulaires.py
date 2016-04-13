@@ -250,13 +250,18 @@ class scanManuel(forms.Form):
             pass
 
     
-        
+        errors=kwargs.pop('errors')
 
         super(scanManuel,self).__init__(*args,**kwargs)
         self.fields['nmap']=forms.BooleanField(label="Scan Nmap",initial=False,required=False)
         self.fields['nmapOptions']=forms.CharField(label='Options Nmap',initial='-A -sS -sU',required=False,max_length=50)
-        self.fields['nessus']=forms.BooleanField(label="Scan Nessus",initial=False,required=False)
-        self.fields['nessus_policy']=forms.CharField(label="Nessus Policy",max_length=40,widget=forms.Select( choices=LISTE_POLICIES),required=True)
+
+
+        #On controle si il y a des problemes pour contacter Nessus
+        if errors['indisponible']==False and errors['policy']==False:
+            self.fields['nessus']=forms.BooleanField(label="Scan Nessus",initial=False,required=False)
+            self.fields['nessus_policy']=forms.CharField(label="Nessus Policy",max_length=40,widget=forms.Select( choices=LISTE_POLICIES),required=True)
+            
 
         if ip is None:
             self.fields['type_selection']=forms.CharField(label="Selection par",max_length=40,widget=forms.Select( choices=[('',''),('id_adresses','ip'),('id_applis','appli')],attrs={'onchange':'Selection()'}),required=True,initial=selection_initiale)

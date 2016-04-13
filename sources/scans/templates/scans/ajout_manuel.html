@@ -6,6 +6,19 @@
 		    			<h3>Paramètre du scan</h3>
 		    		</div>
 
+        {% if error_nessus.indisponible %}
+            <script>
+                alert("Impossible de joindre le serveur Nessus :(");
+            </script>
+
+        {% elif error_nessus.policy %}
+            <script>
+                alert("Aucune policy Nessus definie\nRendez vous sur l'interface WEB de Nessus pour en ajouter");
+            </script>
+
+        {%endif%}
+
+
 		{% if ip == None %}
 		<form class="form-horizontal" action="{% url 'scans:ajoutScanManuel' %}" method="post">
 	

@@ -295,7 +295,13 @@ class serveurTache(Thread,Observable):
             if int(scan['id'])==int(id_scan_status):
                 sc=scan['scan']
                 id_nessus=sc.nessusGetID()
-                self.ScannerNessus.supprimerScan(id_nessus)
+            
+                if id is not None:
+                    try:
+                        self.ScannerNessus.supprimerScan(id_nessus)
+                    except:
+                        pass
+
                 self.scanListe.remove(scan)
                 break
 

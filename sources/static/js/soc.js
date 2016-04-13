@@ -181,8 +181,7 @@ function updateScans() {
 
 
 function supprimerEntreeHistorique(id_scan) {
-    
-    ajaxGet('/scans/supprimerEntreeHistorique/'+id_scan,function(content){
+    ajaxGet('/scans/supprimerEntreeHistorique/'+id_scan+'/',function(content){
         var tableau=document.getElementById('tableau_scans');
         var lignes=tableau.rows;
 

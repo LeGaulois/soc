@@ -150,7 +150,7 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
     for i in range(0,3):
         try:
             subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+nomUnique+'.tex >/dev/null &>/dev/null'],shell=True)
-            time.sleep(1)
+            time.sleep(3)
         except:
             pass 
 
