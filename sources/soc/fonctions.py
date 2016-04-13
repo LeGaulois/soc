@@ -4,6 +4,7 @@ import csv
 from django.db import connection
 from math import floor
 import dns.resolver
+import socket
 
 def dictfetchall(cursor):
     "Retourne le resultat d'une requête SQL dans un tableau de dictionnaire"
@@ -237,6 +238,10 @@ def getIP(hostname):
     Cette fonction permet de récupérer l'adresse IP
     à partir d'un hostname
     '''
-    reponse=dns.resolver.query(str(hostname),'a')
-    return str(reponse[0])
+    try:
+        reponse=dns.resolver.query(str(hostname),'a')
+        return str(reponse[0])
+    except:
+        reponse=socket.gethostbyname_ex(hostname)[2][0]
+        return reponse
          
