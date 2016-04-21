@@ -186,12 +186,14 @@ def liste(request):
             liste_filtres['type_machine']=form.cleaned_data['type_machine']
             liste_filtres['environnement']=form.cleaned_data['environnement']
 
-            requete='''SELECT * FROM (
-                SELECT DISTINCT ON (hotes.ip) hotes.ip,application.nom AS nom,application.criticite AS criticite,vulnerabilite,localisation,scans_status.etat FROM hotes 
-                LEFT JOIN application_hote ON hotes.ip=application_hote.ip 
-                LEFT JOIN application ON application_hote.id_application=application.id
-                LEFT JOIN scan_hote ON hotes.ip=application_hote.ip 
-                LEFT JOIN scans_status ON scan_hote.id_scan=scans_status.id'''
+            requete=''' SELECT * FROM (
+                            SELECT hotes.ip,application.nom,application.criticite,vulnerabilite,localisation,scans_status.etat FROM hotes 
+                            LEFT JOIN application_hote ON hotes.ip=application_hote.ip 
+                            LEFT JOIN application ON application_hote.id_application=application.id
+                            LEFT JOIN scans_status ON (SELECT scan_manuel_status.id_scans_status FROM scan_manuel_hote 
+                                                            LEFT JOIN scan_manuel_status ON scan_manuel_hote.id_scan_manuel=scan_manuel_status.id_scan_manuel 
+                                                            WHERE scan_manuel_hote.ip_hote=hotes.ip 
+                                                            AND id_scans_status IS NOT NULL ORDER BY id_scans_status DESC LIMIT 1)=scans_status.id  '''
 
             #Cette variable sert a l'ajout du mot AND 
             precedent=False
@@ -216,7 +218,7 @@ def liste(request):
                     precedent=True            
             
 
-            requete+=' ORDER BY ip ASC) p ORDER BY ip'
+            requete+=' ORDER by hotes.ip) p ORDER BY ip'
             
             cursor=connection.cursor()
             cursor.execute(str(requete),valeurs_filtres)
@@ -270,8 +272,8 @@ def identite(request,ip):
     #Requetes vulnerabilites
     cursor.execute('''SELECT vulnerabilitees.nom AS vuln_nom, description, criticite, services.nom AS service_nom, refs.nom AS ref_nom FROM vulnerabilitees
     INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id  
-    INNER JOIN vulns_refs ON vulnerabilitees.id=vulns_refs.vuln_id
-    INNER JOIN refs ON refs.id=vulns_refs.ref_id
+    LEFT JOIN vulns_refs ON vulnerabilitees.id=vulns_refs.vuln_id
+    LEFT JOIN refs ON refs.id=vulns_refs.ref_id
     INNER JOIN services ON services.id=vuln_hote_service.id_service
     WHERE vuln_hote_service.ip_hote=%s AND vuln_hote_service.date_correction IS NULL ORDER BY vulnerabilitees.criticite ASC''', [ip])
     infoVulns=dictfetchall(cursor)
@@ -379,8 +381,8 @@ def suppression(request,ip):
 
     #Requete Info Host
     cursor.execute('''SELECT hotes.ip,mac,hostname,os,localisation,type_machine,commentaires,application.nom AS appli_nom FROM hotes 
-    INNER JOIN application_hote ON application_hote.ip=hotes.ip
-    INNER JOIN application ON application.id=application_hote.id_application
+    LEFT JOIN application_hote ON application_hote.ip=hotes.ip
+    LEFT JOIN application ON application.id=application_hote.id_application
     WHERE hotes.ip = %s LIMIT 1''', [ip])
     infoHost=dictfetchall(cursor)
     cursor.close()

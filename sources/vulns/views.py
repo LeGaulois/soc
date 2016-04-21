@@ -90,14 +90,14 @@ def details(request,vuln_id):
     vuln=prepareListeSolution(vuln)
 
     cursor.execute('''SELECT vuln_hote_service.ip_hote,services.protocole,services.port,retour_vuln FROM vuln_hote_service
-    INNER JOIN services ON services.id=vuln_hote_service.id_service
-    WHERE id_vuln=%s''',[vuln_id])
+        INNER JOIN services ON services.id=vuln_hote_service.id_service
+        WHERE id_vuln=%s AND date_correction is NULL ORDER BY ip_hote ASC''',[vuln_id])
     hotes=dictfetchall(cursor)
 
     cursor.execute('''SELECT DISTINCT(refs.nom) FROM refs 
-    INNER JOIN vulns_refs ON refs.id=vulns_refs.ref_id
-    INNER JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id 
-    WHERE vulnerabilitees.id=%s''',[vuln_id])
+        INNER JOIN vulns_refs ON refs.id=vulns_refs.ref_id
+        INNER JOIN vulnerabilitees ON vulnerabilitees.id=vulns_refs.vuln_id 
+        WHERE vulnerabilitees.id=%s''',[vuln_id])
     temp=dictfetchall(cursor)
     cursor.close()
 

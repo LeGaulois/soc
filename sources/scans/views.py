@@ -111,9 +111,6 @@ def status_scans_plannifies(request):
     '''
     Affiche le status de l'ensemble des scans plannifiés qui ont été démarré
     '''
-    
-
-
 
     cursor=connection.cursor()
     cursor.execute('''SELECT scans_status.date_lancement,scans_status.date_fin,scans_status.etat,scans_plannifies.nom,scans_status.id FROM scans_status 
@@ -135,9 +132,9 @@ def liste_scans_plannifies(request):
     cursor=connection.cursor()
     cursor.execute('''SELECT * FROM (
 SELECT DISTINCT ON(scans_plannifies.id) nom,description,nmap,nessus,nessus_policy_id,scans_plannifies.id,scans_status.etat FROM scans_plannifies 
-INNER JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
-INNER JOIN scans_status ON (SELECT scan_plannifie_status.id_scans_status FROM scan_plannifie_status
-INNER JOIN scans_plannifies ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie ORDER BY scans_status.id DESC LIMIT 1)=scans_status.id) p
+LEFT JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
+LEFT JOIN scans_status ON (SELECT scan_plannifie_status.id_scans_status FROM scan_plannifie_status
+LEFT JOIN scans_plannifies ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie ORDER BY scans_status.id DESC LIMIT 1)=scans_status.id) p
 ''')
     scans_plannifies=dictfetchall(cursor)
     cursor.close()

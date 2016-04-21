@@ -43,21 +43,19 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
     date_scan=date[0]['date_lancement']
     
     cursor.execute('''SELECT ip_hote,nom,description,criticite,date_correction,date_detection FROM vuln_hote_service 
-LEFT JOIN vulnerabilitees ON vuln_hote_service.id_vuln=vulnerabilitees.id
-WHERE (date_detection=%s or date_correction=%s) AND criticite!='Info' ORDER BY ip_hote ASC
-''',[date_scan,date_scan])
+        INNER JOIN vulnerabilitees ON vuln_hote_service.id_vuln=vulnerabilitees.id
+        WHERE (date_detection=%s or date_correction=%s) AND criticite!='Info' ORDER BY ip_hote ASC''',[date_scan,date_scan])
     retourScan=dictfetchall(cursor)
 
     cursor.execute('''SELECT ip_hote,nom,protocole,port,version,date_ajout,date_retrait FROM services 
-WHERE date_ajout=%s or date_retrait=%s ORDER BY ip_hote ASC
-''',[date_scan,date_scan])
+        WHERE date_ajout=%s or date_retrait=%s ORDER BY ip_hote ASC''',[date_scan,date_scan])
     retourServices=dictfetchall(cursor)
 
 
     if type_scan=='plannifie':
         cursor.execute('''SELECT id_scan_plannifie FROM scans_status 
-INNER JOIN scan_plannifie_status ON scans_status.id=scan_plannifie_status.id_scans_status
-WHERE scans_status.id=%s LIMIT 1''',[id_scan])
+            INNER JOIN scan_plannifie_status ON scans_status.id=scan_plannifie_status.id_scans_status
+            WHERE scans_status.id=%s LIMIT 1''',[id_scan])
         dict_id_scan=dictfetchall(cursor)
         id_scan_plannifie=dict_id_scan[0]['id_scan_plannifie']
 
@@ -72,8 +70,8 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
 
     else:
         cursor.execute('''SELECT id_scan_manuel FROM scans_status 
-INNER JOIN scan_manuel_status ON scans_status.id=scan_manuel_status.id_scans_status
-WHERE scans_status.id=%s LIMIT 1''',[id_scan])
+            INNER JOIN scan_manuel_status ON scans_status.id=scan_manuel_status.id_scans_status
+            WHERE scans_status.id=%s LIMIT 1''',[id_scan])
         dict_id_scan=dictfetchall(cursor)
         id_scan_manuel=dict_id_scan[0]['id_scan_manuel']
 

@@ -42,12 +42,12 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions'):
 
     if group_by=='vuln':
         cursor.execute('''SELECT DISTINCT(id),criticite,nom,solution,description,infos_complementaires,ip_hote FROM vulnerabilitees 
-LEFT JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
-WHERE criticite!='Info' ORDER BY id ASC''')
+            INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
+            WHERE criticite!='Info' AND date_correction is NULL ORDER BY id ASC''')
 
     else:
         cursor.execute('''SELECT ip_hote,nom,description,solution,infos_complementaires,criticite FROM vuln_hote_service
-LEFT JOIN vulnerabilitees ON id_vuln=id WHERE criticite!='Info' ORDER BY ip_hote ASC''')
+            INNER JOIN vulnerabilitees ON id_vuln=id WHERE criticite!='Info' AND date_correction is NULL ORDER BY ip_hote ASC''')
 
     dict_vuln_temp=dictfetchall(cursor)
 
