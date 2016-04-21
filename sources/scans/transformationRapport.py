@@ -159,14 +159,20 @@ def parserNmapXml(fichiercsv,date_scan):
             
 
         else:
+            continue
+
+            #Possibilité d'ajouter automatiquement le nouvel hôte en base
+            #Decommentez pour activer
+            """
             id_initiaux=[]
             host_dict['nb_services']=0
                 
             cursor.execute('INSERT INTO hotes (ip,mac,hostname,os,famille_os,nb_services) VALUES (%s,%s,%s,%s,%s,%s)',[host_dict['ip'],host_dict['mac'],host_dict['hostname'],host_dict['os'],host_dict['famille_os'],host_dict['nb_services']])
+            """
+            ####
 
         del nb_hotes
         #On cherche ensuite les services associes a la machine
-        
 
         for service in host.getElementsByTagName('port'):
             dic={'etat':None,'nom':None,'type':None,'version':None}
@@ -189,7 +195,7 @@ def parserNmapXml(fichiercsv,date_scan):
             host_dict['nb_services']+=1
 
 
-            #On recupere les id des services actifs sur la machine
+            #On verifie si le service est deja repertorie
             cursor.execute('SELECT count(id) from services WHERE protocole=%s AND port=%s AND etat=%s AND nom=%s AND type=%s AND version=%s AND ip_hote=%s AND date_retrait is NULL',[dic['protocole'],dic['port'],dic['etat'],dic['nom'],dic['type'],dic['version'],host_dict['ip']])
             nb_services=dictfetchall(cursor)
 

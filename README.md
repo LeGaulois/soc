@@ -36,9 +36,24 @@ Téléchargement du dépôt github:
 git clone https://github.com/LeGaulois/soc.git
 ```
 
+Création des certificats:
+```
+cd soc/docker/django/
+mkdir certificats
+cd certificats
+
+openssl genrsa 4096 > django.key
+openssl req -new -key django.key > django.csr
+
+openssl genrsa -des3 4096 > ca.key
+openssl req -new -x509 -days 1000 -key ca.key > ca.crt
+
+openssl x509 -req -in django.csr -out django.crt -CA ca.crt -CAkey ca.key -CAcreateserial -CAserial ca.srl
+cd ../..
+```
+
 Construction des images:
 ```
-cd soc/docker
 docker-compose build
 ```
 
