@@ -98,6 +98,10 @@ class Scan(Observable):
     def setErreur(self,type_scan,erreur):
         dict_erreur={'type':str(type_scan),'description':str(erreur)}
         self.erreurs.append(dict_erreur)
+
+
+    def getErreurs(self):
+        return self.erreurs
     
 
     def nessusUpdateImport(self,nessus_import):

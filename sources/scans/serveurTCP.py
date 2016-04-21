@@ -142,6 +142,7 @@ class serveurTache(Thread,Observable):
         id_scan=temp['id_scan']
         nom_unique=temp['nom_unique']
         type_scan=temp['type_scan']
+        erreurs=scan.getErreurs()
         del temp
 
         cursor=connection.cursor()
@@ -149,37 +150,58 @@ class serveurTache(Thread,Observable):
         status_completed=['disable','completed']
         status_completed_with_error=['disable','completed','completed_with_error']
         status_error=['disable','error','completed','completed_with_error','stopping','canceled']
-        #tz = pytz.timezone('Europe/Paris')
         date_fin=datetime.datetime.now()
-        #date_fin=tz.localize(d)
-
 
         if nessus_status=='running' or nmap_status=='running':
             cursor.execute('UPDATE scans_status SET etat=\'running\' WHERE id=%s', [id_scan])
 
-
-        elif (nmap_status in status_completed) and (nmap_import in status_completed) and (nessus_status in status_completed) and (nessus_import in status_completed): 
-            try:
-                self.generationRapport(id_scan,nom_unique,type_scan)
-                cursor.execute('UPDATE scans_status SET etat=\'completed\', date_fin=%s WHERE id=%s', [date_fin,id_scan])
-                self.log.ecrire('['+str(id_scan)+']= Scan termine avec success','info')
-                self.supprimerScan(id_scan)
-            except:
-                cursor.execute('UPDATE scans_status SET etat=\'completed_with_error\', date_fin=%s WHERE id=%s', [date_fin,id_scan])
-
-
-
-        elif (nmap_status in status_completed_with_error) and (nmap_import in status_completed_with_error) and (nessus_status in status_completed_with_error) and (nessus_import in status_completed_with_error):
-            self.generationRapport(id_scan,nom_unique,type_scan)
-            cursor.execute('UPDATE scans_status SET etat=\'completed_with_error\', date_fin=%s WHERE id=%s', [date_fin,id_scan])
-            self.log.ecrire('['+str(id_scan)+']= Scan termine avec des erreurs','info')
-            self.supprimerScan(id_scan)
-                                        
-        elif (nmap_status in status_error) and (nmap_import in status_error) and (nessus_status in status_error) and (nessus_import in status_error):
-            cursor.execute('UPDATE scans_status SET etat=\'error\', date_fin=%s WHERE id=%s', [date_fin,id_scan])
-            self.log.ecrire('['+str(id_scan)+']= Echec du scan :(','info')
-            self.supprimerScan(id_scan)
         
+        else:
+            #Données pour l'envoie de mail
+            infos_scan={
+                'id': str(id_scan),
+                'status': None,
+                'nessus': None,
+                'nmap': None,
+                'erreurs': erreurs
+            }
+            
+            infos_scan['nessus']=True if nessus_status!='disable' else False
+            infos_scan['nmap']=True if nmap_status!='disable' else False
+
+
+
+            if (nmap_status in status_completed) and (nmap_import in status_completed) and (nessus_status in status_completed) and (nessus_import in status_completed): 
+                self.generationRapport(id_scan,nom_unique,type_scan)
+                status="completed"
+                infos_scan['status']=status
+                message='['+str(id_scan)+']= Scan termine avec success'
+                level='info'
+
+
+            elif (nmap_status in status_completed_with_error) and (nmap_import in status_completed_with_error) and (nessus_status in status_completed_with_error) and (nessus_import in status_completed_with_error):
+                self.generationRapport(id_scan,nom_unique,type_scan)
+                status="completed_with_error"
+                infos_scan['status']=status
+                message='['+str(id_scan)+']= Scan termine avec des erreurs'
+                level='error'
+
+                                            
+            elif (nmap_status in status_error) and (nmap_import in status_error) and (nessus_status in status_error) and (nessus_import in status_error):
+                f.write("error\n")
+                status="error"
+                infos_scan['status']=status
+                message='['+str(id_scan)+']= Echec du scan :('
+                level='warning'
+
+
+            if status:
+                cursor.execute('UPDATE scans_status SET etat=%s, date_fin=%s WHERE id=%s', [status,date_fin,id_scan])
+                self.log.ecrire(message,level)
+                self.supprimerScan(id_scan)
+                #envoieMail(infos_scan)
+
+
         cursor.close()
 
 
