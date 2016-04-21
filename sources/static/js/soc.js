@@ -121,7 +121,7 @@ function updateScans() {
 
             for (var j= 0; j < lignes.length; j++) {
                 if ((j==lignes.length-1)&&(lignes[j].id!='scan_'+id)) {
-                    var nouvelleLigne=tableau.insertRow(0);
+                    var nouvelleLigne=tableau.insertRow(-1);
                     nouvelleLigne.id='scan_'+id;
                     nouvelleLigne.insertCell(0);
                     var graph=nouvelleLigne.insertCell(1);
@@ -137,9 +137,9 @@ function updateScans() {
                     colonnes=lignes[j].cells;
 
                     colonnes[0].innerHTML='<center>'+nmap_status+'</center>';
-                    colonnes[1].innerHTML='<div id="'+id+'-nmap"></div>';
+                    colonnes[1].innerHTML='<div id="'+id+'-nmap" class="jauge"></div>';
                     $("#"+id+'-nmap').circliful({
-                    animationStep: 500,
+                    animation:0,
                     percentageTextSize:30,
                     percent: nmap_progress,
                     backgroundBorderWidth: 15,
@@ -149,15 +149,16 @@ function updateScans() {
                     colonnes[2].innerHTML='<center>'+nmap_import+'</center>';
 
                     colonnes[3].innerHTML='<center>'+nessus_status+'</center>';
-                    colonnes[4].innerHTML='<div id="'+id+'-nessus"></div>';
+                    colonnes[4].innerHTML='<div id="'+id+'-nessus" class="jauge"></div>';
                     $("#"+id+'-nessus').circliful({
-                    animationStep: 500,
+                    animation: 0,
                     percentageTextSize:30,
                     percent: nessus_progress,
                     backgroundBorderWidth: 15,
                     foregroundBorderWidth: 15
                     });
                     colonnes[5].innerHTML='<center>'+nessus_import+'</center>';
+                    cells_restantes.splice(j,1);
                     break
                 }
             }
@@ -168,8 +169,8 @@ function updateScans() {
         }
 
         try {   
-            for (var k= 0; k < cells_restantes.length; k++) {
-                cells_restantes.splice(k,1);
+            for (var k= 0; k < cells_restantes.length; k++) {  
+                document.getElementById("tableau_scans").deleteRow(cells_restantes[k]);
             }
         }
         catch (e){}
