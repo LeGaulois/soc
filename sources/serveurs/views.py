@@ -266,7 +266,7 @@ def identite(request,ip):
         backend=None
 
     #Requete InfoServices
-    cursor.execute('SELECT protocole,port,nom,version,type FROM services WHERE ip_hote = %s AND etat=\'open\' AND date_retrait is NULL', [ip])
+    cursor.execute('SELECT protocole,port,nom,version,type FROM services WHERE ip_hote = %s AND (etat=\'open\' OR etat=\'open|filtered\') AND date_retrait is NULL', [ip])
     infoServices=dictfetchall(cursor)
 
     #Requetes vulnerabilites
