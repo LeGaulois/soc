@@ -90,4 +90,5 @@ Ces 2 initialisations se font simplement à l'aide d'un wizard
 # Reste à faire:
   - gestion des mails
   - manuel technique
+  - traduction automatique des rapports en français
 
