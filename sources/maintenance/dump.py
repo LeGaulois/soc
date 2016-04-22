@@ -7,8 +7,6 @@ from fonctions import dictfetchall,desatanize,valideIP,getIP
 import os
 import shutil
 import datetime
-import pytz
-import time
 import subprocess
 import re
 
@@ -35,9 +33,7 @@ def exportProjet():
     password=desatanize(postgresql['PASSWORD'])
 
     #Variables de temps
-    tz = pytz.timezone('Europe/Paris')
-    d=datetime.datetime.now()
-    date_dump=str(tz.localize(d)).split(' ')[0]
+    date_dump=datetime.datetime.now()
 
     os.putenv('PGPASSWORD',password)
     subprocess.check_output('pg_dump -h '+host+' -p '+str(port)+' -d '+base+' -U '+user+' > '+BASE+'sav/database.pg', shell=True)
@@ -58,9 +54,7 @@ def exportProjet():
 
 def importProjet(fichier):
     #Variables de temps
-    tz = pytz.timezone('Europe/Paris')
-    d=datetime.datetime.now()
-    date_import=str(tz.localize(d)).split(' ')[0]
+    date_import=datetime.datetime.now()
 
     chemin=BASE+'sav_'+date_import+'/'
     os.mkdir(chemin)
