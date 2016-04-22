@@ -218,8 +218,7 @@ CREATE TABLE services (
     ip_hote inet NOT NULL,
     date_ajout timestamp with time zone NOT NULL,
     date_retrait timestamp with time zone,
-    id integer NOT NULL,
-    CONSTRAINT services_port_check CHECK ((port > 0))
+    id integer NOT NULL
 );
 
 
