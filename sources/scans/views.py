@@ -15,7 +15,6 @@ from django_ajax.decorators import ajax
 from socketTCP import socketTCP
 from django.conf import settings
 
-
 BASE=settings.BASE_DIR+'/'
 
 
@@ -31,7 +30,7 @@ def status_scans(request):
 @ajax
 def getStatusScans(request):
     '''
-    Affiche le status de l'ensemble des scans démarrés manuellement
+    Affiche le status de l'ensemble des scans démarrés
     '''
     try:
         conn=socketTCP()
@@ -56,7 +55,7 @@ def historiqueScansManuels(request):
     cursor.execute('''SELECT date_lancement,date_fin,etat,scans_status.id,scan_manuel_status.id_scan_manuel FROM scans_status 
 INNER JOIN scan_manuel_status ON scans_status.id=scan_manuel_status.id_scans_status
 WHERE type='manuel'
-ORDER BY date_lancement DESC''')
+ORDER BY scans_status.id DESC''')
     scans=dictfetchall(cursor)
 
     for elem in scans:
@@ -70,7 +69,6 @@ ORDER BY date_lancement DESC''')
 
         elem['ip_hote']=liste_ip
         elem['nb_hotes']=len(liste_ip)
-
 
     cursor.close()
     return render(request,'scans/historique_scans_manuels.html',{'scans':scans})
@@ -157,7 +155,7 @@ def ajoutScanPlannifie(request):
     cursor.execute('SELECT DISTINCT(nom) FROM scans_plannifies')
     liste_noms=dictfetchall(cursor)
 
-    cursor.execute('SELECT nom,id FROM application')
+    cursor.execute('SELECT nom,id FROM application ORDER BY nom ASC')
     liste_appli=dictfetchall(cursor)
 
     ScannerNessus=Nessus()
@@ -608,3 +606,4 @@ WHERE id_scan_plannifie=%s ORDER BY date_lancement DESC''',[id_scan_plannifie])
     autre='evolution'
 
     return render(request,'scans/historique_scan_plannifie.html',locals())
+

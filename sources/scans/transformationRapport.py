@@ -18,16 +18,14 @@ def getPlagePorts(listeArgumentsNmap):
     '''
     protocole={
         'all':[('-p\d+','-p'),('-p ','-p')],
-        'tcp':[('-pT','-pT'),(',T:',',T:')],
-        'udp':[('-pU','-pU'),(',U:',',U:')]
+        'tcp':[('-pT','-pT:'),(',T:',',T:')],
+        'udp':[('-pU','-pU:'),(',U:',',U:')]
     }
 
     ports_tcp_scannes=[]
     ports_udp_scannes=[]
 
     for elem in listeArgumentsNmap:
-        
-
         for proto in protocole.keys():
             for parser in protocole[proto]:
                 if re.search(parser[0],elem)!=None:
@@ -35,18 +33,24 @@ def getPlagePorts(listeArgumentsNmap):
 
                     for plage in temp:
                         if re.search('-',plage)!=None:
-                            port_debut=int(plage.split('-')[0])
-                            port_fin=int(plage.split('-')[1])
+                            try:
+                                print 'plage'
+                                port_debut=int(plage.split('-')[0])
+                                port_fin=int(plage.split('-')[1])
 
-                            for port in range(port_debut,port_fin+1):
+                                for port in range(port_debut,port_fin+1):
 
-                                if proto=='tcp':
-                                    ports_tcp_scannes.append(int(port))
-                                elif proto=='udp':
-                                    ports_udp_scannes.append(int(port))
-                                else:
-                                    ports_udp_scannes.append(int(port))
-                                    ports_tcp_scannes.append(int(port))
+                                    if proto=='tcp':
+                                        ports_tcp_scannes.append(int(port))
+                                    elif proto=='udp':
+                                        ports_udp_scannes.append(int(port))
+                                    else:
+                                        ports_udp_scannes.append(int(port))
+                                        ports_tcp_scannes.append(int(port))
+                            except ValueError:
+                                #dans le cas où la plage corresponde à un parser
+                                #d'un autre protocole (ex: ,U: ou ,T:)
+                                break
                               
                         else:
                             try:
@@ -63,12 +67,13 @@ def getPlagePorts(listeArgumentsNmap):
                                 #d'un autre protocole (ex: ,U: ou ,T:)
                                 break
 
+
     return ports_udp_scannes,ports_tcp_scannes
        
 
 
 
-def parserNmapXml(fichiercsv,date_scan):
+def parserNmapXml(fichierXML,date_scan):
     '''
     fonction permet de parser le rapport csv dun scan nmap
     et de l'importer dans une BDD
@@ -77,7 +82,7 @@ def parserNmapXml(fichiercsv,date_scan):
     '''
 
     cursor=connection.cursor()
-    dom = parse(fichiercsv)
+    dom = parse(fichierXML)
 
     #On recupere dans un premier temps les arguments
     args=dom.getElementsByTagName('nmaprun')[0].getAttribute('args')
@@ -144,7 +149,7 @@ def parserNmapXml(fichiercsv,date_scan):
 
 
         if(int(nb_hotes[0]['count'])>0):
-            cursor.execute('SELECT id FROM services WHERE ip_hote=%s',[host_dict['ip']])
+            cursor.execute('SELECT id FROM services WHERE ip_hote=%s AND date_retrait is NULL',[host_dict['ip']])
             id_existant=dictfetchall(cursor)
             id_initiaux=[]
 
@@ -217,6 +222,9 @@ def parserNmapXml(fichiercsv,date_scan):
                 cursor.execute("SELECT protocole,port FROM services WHERE id=%s LIMIT 1",[srv])
                 rep=dictfetchall(cursor)
 
+                if int(rep[0]['port'])==0:
+                    continue
+
                 #Si le port en question fait parti des ports scannes
                 if rep[0]['protocole']=='udp' and int(rep[0]['port']) in ports_udp_scannes:
                     cursor.execute('UPDATE services SET date_retrait=%s WHERE id=%s and ip_hote=%s',[date_scan,srv,host_dict['ip']])
@@ -224,13 +232,15 @@ def parserNmapXml(fichiercsv,date_scan):
                 elif rep[0]['protocole']=='tcp' and int(rep[0]['port']) in ports_tcp_scannes:
                     cursor.execute('UPDATE services SET date_retrait=%s WHERE id=%s and ip_hote=%s',[date_scan,srv,host_dict['ip']])
         
-            #Si le scan a été lancé sur tous les ports alors, on peut supprimer tous les ports présenets dans la base 
+            #Si le scan a été lancé sur tous les ports alors, on peut supprimer tous les ports présents dans la base 
             #qui n'ont pas été détecté lors de ce scan
             else:    
                 cursor.execute('UPDATE services SET date_retrait=%s WHERE id=%s and ip_hote=%s',[date_scan,srv,host_dict['ip']])
 
         #On met a jour la table hote
-        cursor.execute('UPDATE hotes SET nb_services=%s WHERE ip=%s',[host_dict['nb_services'],host_dict['ip']])
+        cursor.execute("SELECT count(id) FROM services WHERE ip_hote=%s AND date_retrait is NULL",[host_dict['ip']])
+        nb_services=dictfetchall(cursor)[0]['count']
+        cursor.execute('UPDATE hotes SET nb_services=%s WHERE ip=%s',[nb_services,host_dict['ip']])
 
         
 
@@ -329,7 +339,7 @@ def parserNessusCsv(fichierCSV,scans_status_id,modeStrict=False):
                 temp=dictfetchall(cursor)
 
                 #On ajoute la reference à un tableau si elle n'y est pas présente
-                #A la fin d el'importation, chaque reference sera interrogé sur le site (cvedetails)
+                #A la fin de l'importation, chaque reference sera interrogé sur le site (cvedetails)
                 # afin de récupérer diverse informations (facilité, impact sur la dispo,confidentialité,...)
                 if reference not in cve_a_interroger:
                     cve_a_interroger.append(reference)
@@ -384,7 +394,7 @@ def parserNessusCsv(fichierCSV,scans_status_id,modeStrict=False):
 
 
             #On selectionne l'id du service correpondant 
-            cursor.execute('SELECT id FROM services WHERE ip_hote=%s AND protocole=%s AND port=%s', [hote,protocole,port])
+            cursor.execute('SELECT id FROM services WHERE ip_hote=%s AND protocole=%s AND port=%s AND date_retrait is NULL', [hote,protocole,port])
             rep=dictfetchall(cursor)
 
 
@@ -394,24 +404,32 @@ def parserNessusCsv(fichierCSV,scans_status_id,modeStrict=False):
             if len(rep)==0:
                 #Cas d'une vulnerabilite systeme:
                 if port=='0' and criticite!='Info':
-                    pass
+                    cursor.execute("SELECT id  FROM services WHERE ip_hote=%s AND port=0 AND nom='OS' AND type='OS'",[hote])
+                    rep=dictfetchall(cursor)
+
+                    if len(rep)==0:
+                        cursor.execute("INSERT INTO services (protocole,port,etat,nom,type,ip_hote,date_ajout) VALUES ('tcp',0,'open','OS','OS',%s,%s)",[hote,date_scan])
+
+                        cursor.execute("SELECT id FROM services WHERE ip_hote=%s AND port=0 AND nom='OS' AND type='OS'", [hote])
+                        rep=dictfetchall(cursor)
+
 
                 elif modeStrict==True and str(port)!='0':
-                    if (str(hote) in dict_raise['ip'])==False:
+                    if (str(hote) not in dict_raise['ip']):
                         dict_raise['ip'].append(str(hote))
 
-                    if (protocole=='udp' and (port in dict_raise['ports_udp'])==False):
+                    if (protocole=='udp' and (port not in dict_raise['ports_udp'])):
                         dict_raise['ports_udp'].append(str(port))
 
-                    elif (protocole=='tcp' and (port in dict_raise['ports_tcp'])==False):
+                    if (protocole=='tcp' and (port not in dict_raise['ports_tcp'])):
                         dict_raise['ports_tcp'].append(str(port))
                     continue
                 else:
                     continue
 
             if port=="0":
-                id_service=None
-                cursor.execute('SELECT id_vuln FROM vuln_hote_service WHERE ip_hote=%s AND id_service is NULL AND id_vuln=%s AND date_correction is NULL',[hote,id_vuln])
+                id_service=rep[0]['id']
+                cursor.execute('SELECT id_vuln FROM vuln_hote_service WHERE ip_hote=%s AND id_service=%s AND id_vuln=%s AND date_correction is NULL',[hote,id_service,id_vuln])
                 temp=dictfetchall(cursor)
 
             else:

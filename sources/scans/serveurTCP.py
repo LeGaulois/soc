@@ -17,7 +17,7 @@ from observable import Observable
 import ConfigParser
 from socketTCP import socketTCP
 import requests
-
+from mail import envoieMail
 
 buf=4096
 BASE=settings.BASE_DIR+'/'
@@ -150,7 +150,10 @@ class serveurTache(Thread,Observable):
         status_completed=['disable','completed']
         status_completed_with_error=['disable','completed','completed_with_error']
         status_error=['disable','error','completed','completed_with_error','stopping','canceled']
-        date_fin=datetime.datetime.now()
+
+        d=datetime.datetime.now()
+        tz = pytz.timezone('Europe/Paris')
+        date_fin=tz.localize(d)      
 
         if nessus_status=='running' or nmap_status=='running':
             cursor.execute('UPDATE scans_status SET etat=\'running\' WHERE id=%s', [id_scan])
@@ -196,14 +199,14 @@ class serveurTache(Thread,Observable):
 
 
             if status:
-                cursor.execute('UPDATE scans_status SET etat=%s, date_fin=%s WHERE id=%s', [status,date_fin,id_scan])
+                cursor.execute('UPDATE scans_status SET etat=%s, date_fin=%s WHERE id=%s', [status,date_postgresql,id_scan])
                 self.log.ecrire(message,level)
                 self.supprimerScan(id_scan)
                 #envoieMail(infos_scan)
 
 
         cursor.close()
-
+        
 
 
     def generationRapport(self,id_scan,nom_unique,type_scan):
@@ -238,14 +241,14 @@ class serveurTache(Thread,Observable):
         nmapOptions=dictScan[0]['nmap_options'] if nmap==True else None
         policy_id=dictScan[0]['nessus_policy_id'] if nessus==True else None
 
-        #tz = pytz.timezone('Europe/Paris')
+        tz = pytz.timezone('Europe/Paris')
         date_lancement=datetime.datetime.now()
-        #date_lancement=tz.localize(d)
+        date_postgresql=tz.localize(date_lancement)      
+        date_lancement=datetime.datetime.now()
 
-        
 
-        cursor.execute('INSERT INTO scans_status (date_lancement,etat,type) VALUES (%s,\'ready\',%s)',[date_lancement,str(type_scan)])
-        cursor.execute('SELECT id FROM scans_status WHERE date_lancement=%s AND etat=%s AND type=%s LIMIT 1',[date_lancement,'ready',str(type_scan)])
+        cursor.execute('INSERT INTO scans_status (date_lancement,etat,type) VALUES (%s,\'ready\',%s)',[date_postgresql,str(type_scan)])
+        cursor.execute('SELECT id FROM scans_status WHERE date_lancement=%s AND etat=%s AND type=%s LIMIT 1',[date_postgresql,'ready',str(type_scan)])
         temp=dictfetchall(cursor)
         id_scan_status=temp[0]['id']
 
@@ -458,4 +461,5 @@ class srvTCP(Thread):
             except Exception as e:
                 conn.close()
                 sys.exit(-1)
+
 

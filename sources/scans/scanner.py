@@ -165,6 +165,7 @@ class Scan(Observable):
 
                 #En cas d'erreur avec Nmap, on desactive l'importation du rapport
                 elif self.nmap['status']=='error':
+                    self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Erreur lors du scan Nmap','type':'error'})
                     self.nmapUpdateImport('disable')
 
   
@@ -351,3 +352,4 @@ class Scan(Observable):
         if import_ok:
             self.nessusUpdateImport('completed')
             del import_ok
+
