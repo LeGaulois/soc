@@ -62,6 +62,8 @@ function Selection() {
 function updateScans() {
     ajaxGet('/scans/getStatusScans/',function(content){
 
+        var cells_restantes=[];
+
         try {   
             var tableau=document.getElementById('tableau_scans');
             var lignes=tableau.rows;
@@ -72,6 +74,7 @@ function updateScans() {
             }
         }
         catch(e){}
+
 
         for (var i = 0; i < content.length; i++) {
             var id=content[i]['id_scan'];
@@ -105,7 +108,7 @@ function updateScans() {
                 div.innerHTML=table;
                 
                 tableau=document.getElementById('tableau_scans');
-                var nouvelleLigne=tableau.insertRow(0);
+                var nouvelleLigne=tableau.insertRow(-1);
                 nouvelleLigne.id='scan_'+id;
                 nouvelleLigne.insertCell(0);
                 var graph=nouvelleLigne.insertCell(1);
@@ -119,7 +122,9 @@ function updateScans() {
 
             var lignes=tableau.rows;
 
+
             for (var j= 0; j < lignes.length; j++) {
+
                 if ((j==lignes.length-1)&&(lignes[j].id!='scan_'+id)) {
                     var nouvelleLigne=tableau.insertRow(-1);
                     nouvelleLigne.id='scan_'+id;
@@ -158,17 +163,21 @@ function updateScans() {
                     foregroundBorderWidth: 15
                     });
                     colonnes[5].innerHTML='<center>'+nessus_import+'</center>';
-                    cells_restantes.splice(j,1);
+                    var index = cells_restantes.indexOf(j);
+                    cells_restantes.splice(index,1);
                     break
                 }
             }
+
         }
+
+
 
         if(content.length==0) {
             $("table").remove();
         }
 
-        try {   
+        try {  
             for (var k= 0; k < cells_restantes.length; k++) {  
                 document.getElementById("tableau_scans").deleteRow(cells_restantes[k]);
             }
@@ -182,7 +191,8 @@ function updateScans() {
 
 
 function supprimerEntreeHistorique(id_scan) {
-    ajaxGet('/scans/supprimerEntreeHistorique/'+id_scan+'/',function(content){
+    
+    ajaxGet('/scans/supprimerEntreeHistorique/'+id_scan,function(content){
         var tableau=document.getElementById('tableau_scans');
         var lignes=tableau.rows;
 
