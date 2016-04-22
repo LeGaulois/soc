@@ -27,7 +27,7 @@ def pageGarde(titre,auteur,entreprise,cheminImage,cheminFichier='./file.tex'):
 
 \\title{\parbox{15cm}{
 \\begin{center}
-\\includegraphics[width=6cm]{'''+str(cheminImage)+'''}
+\\includegraphics[width=7cm,keepaspectratio]{'''+str(cheminImage)+'''}
 \end{center}
 \\vspace*{1cm}
 \\begin{center}\sf\\bfseries\huge
