@@ -157,7 +157,8 @@ class InitWizard(CookieWizardView):
 
 
         initialiserPG(BASE+'maintenance/django.pg',host,port,database,user,password)
-
+        import psycopg2
+        conn = psycopg2.connect(host=host,port=port,database=database,user=user,password=password)
 
         #Modification du fichier default.cfg
         #Formulaire 1 et 2
@@ -200,7 +201,7 @@ class InitWizard(CookieWizardView):
             except IndexError:
                 pass
 
-        with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
+        with open(BASE+"soc/default.cfg", 'wb') as configfile:
             self.config.write(configfile)
 
         #Formulaire 3
@@ -222,7 +223,7 @@ class InitWizard(CookieWizardView):
         self.config.set('Rapports','Societe',str(form_list[3].cleaned_data['societe']))
         self.config.set('Rapports','Auteur',str(form_list[3].cleaned_data['auteur']))
 
-        with open(BASE+"soc/default.cfg", 'wb') as configfile:
+        with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
             self.config.write(configfile)
 
 
@@ -243,13 +244,7 @@ class InitWizard(CookieWizardView):
         date_creation=tz.localize(d)
 
         password=django_password.encrypt(password,rounds=24000)
-
-
-        import django.conf
-        reload(django.conf)
-        from django.conf import settings
-
-        cursor=connection.cursor()
+        cursor= conn.cursor()
         cursor.execute('''INSERT INTO auth_user (first_name,last_name,email,username,password,date_joined,is_superuser,is_staff,is_active) 
                             VALUES(%s,%s,%s,%s,%s,%s,True,True,True)''',[nom,prenom,email,login,password,date_creation])
 
@@ -260,7 +255,7 @@ class InitWizard(CookieWizardView):
         with open(BASE+"soc/default.cfg", 'wb') as configfile:
             self.config.write(configfile)
 
-        return redirect('serveurs:liste')  
+        return render(self.request, 'maintenance/success.html')  
 
 
 @login_required
