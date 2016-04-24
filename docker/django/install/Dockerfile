@@ -10,8 +10,8 @@ RUN apt-get update \
 ###### NMAP ######
 RUN chgrp adm /usr/bin/nmap \
 && chmod 750 /usr/bin/nmap \
-#&& setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap \
-&& usermod -a -G adm www-data 
+&& usermod -a -G adm www-data \
+&& chmod 6750 /usr/bin/nmap 
 
 
 ###### DJANGO ######
