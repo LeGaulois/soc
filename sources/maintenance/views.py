@@ -97,13 +97,10 @@ class InitWizard(CookieWizardView):
             - 1 sans menu > utiliser lors de la toute premiere connexion
             - 2 le second > utiliser une fois le site initialiser
         '''
-        try:
-            if (self.request.user.is_authenticated()): 
-                return 'maintenance/wizard.html'
-            elif self.initialiser=='NO':
-                return 'maintenance/wizard_zero.html'
-        except:
+        if self.initialiser=='NO':
             return 'maintenance/wizard_zero.html'
+        else:
+            return 'maintenance/wizard.html'
 
 
     def done(self,form_list, **kwargs):
@@ -175,7 +172,10 @@ class InitWizard(CookieWizardView):
 
         for localisation in form_list[2].cleaned_data['localisation'].split('\r\n'):
             loc_tuple=localisation.split(';')
-            self.config.set('LOCALISATION',loc_tuple[0],loc_tuple[1])
+            try:
+                self.config.set('LOCALISATION',loc_tuple[0],loc_tuple[1])
+            except IndexError:
+                pass
             
 
         self.config.remove_section('ENVIRONNEMENT')
@@ -184,8 +184,10 @@ class InitWizard(CookieWizardView):
 
         for environnement in form_list[2].cleaned_data['environnement'].split('\r\n'):
             env_tuple=environnement.split(';')
-            self.config.set('ENVIRONNEMENT',env_tuple[0],env_tuple[1])
-
+            try:
+                self.config.set('ENVIRONNEMENT',env_tuple[0],env_tuple[1])
+            except IndexError:
+                pass
 
         self.config.remove_section('TYPE')
         self.config.add_section('TYPE')
@@ -193,8 +195,10 @@ class InitWizard(CookieWizardView):
 
         for type_machine in form_list[2].cleaned_data['type_machine'].split('\r\n'):
             machine_tuple=type_machine.split(';')
-            self.config.set('TYPE',machine_tuple[0],machine_tuple[1])
-
+            try:
+                self.config.set('TYPE',machine_tuple[0],machine_tuple[1])
+            except IndexError:
+                pass
 
         with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
             self.config.write(configfile)
@@ -241,6 +245,8 @@ class InitWizard(CookieWizardView):
         password=django_password.encrypt(password,rounds=24000)
 
 
+        import django.conf
+        reload(django.conf)
         from django.conf import settings
 
         cursor=connection.cursor()
