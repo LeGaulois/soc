@@ -64,6 +64,7 @@ CREATE TABLE hotes (
     ip inet NOT NULL,
     mac macaddr,
     hostname character varying(50),
+    famille_os character varying(20),
     os character varying(60),
     type_machine character varying(20),
     localisation character varying(20),
