@@ -16,7 +16,7 @@ RUN chgrp adm /usr/bin/nmap \
 
 ###### DJANGO ######
 RUN pip install --upgrade pip \
-&& pip install django django-extensions configparser pytz dnspython djangoajax django-formtools passlib Pillow
+&& pip install django django-extensions configparser pytz dnspython djangoajax django-formtools passlib Pillow goslate futures
 
 
 ##### CONF APACHE ####

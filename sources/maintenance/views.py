@@ -206,7 +206,7 @@ class InitWizard(CookieWizardView):
 
         #Formulaire 3
         #Importation de l'image
-        image=form_list[3].cleaned_data['logo']#self.request.FILES['logo']
+        image=form_list[3].cleaned_data['logo']
         image_name=image._get_name()
         image_path=BASE+'static/img/'
 
