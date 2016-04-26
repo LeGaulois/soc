@@ -96,6 +96,7 @@ def getPDF(request):
             
         if form.is_valid():
             nom=form.cleaned_data['nom']
+            traduire=form.cleaned_data['traduire']
             group_by=form.cleaned_data['group_by']
             liste_adresses=form.cleaned_data['adresses']
             selection=form.cleaned_data['type_selection']
@@ -127,7 +128,7 @@ def getPDF(request):
 
                 cursor.close()
 
-            pdf=creerRapportSolutions(adresses,group_by,nom)
+            pdf=creerRapportSolutions(adresses,group_by,nom,traduire)
             response = HttpResponse(pdf,content_type='application/pdf')
             return response
 
