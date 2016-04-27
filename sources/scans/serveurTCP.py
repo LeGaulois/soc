@@ -398,12 +398,14 @@ class serveurTache(Thread,Observable):
 
             #En cas de perte de la connexion avec Nessus
             except requests.exceptions.ConnectionError:
+                self.log.ecrire('Perte de la connexion au serveur Nessus','warning')
                 time.sleep(10)
 
                 #On attend et on reassaye de se connecter
                 try:
+                    self.log.ecrire('Tentative de reconnexion au serveur Nessus','debug')
                     self.ScannerNessus.connexion()
-
+                    self.log.ecrire('Reconnexion réussi','debug')
 
                     #si la connexion reussi on verifie si des scans sont en attente d'ajout
                     for scan_en_attente in self.attenteNessus:
@@ -418,17 +420,19 @@ class serveurTache(Thread,Observable):
                         scan.nessusSetID(int(nessus_id))
                         self.ScannerNessus.lancerScan(int(nessus_id))
                         self.log.ecrire('['+str(id_scan_status)+']= Demmarage du scan nessus','info')
-                except:    
+                except Exception as e:
+                    self.log.ecrire('Echec de reconnexion au serveur Nessus: '+str(e),'error')    
                     pass
 
             
             except Exception as e:
                 #Dans le cas ou la session trop longtemps, elle passe en timeout
-                #On se reconnecte donc
+                #On se reconnecte donc                
                 if(str(e)=='Invalid Credentials'):
+                    self.log.ecrire('Connexion timeout, reconnexion...','debug')
                     self.ScannerNessus.connexion()
                 else:
-                    raise Exception(e)
+                    self.log.ecrire('Echec de reconnexion suite au timeout: '+str(e),'error')
 
              
 
