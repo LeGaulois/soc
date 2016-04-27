@@ -260,8 +260,9 @@ class scanManuel(forms.Form):
         #On controle si il y a des problemes pour contacter Nessus
         if errors['indisponible']==False and errors['policy']==False:
             self.fields['nessus']=forms.BooleanField(label="Scan Nessus",initial=False,required=False)
-            self.fields['nessus_policy']=forms.CharField(label="Nessus Policy",max_length=40,widget=forms.Select( choices=LISTE_POLICIES),required=True)
-            
+            self.fields['nessus_policy']=forms.CharField(label="Nessus Policy",max_length=40,widget=forms.Select(choices=LISTE_POLICIES),required=False)
+
+                       
 
         if ip is None:
             self.fields['type_selection']=forms.CharField(label="Selection par",max_length=40,widget=forms.Select( choices=[('',''),('id_adresses','ip'),('id_applis','appli')],attrs={'onchange':'Selection()'}),required=True,initial=selection_initiale)
@@ -290,3 +291,4 @@ class scanManuel(forms.Form):
                                 self.errors[field].as_text()
                         )
             return is_valid
+

@@ -379,6 +379,11 @@ def ajoutScanManuel(request, ip=None):
     cursor.close()
     
     if request.method == 'POST':
+        #Obligatoire, car dans le cas où la perte de connexion avec Nessus intervient entre le moment où l'utilisateur appelle le formulaire
+        #et le moment où il l'envoie; les champs 'nessus' et 'nessus_policy' seront supprimés de la validation 
+        error_nessus['policy']=False
+        error_nessus['indisponible']=False
+
         form = scanManuel(request.POST,liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli,errors=error_nessus)
             
         if form.is_valid():
@@ -386,10 +391,12 @@ def ajoutScanManuel(request, ip=None):
             Nmap=form.cleaned_data['nmap']
             nmapOptions=form.cleaned_data['nmapOptions']
 
-            try:
+            if form.cleaned_data.has_key('nessus'):
                 nessus=form.cleaned_data['nessus']
                 nessusPolicy_id=form.cleaned_data['nessus_policy']
-            except:
+                nessusPolicy_id=None if nessusPolicy_id=="" else nessusPolicy_id
+
+            else:
                 nessus=False
                 nessusPolicy_id=None
             
@@ -606,4 +613,5 @@ WHERE id_scan_plannifie=%s ORDER BY date_lancement DESC''',[id_scan_plannifie])
     autre='evolution'
 
     return render(request,'scans/historique_scan_plannifie.html',locals())
+
 
