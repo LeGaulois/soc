@@ -12,8 +12,6 @@ import ConfigParser
 import codecs
 import re
 from django.conf import settings
-import goslate
-import concurrent.futures
 
 '''
 La fonction permet de génerer un rapport PDF
@@ -54,13 +52,6 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
             INNER JOIN vulnerabilitees ON id_vuln=id WHERE criticite!='Info' AND date_correction is NULL ORDER BY ip_hote ASC''')
 
     dict_vuln_temp=dictfetchall(cursor)
-
-
-    if traduire:
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREAD_TRADUCTION)
-        gs = goslate.Goslate(executor=executor)
-        solutions_to_traduct=[]
-        descriptions_to_traduct=[]  
     
 
     dict_vuln=[]
@@ -69,33 +60,6 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
     for i in range(0,taille):
         if (dict_vuln_temp[i]['ip_hote'] in listeIP):
             dict_vuln.append(dict_vuln_temp[i])
-
-            if traduire:
-                descriptions_to_traduct.append(dict_vuln_temp[i]['description'])
-                solutions_to_traduct.append(dict_vuln_temp[i]['solution'])
-
-
-    #On se charge de la traduction
-    #l'API goslate intègre nativement l'envoie massif de requêtes de traduction
-    #via des threads. Le nombre de thread étant défini par le paramètre MAX_THREAD_TRADUCTION
-    #On parcourt donc le tableau à traduire en fonction de cet élément
-    if traduire:
-        taille_tab=len(solutions_to_traduct)
-        nb_tour=int(taille_tab/MAX_THREAD_TRADUCTION)
-        nb_tour+=1 if (taille_tab/MAX_THREAD_TRADUCTION)>0 else 0
-        position=0
-        
-        for j in range(0,nb_tour):
-            max_tab=min(taille_tab,taille_tab-(MAX_THREAD_TRADUCTION*j))        
-            solutions_traduites = gs.translate(solutions_to_traduct[position:max_tab-1],'fr')
-            descriptions_traduites = gs.translate(descriptions_to_traduct[position:max_tab-1],'fr')            
-
-            for k in range(position,max_tab):
-                dict_vuln_temp[k]['solution']= solutions_traduites[k]
-                dict_vuln_temp[k]['description']= descriptions_traduites[k]
-
-            position+=max_tab
-
 
     
     if group_by=='vuln':
