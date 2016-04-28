@@ -532,11 +532,11 @@ def parametresScan(request,id_scan):
     CHEMIN_RAPPORT=BASE+'rapports/rapports/'
 
     cursor=connection.cursor()
-    cursor.execute('''SELECT ip_hote,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_manuel_status.id_scans_status FROM scans_manuels
+    cursor.execute('''SELECT ip,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_manuel_status.id_scans_status FROM scans_manuels
 INNER JOIN scan_manuel_status ON scans_manuels.id=scan_manuel_status.id_scan_manuel
-INNER JOIN scan_manuel_hote ON scan_manuel_hote.id_scan_manuel=scans_manuels.id
+INNER JOIN scan_hote ON scan_hote.id_scan=scan_manuel_status.id_scans_status
 INNER JOIN scans_status ON scans_status.id=scan_manuel_status.id_scans_status
-WHERE scan_manuel_status.id_scans_status=%s''',[id_scan])
+WHERE scan_hote.id_scan=%s''',[id_scan])
     infoScan=dictfetchall(cursor)
     type_scan='manuel'
     id_scan_type=id_scan
@@ -544,9 +544,9 @@ WHERE scan_manuel_status.id_scans_status=%s''',[id_scan])
 
     #Dans ce cas il s'agit d'un scan plannifie
     if len(infoScan)==0:
-        cursor.execute('''SELECT ip_hote,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_plannifie_status.id_scans_status,scans_plannifies.id FROM scans_plannifies
+        cursor.execute('''SELECT ip,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_plannifie_status.id_scans_status,scans_plannifies.id FROM scans_plannifies
 INNER JOIN scan_plannifie_status ON scans_plannifies.id=scan_plannifie_status.id_scan_plannifie
-INNER JOIN scan_plannifie_hote ON scan_plannifie_hote.id_scan_plannifie=scans_plannifies.id
+INNER JOIN scan_hote ON scan_hote.id_scan=scan_plannifie_status.id_scans_status
 INNER JOIN scans_status ON scans_status.id=scan_plannifie_status.id_scans_status
 WHERE id_scans_status=%s''',[id_scan])
         infoScan=dictfetchall(cursor)
@@ -565,16 +565,16 @@ WHERE scans_status.id=%s LIMIT 1''',[id_scan])
     scan=infoScan
 
     adresses=''
-    last=scan[-1]['ip_hote']
+    last=scan[-1]['ip']
 
     for ip in scan:
-        adresses+=str(ip['ip_hote'])
+        adresses+=str(ip['ip'])
     
-        if ip['ip_hote'] != last:
+        if ip['ip'] != last:
             adresses+=', '
 
     scan=scan[0]
-    scan['ip_hote']=adresses
+    scan['ip']=adresses
 
 
     #On verifie si des rapports existes
