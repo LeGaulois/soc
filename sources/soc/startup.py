@@ -4,7 +4,7 @@ from django.db import connection
 from scans.clientNessusRPC import Nessus
 import ConfigParser
 from django.conf import settings
-import datetime
+import datetime,pytz,time
 import codecs,subprocess
 
 BASE=settings.BASE_DIR+'/'
@@ -14,7 +14,10 @@ DIRECTORY_ID=Config.get('Nessus','Directory_Id')
 
 def run():
     #Purge des scans dans la base
-    date_fin=datetime.datetime.now()
+    
+    d=datetime.datetime.now()
+    tz = pytz.timezone('Europe/Paris')
+    date_fin=date_fin=tz.localize(d)
 
     try:
         cursor=connection.cursor()
