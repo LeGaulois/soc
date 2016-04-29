@@ -532,11 +532,11 @@ def parametresScan(request,id_scan):
     CHEMIN_RAPPORT=BASE+'rapports/rapports/'
 
     cursor=connection.cursor()
-    cursor.execute('''SELECT ip,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_manuel_status.id_scans_status FROM scans_manuels
+    cursor.execute('''SELECT ip_hote AS ip,nmap,nmap_options,nessus,nessus_policy_id,etat,scan_manuel_status.id_scans_status FROM scans_manuels
 INNER JOIN scan_manuel_status ON scans_manuels.id=scan_manuel_status.id_scan_manuel
-INNER JOIN scan_hote ON scan_hote.id_scan=scan_manuel_status.id_scans_status
+INNER JOIN scan_manuel_hote ON scan_manuel_hote.id_scan_manuel=scans_manuels.id
 INNER JOIN scans_status ON scans_status.id=scan_manuel_status.id_scans_status
-WHERE scan_hote.id_scan=%s''',[id_scan])
+WHERE scan_manuel_status.id_scans_status=%s''',[id_scan])
     infoScan=dictfetchall(cursor)
     type_scan='manuel'
     id_scan_type=id_scan
