@@ -41,19 +41,19 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
     cursor.execute('SELECT date_lancement FROM scans_status WHERE id=%s LIMIT 1',[id_scan])
     date=dictfetchall(cursor)
     date_scan=date[0]['date_lancement']
-    
-    cursor.execute('''SELECT ip_hote,nom,description,criticite,date_correction,date_detection FROM vuln_hote_service 
+
+    cursor.execute('''SELECT ip_hote,nom,description,criticite,date_correction,date_detection FROM vuln_hote_service
         INNER JOIN vulnerabilitees ON vuln_hote_service.id_vuln=vulnerabilitees.id
         WHERE (date_detection=%s or date_correction=%s) AND criticite!='Info' ORDER BY ip_hote ASC''',[date_scan,date_scan])
     retourScan=dictfetchall(cursor)
 
-    cursor.execute('''SELECT ip_hote,nom,protocole,port,version,date_ajout,date_retrait FROM services 
+    cursor.execute('''SELECT ip_hote,nom,protocole,port,version,date_ajout,date_retrait FROM services
         WHERE date_ajout=%s or date_retrait=%s ORDER BY ip_hote ASC''',[date_scan,date_scan])
     retourServices=dictfetchall(cursor)
 
 
     if type_scan=='plannifie':
-        cursor.execute('''SELECT id_scan_plannifie FROM scans_status 
+        cursor.execute('''SELECT id_scan_plannifie FROM scans_status
             INNER JOIN scan_plannifie_status ON scans_status.id=scan_plannifie_status.id_scans_status
             WHERE scans_status.id=%s LIMIT 1''',[id_scan])
         dict_id_scan=dictfetchall(cursor)
@@ -69,7 +69,7 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
         chemin_rapport=REP_RAPPORT+'ScansPlannifies/'+str(int(id_scan_plannifie))+'/'+str(int(id_scan))+'/'
 
     else:
-        cursor.execute('''SELECT id_scan_manuel FROM scans_status 
+        cursor.execute('''SELECT id_scan_manuel FROM scans_status
             INNER JOIN scan_manuel_status ON scans_status.id=scan_manuel_status.id_scans_status
             WHERE scans_status.id=%s LIMIT 1''',[id_scan])
         dict_id_scan=dictfetchall(cursor)
@@ -97,20 +97,16 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
 
         chemin_rapport=REP_RAPPORT+'ScansManuels/'+str(int(id_scan))+'/'
 
-        
 
-    
-
-    
     copyfile(REP_TRAVAIL+'base.tex',REP_TRAVAIL+'/temp/'+nomUnique+'.tex')
 
 
-    pageGarde(titre,AUTEUR,SOCIETE,LOGO,REP_TRAVAIL+'/temp/'+nomUnique+'.tex') 
+    pageGarde(titre,AUTEUR,SOCIETE,LOGO,REP_TRAVAIL+'/temp/'+nomUnique+'.tex')
 
     if type_scan=='plannifie':
         intro(dictScan[0],dictIP,REP_TRAVAIL+'/temp/'+nomUnique+'.tex','plannifie')
 
-    else: 
+    else:
         intro(dictScan[0],dictIP,REP_TRAVAIL+'/temp/'+nomUnique+'.tex','manuel')
 
 
@@ -126,7 +122,7 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
     if dictScan[0]['nmap']==True:
         tableauServices(retourServices,REP_TRAVAIL+'/temp/'+nomUnique+'.tex')
 
-    
+
     fichierLatex=open(REP_TRAVAIL+'/temp/'+nomUnique+'.tex','a')
     fichierLatex.write('''
 \\end{document}''')
@@ -145,12 +141,12 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
 
 
     #Necessaire pour la creation des liens dans le sommaire vers les différentes parties
-    for i in range(0,3):
+    for i in range(0,5):
         try:
             subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+nomUnique+'.tex >/dev/null &>/dev/null'],shell=True)
             time.sleep(3)
         except:
-            pass 
+            pass
 
     time.sleep(10)
     copyfile(REP_TRAVAIL+'temp/'+nomUnique+'.pdf',chemin_rapport+nomUnique+'_evolution.pdf')

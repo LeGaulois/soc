@@ -43,7 +43,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
     cursor=connection.cursor()
 
     if group_by=='vuln':
-        cursor.execute('''SELECT DISTINCT(id),criticite,nom,solution,description,infos_complementaires,ip_hote FROM vulnerabilitees 
+        cursor.execute('''SELECT DISTINCT(id),criticite,nom,solution,description,infos_complementaires,ip_hote FROM vulnerabilitees
             INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
             WHERE criticite!='Info' AND date_correction is NULL ORDER BY id ASC''')
 
@@ -52,7 +52,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
             INNER JOIN vulnerabilitees ON id_vuln=id WHERE criticite!='Info' AND date_correction is NULL ORDER BY ip_hote ASC''')
 
     dict_vuln_temp=dictfetchall(cursor)
-    
+
 
     dict_vuln=[]
     taille=len(dict_vuln_temp)
@@ -61,7 +61,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
         if (dict_vuln_temp[i]['ip_hote'] in listeIP):
             dict_vuln.append(dict_vuln_temp[i])
 
-    
+
     if group_by=='vuln':
         dict_vuln_temp=[]
         taille=len(dict_vuln)
@@ -86,7 +86,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
         vuln_high=[]
         vuln_medium=[]
         vuln_low=[]
-        
+
         for vuln in dict_vuln_temp:
             crit=vuln['criticite']
 
@@ -140,7 +140,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
     fichierLatex.write('''
 \\end{document}''')
     fichierLatex.close()
-    
+
 
     liste_arguments=[REP_TRAVAIL,titre]
 
@@ -152,11 +152,14 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
             raise Exception("Erreur de paramètres")
 
 
+    titre_latex=titre
+    titre_latex=titre_latex.replace(" ","\ ").replace("'","\\'")
+
     #Necessaire pour la creation des liens dans le sommaire vers les différentes parties
     for i in range(0,3):
         try:
-            subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+titre+'.tex >/dev/null'],shell=True)
-            time.sleep(1)
+            subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+titre_latex+'.tex >/dev/null'],shell=True)
+            time.sleep(2)
         except:
             pass
 
@@ -165,10 +168,10 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
     pdf= f.read()
     f.close()
 
-    subprocess.check_output(['rm '+REP_TRAVAIL+'temp/'+titre.replace(' ','\ ')+'* >/dev/null'],shell=True)
+    subprocess.check_output(['rm '+REP_TRAVAIL+'temp/'+titre.replace(' ','\ ').replace("'","\\'")+'.* >/dev/null'],shell=True)
 
     return pdf
-    
+
 
 
 
