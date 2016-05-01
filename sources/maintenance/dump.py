@@ -101,7 +101,7 @@ def initialiserPG(dump_file,host,port,database,login,password):
     user=dictfetchall(cursor)
 
     #si la base n'existe pas
-    #et si l'utilisateur ne possede pas le droit de creation de base
+    #et si l'utilisateur possede le droit de creation de base
     if ((len(base)==0) and (user[0]['rolcreatedb']==True)):
         error=re.search('[;|<>]&"\'',str(database))
 

@@ -230,6 +230,8 @@ CREATE SEQUENCE services_id_seq
     NO MAXVALUE
     CACHE 1;
 
+ALTER SEQUENCE services_id_seq OWNED BY application.id;
+
 
 CREATE TABLE vuln_hote_service (
     ip_hote inet NOT NULL,

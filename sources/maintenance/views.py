@@ -248,6 +248,9 @@ class InitWizard(CookieWizardView):
         cursor.execute('''INSERT INTO auth_user (first_name,last_name,email,username,password,date_joined,is_superuser,is_staff,is_active) 
                             VALUES(%s,%s,%s,%s,%s,%s,True,True,True)''',[nom,prenom,email,login,password,date_creation])
 
+        conn.commit()
+        conn.close()
+
         password='666'*20
         del password
 
