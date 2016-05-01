@@ -77,7 +77,7 @@ def ajout(request):
                 liste_application=form.cleaned_data['backend']
             
             cursor=connection.cursor()
-            cursor.execute('INSERT INTO hotes (ip,mac,hostname,os,localisation,environnement,type_machine,commentaires) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ',[adresse,mac,hostname,os,localisation,environnement,type_machine,commentaires])
+            cursor.execute(',%sINSERT INTO hotes (ip,mac,hostname,os,localisation,environnement,type_machine,commentaires) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ',[adresse,mac,hostname,os,localisation,environnement,type_machine,commentaires])
 
             if (liste_application[0]!=''):
 
@@ -127,9 +127,9 @@ def liste(request):
         premier=True
 
     
-        #Sert à obtenir une seule et unique entre par machine
+        #Sert à obtenir une seule et unique entrée par machine
         #Pour les machines ayant un rôle dans plusieurs applis (ex BDD)
-        #on regroupe en uen seule entree avec pour nom d'appli Backend: appli1, appli2,....
+        #on regroupe en une seule entree avec pour nom d'appli Backend: appli1, appli2,....
         for i in range(1,taille):
             test=(temp_liste_machines[i]['ip'])==str(precedent['ip'])
 
@@ -140,10 +140,13 @@ def liste(request):
                 else:
                     precedent['nom']+=' ,'+str(temp_liste_machines[i]['nom'])
 
-            if (test==False) or (i==(taille-1)):
+            if (test==False):
                 liste_machines.append(precedent)
                 precedent=temp_liste_machines[i]
                 premier=True
+
+            if i==(taille-1):
+                liste_machines.append(temp_liste_machines[i])
 
     elif taille==1:
         liste_machines.append(temp_liste_machines[0])
