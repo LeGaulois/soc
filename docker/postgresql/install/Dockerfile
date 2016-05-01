@@ -7,7 +7,6 @@ RUN apt-get update \
 
 
 ###### PSQL ######
-COPY django.pg /tmp/
 USER postgres
 RUN /etc/init.d/postgresql start \
 && psql --command "CREATE USER django_db WITH PASSWORD 'DjangoDBPassWordSOC' CREATEDB;" \

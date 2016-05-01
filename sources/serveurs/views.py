@@ -77,7 +77,7 @@ def ajout(request):
                 liste_application=form.cleaned_data['backend']
             
             cursor=connection.cursor()
-            cursor.execute(',%sINSERT INTO hotes (ip,mac,hostname,os,localisation,environnement,type_machine,commentaires) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ',[adresse,mac,hostname,os,localisation,environnement,type_machine,commentaires])
+            cursor.execute('INSERT INTO hotes (ip,mac,hostname,os,localisation,environnement,type_machine,commentaires) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ',[adresse,mac,hostname,os,localisation,environnement,type_machine,commentaires])
 
             if (liste_application[0]!=''):
 
