@@ -19,14 +19,21 @@ def projet_initialiser(view_func):
         config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
         initialiser=config.get('PROJET','Initialiser')
 
-        if request.user.is_authenticated():
-            return view_func(request, *args, **kwargs)
+        try:
+            if request.user.is_authenticated():
+                return view_func(request, *args, **kwargs)
 
-        elif initialiser=='NO':
-            return view_func(request, *args, **kwargs)
+            elif initialiser=='NO':
+                return view_func(request, *args, **kwargs)
 
-        else:
-            return HttpResponseRedirect('/')
+            else:
+                return HttpResponseRedirect('/')
+        except:
+            if initialiser=='NO':
+                return view_func(request, *args, **kwargs)
+
+            else:
+                return HttpResponseRedirect('/')
 
     return wraps(view_func)(_decorator)
 
