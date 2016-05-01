@@ -249,8 +249,8 @@ class serveurTache(Thread,Observable):
         date_lancement=datetime.datetime.now()
 
 
-        cursor.execute('INSERT INTO scans_status (date_lancement,etat,type) VALUES (%s,\'ready\',%s)',[date_postgresql,str(type_scan)])
-        cursor.execute('SELECT id FROM scans_status WHERE date_lancement=%s AND etat=%s AND type=%s LIMIT 1',[date_postgresql,'ready',str(type_scan)])
+        cursor.execute('INSERT INTO scans_status (date_lancement,etat,type) VALUES (%s,\'ready\',%s)',[date_lancement,str(type_scan)])
+        cursor.execute('SELECT id FROM scans_status WHERE date_lancement=%s AND etat=%s AND type=%s LIMIT 1',[date_lancement,'ready',str(type_scan)])
         temp=dictfetchall(cursor)
         id_scan_status=temp[0]['id']
 
