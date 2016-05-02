@@ -467,6 +467,8 @@ def parserNessusCsv(fichierCSV,scans_status_id,modeStrict=False):
 
     for reference in cve_a_interroger:
         param=get_CVE_details(str(reference))
+        cursor.execute("SELECT * FROM refs WHERE nom=%s",[str(reference)])
+        temp=dictfetchall(cursor)
 
         if len(temp)==0:
             cursor.execute('''INSERT INTO refs (nom,cvss_score,confidentialite,integrite,disponibilite,complexite,authentification,type,acces_obtention) 
