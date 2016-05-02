@@ -5,8 +5,8 @@ from formulaires import *
 from decorateurs import projet_initialiser
 
 urlpatterns = [
-    url(r'^$', projet_initialiser(InitWizard.as_view([postgreSQL, Nessus,Variables,rapport,utilisateurs]))),
-    url(r'^initialisation/$', projet_initialiser(InitWizard.as_view([postgreSQL, Nessus,Variables,rapport,utilisateurs]))),
+    url(r'^$', projet_initialiser(InitWizard.as_view([postgreSQL, Nessus,Variables,rapport,email,utilisateurs]))),
+    url(r'^initialisation/$', projet_initialiser(InitWizard.as_view([postgreSQL, Nessus,Variables,rapport,email,utilisateurs]))),
     url(r'testConnectionSQL/$',connectionSQL,name='connectionSQL'),
     url(r'testConnectionNessus/$',connectionNessus,name='connectionNessus'),
     url(r'export/$',export,name='export'),

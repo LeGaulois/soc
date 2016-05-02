@@ -153,6 +153,13 @@ class rapport(forms.Form):
 
 
 
+class email(forms.Form):
+    serveur=forms.CharField(label="Serveur SMTP",max_length=50,required=True)
+    port=forms.IntegerField(label="Port",required=True)
+    email=forms.EmailField(label="Mail",max_length=50,required=True)
+    password=forms.CharField(label="Mot de passe",max_length=50,required=True,widget=forms.PasswordInput)
+
+
 class utilisateurs(forms.Form):
     nom=forms.CharField(label="Nom",max_length=30,required=True)
     prenom=forms.CharField(label="Prenom",max_length=30,required=True)

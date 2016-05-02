@@ -223,6 +223,13 @@ class InitWizard(CookieWizardView):
         self.config.set('Rapports','Societe',str(form_list[3].cleaned_data['societe']))
         self.config.set('Rapports','Auteur',str(form_list[3].cleaned_data['auteur']))
 
+        self.config.remove_section('MAIL')
+        self.config.add_section('MAIL')
+        self.config.set('MAIL','SMTP_Addr',str(form_list[4].cleaned_data['serveur']))
+        self.config.set('MAIL','SMTP_Port',str(form_list[4].cleaned_data['port']))
+        self.config.set('MAIL','Mail_Addr',str(form_list[4].cleaned_data['email']))
+        self.config.set('MAIL','Password',str(form_list[4].cleaned_data['password']))
+
         with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
             self.config.write(configfile)
 
@@ -232,12 +239,12 @@ class InitWizard(CookieWizardView):
         subprocess.check_output("python "+BASE+"manage.py migrate", shell=True)
         os.popen("touch "+BASE+'soc/wsgi.py')
 
-        #Formulaire 4: utilisateur django
-        nom=form_list[4].cleaned_data['nom']
-        prenom=form_list[4].cleaned_data['prenom']
-        email=form_list[4].cleaned_data['email']
-        login=form_list[4].cleaned_data['login']
-        password=form_list[4].cleaned_data['password']
+        #Formulaire 5: utilisateur django
+        nom=form_list[5].cleaned_data['nom']
+        prenom=form_list[5].cleaned_data['prenom']
+        email=form_list[5].cleaned_data['email']
+        login=form_list[5].cleaned_data['login']
+        password=form_list[5].cleaned_data['password']
 
         tz = pytz.timezone('Europe/Paris')
         d=datetime.datetime.now()
