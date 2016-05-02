@@ -6,11 +6,14 @@ import ConfigParser
 from django.conf import settings
 import datetime,pytz,time
 import codecs,subprocess
+import logging
 
 BASE=settings.BASE_DIR+'/'
 Config = ConfigParser.ConfigParser()
 Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 DIRECTORY_ID=Config.get('Nessus','Directory_Id')
+
+logger = logging.getLogger(__name__)
 
 def run():
     #Purge des scans dans la base
@@ -23,7 +26,8 @@ def run():
         cursor=connection.cursor()
         cursor.execute("UPDATE scans_status SET etat='cancelled', date_fin=%s  WHERE etat='running'",[date_fin])
         cursor.close()
-    except:
+    except Exception as e:
+        logger.error("Erreur lors de la MAJ du status des scans non arretes: "+str(e))
         pass
 
     #Purge des scans dans Nessus
@@ -43,8 +47,8 @@ def run():
                 pass
 
         nessus.deconnexion()
-    except:
-        pass
+    except Exception as e:
+        logger.error("Erreur lors de la suppresion des scans Nessus: "+str(e))
 
     srv=srvTCP()
     srv.start()

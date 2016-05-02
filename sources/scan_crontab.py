@@ -10,7 +10,7 @@ from django.db import connection
 import subprocess
 from scans.socketTCP import socketTCP
 import json
-
+import logging
 
 #Ce script sert a lancer les scans plannifies prevus pour la journee en cours
 #Son execution devra donc etre plannifie a laide dune crontab
@@ -22,6 +22,7 @@ cursor.execute('SELECT id,jours_execution FROM scans_plannifies WHERE jours_exec
 scans=dictfetchall(cursor)
 conn=clientTCP()
 
+logger = logging.getLogger(__name__)
 
 for scan in scans:
     jours=scan['jours_execution'].split(';')
@@ -57,6 +58,7 @@ for scan in scans:
             rep=conn.envoyer(json.dumps(data))  
         
         except Exception as e:
+            logger.error("[CRONTAB] Erreur d'ajout du scan: "+str(e))
             pass
 
 

@@ -13,6 +13,7 @@ import codecs
 from django.conf import settings
 import re
 import time
+import logging
 
 '''
 La fonction permet de génerer un rapport PDF
@@ -34,6 +35,8 @@ Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 AUTEUR=Config.get('Rapports','Auteur')
 SOCIETE=Config.get('Rapports','Societe')
 LOGO=BASE+"static/img/"+Config.get('Rapports','Logo')
+
+logger = logging.getLogger(__name__)
 
 
 def creerRapportEvolution(nomUnique,id_scan,type_scan):
@@ -145,7 +148,8 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
         try:
             subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+nomUnique+'.tex >/dev/null &>/dev/null'],shell=True)
             time.sleep(3)
-        except:
+        except Exception as e:
+            logger.error("Erreur generation rapport ["+str(id_scan)+"] : "+str(e))
             pass
 
     time.sleep(10)

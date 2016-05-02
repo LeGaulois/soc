@@ -12,6 +12,7 @@ import ConfigParser
 import codecs
 import re
 from django.conf import settings
+import logging
 
 '''
 La fonction permet de génerer un rapport PDF
@@ -35,8 +36,8 @@ AUTEUR=Config.get('Rapports','Auteur')
 SOCIETE=Config.get('Rapports','Societe')
 LOGO=BASE+"static/img/"+Config.get('Rapports','Logo')
 
+logger = logging.getLogger(__name__)
 
-MAX_THREAD_TRADUCTION=50
 
 def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=False):
 
@@ -160,7 +161,8 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
         try:
             subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+titre_latex+'.tex >/dev/null'],shell=True)
             time.sleep(2)
-        except:
+        except Exception as e:
+            logger.error("Erreur generation rapport ["+str(id_scan)+"] : "+str(e))
             pass
 
 

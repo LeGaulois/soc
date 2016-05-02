@@ -18,6 +18,11 @@ import ConfigParser
 from socketTCP import socketTCP
 import requests
 from mail import envoieMail
+import logging
+
+
+
+logger = logging.getLogger(__name__)
 
 buf=4096
 BASE=settings.BASE_DIR+'/'
@@ -477,10 +482,11 @@ class srvTCP(Thread):
             self.lock=RLock()
 
         except Exception as e:
+            logger.critical('Erreur de lancement du serveur de gestion des scans !')
+            logger.critical(str(e))
             sys.exit(-1)
 
     def run(self):
-        
         while True:
             try:
                 self.conn.listen(0)
@@ -490,7 +496,8 @@ class srvTCP(Thread):
                 cv.start()
 
             except Exception as e:
-                conn.close()
-                sys.exit(-1)
+                logger.warning('Erreur client/serveur avec le serveur de taches')
+                logger.warning(str(e))
+                pass
 
 
