@@ -37,7 +37,7 @@ def envoieMail(scan):
 
 
     #Corps du texte
-    body=""""Bonjour,\n
+    body="""Bonjour,\n
     Le scan N°"""+str(scan['id'])+" s'est terminé avec l'état \""+str(scan['status'])+"\"."
   
     if scan['status']!="completed":
@@ -103,7 +103,7 @@ def envoieMail(scan):
     for element in res:
         toaddr= element['email']
         msg['To']= toaddr
-        text = msg.as_string()
+        text = msg.as_string().encode('utf-8')
 
         server.sendmail(fromaddr, toaddr, text)
 	

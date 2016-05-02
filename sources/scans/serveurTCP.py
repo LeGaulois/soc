@@ -209,8 +209,13 @@ class serveurTache(Thread,Observable):
                 cursor.execute('UPDATE scans_status SET etat=%s, date_fin=%s WHERE id=%s', [status,date_fin,id_scan])
                 self.log.ecrire(message,level)
                 self.supprimerScan(id_scan)
-                #envoieMail(infos_scan)
 
+                try:
+                    envoieMail(infos_scan)
+                except Exception as e:
+                    message='['+str(id_scan)+"]= Echec d envoie des mails "+str(e)
+                    level="warning"
+                    self.log.ecrire(message,level)
 
         cursor.close()
         
