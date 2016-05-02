@@ -10,6 +10,7 @@ import re
 from cvedetails import get_CVE_details
 
 
+
 def getPlagePorts(listeArgumentsNmap):
     '''
     Cette fonction permet a partir d'une liste d'arguments
@@ -25,6 +26,25 @@ def getPlagePorts(listeArgumentsNmap):
     ports_tcp_scannes=[]
     ports_udp_scannes=[]
 
+    #L'option -F permet de scanner les ports spécifiés dans le fichier
+    # nmap-services
+    if "-F" in listeArgumentsNmap:
+        f=open("/usr/share/nmap/nmap-services","r")
+
+        for ligne in f:
+            comm=re.match('#',str(ligne))
+
+            if comm==None:
+                res=ligne.split("\t")[1]
+                port,protocole=res.split("/")
+                
+                if protocole=='tcp':
+                    ports_tcp_scannes.append(int(port))
+                else:
+                    ports_udp_scannes.append(int(port))
+
+        f.close()
+
     for elem in listeArgumentsNmap:
         for proto in protocole.keys():
             for parser in protocole[proto]:
@@ -34,7 +54,6 @@ def getPlagePorts(listeArgumentsNmap):
                     for plage in temp:
                         if re.search('-',plage)!=None:
                             try:
-                                print 'plage'
                                 port_debut=int(plage.split('-')[0])
                                 port_fin=int(plage.split('-')[1])
 
@@ -222,10 +241,10 @@ def parserNmapXml(fichierXML,scans_status_id):
         #Si date_retrait est null cela veut dire que
         #le service est tjrs actif
         for srv in id_initiaux:
-            if len(ports_tcp_scannes)!=0 or len(ports_udp_scannes)!=0:
-                cursor.execute("SELECT protocole,port FROM services WHERE id=%s LIMIT 1",[srv])
-                rep=dictfetchall(cursor)
+            cursor.execute("SELECT protocole,port FROM services WHERE id=%s LIMIT 1",[srv])
+            rep=dictfetchall(cursor)
 
+            if len(ports_tcp_scannes)!=0 or len(ports_udp_scannes)!=0:
                 if int(rep[0]['port'])==0:
                     continue
 
@@ -238,8 +257,12 @@ def parserNmapXml(fichierXML,scans_status_id):
         
             #Si le scan a été lancé sur tous les ports alors, on peut supprimer tous les ports présents dans la base 
             #qui n'ont pas été détecté lors de ce scan
-            else:    
+            else:
+                if int(rep[0]['port'])==0:
+                    continue
+    
                 cursor.execute('UPDATE services SET date_retrait=%s WHERE id=%s and ip_hote=%s',[date_scan,srv,host_dict['ip']])
+
 
         #On met a jour la table hote
         cursor.execute("SELECT count(id) FROM services WHERE ip_hote=%s AND date_retrait is NULL",[host_dict['ip']])
