@@ -73,7 +73,7 @@ def getPlagePorts(listeArgumentsNmap):
 
 
 
-def parserNmapXml(fichierXML,date_scan):
+def parserNmapXml(fichierXML,scans_status_id):
     '''
     fonction permet de parser le rapport csv dun scan nmap
     et de l'importer dans une BDD
@@ -83,6 +83,10 @@ def parserNmapXml(fichierXML,date_scan):
 
     cursor=connection.cursor()
     dom = parse(fichierXML)
+
+    cursor.execute('SELECT date_lancement FROM scans_status WHERE id=%s LIMIT 1',[scans_status_id])
+    rep=dictfetchall(cursor)
+    date_scan=rep[0]['date_lancement']
 
     #On recupere dans un premier temps les arguments
     args=dom.getElementsByTagName('nmaprun')[0].getAttribute('args')

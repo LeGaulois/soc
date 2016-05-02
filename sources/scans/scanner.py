@@ -21,13 +21,12 @@ class Scan(Observable):
     Cette class correspond à un scan nmap et/ou nessus
     '''
 
-    def __init__(self,id_scan,nom_unique,date_lancement,type_scan,chemin_rapport,liste_adresses,nmap_options=None,nessus_policy_id=None):
+    def __init__(self,id_scan,nom_unique,type_scan,chemin_rapport,liste_adresses,nmap_options=None,nessus_policy_id=None):
         Observable.__init__(self)
         self.nmap={'enable':False,'options':None,'instance':None,'status':'disable','progress':0,'import':'disable'}
         self.nessus={'enable':False,'id':-1,'policy_id':None,'status':'disable','progress':0,'import':'disable'}
         self.erreurs=[]
         self.cibles=liste_adresses
-        self.date_lancement=date_lancement
         self.nom_unique=nom_unique
         self.chemin_rapport=chemin_rapport
         self.id_scan=id_scan
@@ -208,7 +207,7 @@ class Scan(Observable):
         self.nmapUpdateImport('running')
 
         try:
-            parserNmapXml(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml',self.date_lancement)
+            parserNmapXml(CHEMIN_TEMP+'nmap/'+str(self.nom_unique)+'.xml',self.id_scan)
             self.notify_observers('dispatcher',log={'message':'['+str(self.id_scan)+']= Parsage du rapport Nmap reussi','type':'info'})
             self.nmapUpdateImport('completed')
 
