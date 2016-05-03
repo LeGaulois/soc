@@ -11,81 +11,34 @@ from cvedetails import get_CVE_details
 
 
 
-def getPlagePorts(listeArgumentsNmap):
+def getPlagePorts(listeDictionnairePorts):
     '''
-    Cette fonction permet a partir d'une liste d'arguments
-    (ex: -p80,443,T:21,22,U:53)
-    De renvoyer 2 tableaux avec la liste des ports scannes
+    Cette fonction permet de récupérer 
+    les listes des ports scannés pour chaque protocole (udp,tcp)
     '''
-    protocole={
-        'all':[('-p\d+','-p'),('-p ','-p')],
-        'tcp':[('-pT','-pT:'),(',T:',',T:')],
-        'udp':[('-pU','-pU:'),(',U:',',U:')]
-    }
 
     ports_tcp_scannes=[]
     ports_udp_scannes=[]
 
-    #L'option -F permet de scanner les ports spécifiés dans le fichier
-    # nmap-services
-    if "-F" in listeArgumentsNmap:
-        f=open("/usr/share/nmap/nmap-services","r")
+    for element in listeDictionnairePorts:
+        ports=element["ports"].split(',')
+        proto=element["protocole"]
 
-        for ligne in f:
-            comm=re.match('#',str(ligne))
+        for plage in ports:
+            if re.search('-',plage)!=None:
+                port_debut=int(plage.split('-')[0])
+                port_fin=int(plage.split('-')[1])
 
-            if comm==None:
-                res=ligne.split("\t")[1]
-                port,protocole=res.split("/")
-                
-                if protocole=='tcp':
-                    ports_tcp_scannes.append(int(port))
-                else:
-                    ports_udp_scannes.append(int(port))
-
-        f.close()
-
-    for elem in listeArgumentsNmap:
-        for proto in protocole.keys():
-            for parser in protocole[proto]:
-                if re.search(parser[0],elem)!=None:
-                    temp=elem.split(parser[1])[1].split(',')
-
-                    for plage in temp:
-                        if re.search('-',plage)!=None:
-                            try:
-                                port_debut=int(plage.split('-')[0])
-                                port_fin=int(plage.split('-')[1])
-
-                                for port in range(port_debut,port_fin+1):
-
-                                    if proto=='tcp':
-                                        ports_tcp_scannes.append(int(port))
-                                    elif proto=='udp':
-                                        ports_udp_scannes.append(int(port))
-                                    else:
-                                        ports_udp_scannes.append(int(port))
-                                        ports_tcp_scannes.append(int(port))
-                            except ValueError:
-                                #dans le cas où la plage corresponde à un parser
-                                #d'un autre protocole (ex: ,U: ou ,T:)
-                                break
-                              
-                        else:
-                            try:
-                                if proto=='tcp':
-                                    ports_tcp_scannes.append(int(plage))
-                                elif proto=='udp':
-                                        ports_udp_scannes.append(int(plage))
-                                else:
-                                    ports_udp_scannes.append(int(plage))
-                                    ports_tcp_scannes.append(int(plage))
-
-                            except ValueError:
-                                #dans le cas où la plage corresponde à un parser
-                                #d'un autre protocole (ex: ,U: ou ,T:)
-                                break
-
+                for port in range(port_debut,port_fin+1):
+                    if proto=='tcp':
+                        ports_tcp_scannes.append(int(port))
+                    elif proto=='udp':
+                        ports_udp_scannes.append(int(port))
+            else:
+                if proto=='tcp':
+                    ports_tcp_scannes.append(int(plage))
+                elif proto=='udp':
+                    ports_udp_scannes.append(int(plage))
 
     return ports_udp_scannes,ports_tcp_scannes
        
@@ -120,7 +73,15 @@ def parserNmapXml(fichierXML,scans_status_id):
     #Dans le cas ou on effectue un scan nmap uniquement sur certains ports
     #Ces 2 listes permettront de gérer la suppression des services dans la base
     #ex ne pas supprimer un service en base si on n'a pas scanné le port en question
-    ports_udp_scannes,ports_tcp_scannes=getPlagePorts(liste_args)
+    table_srv=[]
+
+    for element in dom.getElementsByTagName('scaninfo'):
+        dic={"protocole":None,'ports':None}
+        dic["protocole"]=element.getAttribute('protocol')
+        dic["ports"]=element.getAttribute('services')
+        table_srv.append(dic)
+
+    ports_udp_scannes,ports_tcp_scannes=getPlagePorts(table_srv)
 
 
     for host in dom.getElementsByTagName('host'):
