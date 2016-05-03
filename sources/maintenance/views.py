@@ -19,11 +19,12 @@ from django_ajax.decorators import ajax
 from tests_wizard import *
 from dump import *
 from django.core.files import File
-import datetime
-import pytz
-import time
+import datetime,pytz,time
 from passlib.hash import django_pbkdf2_sha256 as django_password
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 BASE=settings.BASE_DIR+'/'
 
@@ -264,6 +265,15 @@ class InitWizard(CookieWizardView):
         self.config.set('PROJET','Initialiser','YES')
         with open(BASE+"soc/default.cfg", 'wb') as configfile:
             self.config.write(configfile)
+
+
+        #Ajout du script python dans la crontab de www-data
+        try:
+            subprocess.check_output(['crontab -l | { cat; echo "10 1 * * * '+BASE+'scan_crontab.py; } | crontab -'],shell=True)
+        except Exception as e:
+            logger.error("Erreur de creation de la crontab: "+str(e))
+            pass
+
 
         return render(self.request, 'maintenance/success.html')  
 
