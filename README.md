@@ -86,9 +86,8 @@ L'initialisation du projet se fait en 2 étapes:
 Ces 2 initialisations se font simplement à l'aide d'un wizard
 
 
-  
-# Reste à faire:
-  - gestion des mails
-  - manuel technique
-  - traduction automatique des rapports en français
+Le wizard vous invitera à redémarrer le service apache pour finaliser l'installation. Redémarrez simplement le container django
+```
+docker-compose restart django
+```  
 
