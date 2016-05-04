@@ -278,17 +278,31 @@ class scanManuel(forms.Form):
 
         else:
             return self.cleaned_data['nmapOptions']
+
+
+    def clean(self):
+        form_data = self.cleaned_data
+
+        if (form_data['nmap']==False) and (form_data['nessus']==False):
+            self._errors["nmap"] = self._errors["nessus"]="Aucun type de scan selectionne"
+            del form_data['nmap']
+            del form_data["nessus"]
+
+        return form_data
         
                                 
     def is_valid(self):
             is_valid = super(scanManuel,self).is_valid()
             if not is_valid:
-                    for field in self.errors.keys():
-                        print "ValidationError: %s[%s] <- \"%s\" %s" % (
-                                type(self),
-                                field,
-                                self.data[field],
-                                self.errors[field].as_text()
-                        )
-            return is_valid
+                    try:
+                        for field in self.errors.keys():
+                            print "ValidationError: %s[%s] <- \"%s\" %s" % (
+                                    type(self),
+                                    field,
+                                    self.data[field],
+                                    self.errors[field].as_text()
+                            )
+                    except Exception as e:
+                        pass
 
+            return is_valid
