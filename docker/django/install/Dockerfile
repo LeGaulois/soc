@@ -20,6 +20,8 @@ RUN pip install --upgrade pip \
 
 
 ##### CONF APACHE ####
+COPY ../certificats/django.crt /etc/ssl/certs/
+COPY ../certificats/django.key /etc/ssl/private/
 COPY 000-default.conf /etc/apache2/sites-available/
 VOLUME  ["/var/www/html/soc/"]
 
