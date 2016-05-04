@@ -162,7 +162,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
             subprocess.check_output(['pdflatex -no-file-line-error -interaction=nonstopmode --output-directory '+REP_TRAVAIL+'temp/ '+REP_TRAVAIL+'temp/'+titre_latex+'.tex >/dev/null'],shell=True)
             time.sleep(2)
         except Exception as e:
-            logger.error("Erreur generation rapport ["+str(id_scan)+"] : "+str(e))
+            logger.error("Erreur generation rapport: "+str(e))
             pass
 
 
