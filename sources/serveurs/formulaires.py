@@ -271,7 +271,7 @@ class formEditMachine(forms.Form):
 
 
         self.fields['localisation']=forms.CharField(label='Localisation',initial=localisation,widget=forms.Select( choices=self.CHOIX_LOCALISATION),required=False)
-        self.fields['commentaires']=forms.CharField(label="Commentaires",widget=forms.Textarea,initial=commentaires,max_length=200,required=False)
+        self.fields['commentaires']=forms.CharField(label="Commentaires",widget=forms.Textarea(attrs={'rows': 15,'cols': 80,'style': 'height: 12em; width:30em;'}),initial=commentaires,max_length=200,required=False)
 
 
     def clean_mac(self):
