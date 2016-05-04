@@ -173,8 +173,60 @@ class importTAR(forms.Form):
     backup_file = forms.FileField()
 
 
+class modifNessus(forms.Form):
+    def __init__(self,*args,**kwargs):
+        addr=kwargs.pop('addr')
+        port=kwargs.pop('port')
+        login=kwargs.pop('login')
+        password=kwargs.pop('password')
+        directory_id=kwargs.pop('directory_id')
+        verify=kwargs.pop('verify')
+
+        self.titre="Paramètres de connexion au serveur NESSUS"
+        self.test="testNessus()"
+        self.commit="validerNessus()"
+
+        super(modifNessus,self).__init__(*args,**kwargs)
+        self.fields['addr']=forms.CharField(label="Adresse IP",required=True,initial=addr,widget=forms.TextInput(attrs={'id':"nessus_addr"}))
+        self.fields['port']=forms.IntegerField(label="Port",required=True,initial=port,widget=forms.NumberInput(attrs={'id':"nessus_port"}))
+        self.fields['login']=forms.CharField(label="Login",required=True,initial=login,widget=forms.TextInput(attrs={'id':"nessus_login"}))
+        self.fields['password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id':'nessus_password'},render_value=True),initial=password)
+        self.fields['directory_id']=forms.CharField(label="Directory ID",initial=directory_id,widget=forms.TextInput(attrs={'id':"nessus_directory-id"}))
+        self.fields['verify']=forms.BooleanField(label="Verify",initial=verify,widget=forms.CheckboxInput(attrs={'id':"nessus_verify"}))      
 
 
-    
+class modifMail(forms.Form):
+    def __init__(self,*args,**kwargs):
+        addr=kwargs.pop('addr')
+        port=kwargs.pop('port')
+        login=kwargs.pop('login')
+        password=kwargs.pop('password')
+
+        self.titre="Paramètres de connexion au serveur SMTP"
+        self.test=None
+        self.commit="validerMail()"
+
+
+        super(modifMail,self).__init__(*args,**kwargs)
+        self.fields['addr']=forms.CharField(label="Adresse IP",required=True,initial=addr,widget=forms.TextInput(attrs={'id':"mail_addr"}))
+        self.fields['port']=forms.IntegerField(label="Port",required=True,initial=port,widget=forms.NumberInput(attrs={'id':"mail_port"}))
+        self.fields['login']=forms.CharField(label="Login",required=True,initial=login,widget=forms.TextInput(attrs={'id':"mail_login"}))
+        self.fields['password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id':'mail_password'},render_value=True),initial=password)
+
+
+class modifVariables(forms.Form):
+    def __init__(self,*args,**kwargs):
+        loc=kwargs.pop('localisations')
+        env=kwargs.pop('environnements')
+        typ=kwargs.pop('types')
+
+        self.titre="Variables de machines"
+        self.test=None
+        self.commit="validerVariables()"
+
+        super(modifVariables,self).__init__(*args,**kwargs)
+        self.fields['localisation']=forms.CharField(label="Localisation",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em; width:30em;','id':'var_localisation'}),max_length=100,required=False,initial=loc)
+        self.fields['environnement']=forms.CharField(label="Environnement",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em; width:30em;','id':'var_environnement'}),max_length=100,required=False,initial=env)
+        self.fields['type_machine']=forms.CharField(label="Type Machine",widget=forms.Textarea(attrs={'rows': 15,'cols': 80,'style': 'height: 12em; width:30em;','id':'var_type'}),max_length=100,required=False,initial=typ)
 
     

@@ -73,20 +73,31 @@ def testConnectionNessus(host,port,user,password):
             raise ValueError('Erreur')
 
 
+
 def testTuples(variable):
     '''
     Permet de contrôler que les variables rentrées soient sous forme
     de tuples
     '''
 
-    tuples=variable.split('\r\n')
+    temp1=variable.split('\r\n')
+    temp2=variable.split('\n')
+
+    tuples=temp1 if len(temp1)>len(temp2) else temp2
 
     for var_tuple in tuples:
         temp=var_tuple.split(';')
         
-        if len(temp)!=2:
+        if len(temp)==1:
+            if not temp[0].strip():
+                continue
+            else:
+                raise ValueError(str(temp))        
+
+        elif len(temp)!=2:
             raise ValueError(str(var_tuple)+' -> format invalide: valeur_base;valeur_affichée')
 
     return variable 
+    
     
 

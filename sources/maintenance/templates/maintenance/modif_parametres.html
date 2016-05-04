@@ -1,0 +1,52 @@
+{% extends "serveurs/app_base.html" %}
+{% block content %}
+
+{% load static %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'js/jquery.ajax.min.js' %}"></script>
+<script src="{% static 'js/maintenance.js' %}"></script>
+<link   href="{% static 'css/jquery-ui/jquery-ui.css' %}" rel="stylesheet">
+
+<div class="container">
+	<div class="span10 offset1">
+
+        <div id=popup></div>
+        <script>
+        $(document).ready( function() {
+	        var popup=$("#popup").dialog({ autoOpen: false });
+        });
+        </script>
+
+        {% for form in forms %}
+     				<div class="row">
+		    			<h5>{{ form.titre }}</h5>
+		    		</div>
+
+
+		    <form class="form-horizontal">
+	        		{% csrf_token %}
+	        		{% for field in form %}
+       			<div class="form-horizontal">
+            		{{ field.label_tag }} {{ field }}
+			    {{ field.errors }}
+            		{% if field.help_text %}
+            		<p class="help">{{ field.help_text|safe }}</p>
+           			 {% endif %}
+       			</div>
+			    {% endfor %}
+		    <div class="form-actions">
+			     {% if form.test %}
+                    <a class="btn btn-primary" onclick={{form.test}}>Test</a>
+                {% endif %}
+
+                {% if form.commit %}
+                    <a class="btn btn-success" onclick={{form.commit}}>Valider</a>
+                {% endif %}
+		    </div>
+		    </form>
+        {% endfor %}
+
+</div>
+</div>
+{% endblock %}
