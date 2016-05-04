@@ -11,7 +11,11 @@
 	    		{% for field in form %}
    			<div class="form-horizontal">
         		{{ field.label_tag }} {{ field }}
-			{{ field.errors }}
+			
+			    {% if field.errors %}
+                    <FONT color="red"><strong>{{field.errors}}</FONT></strong><br>
+                {%endif%}
+
         		{% if field.help_text %}
         		<p class="help">{{ field.help_text|safe }}</p>
        			 {% endif %}
