@@ -11,7 +11,7 @@ class scanPlannifie(forms.Form):
     def __init__(self,*args,**kwargs):
 
         try:
-            scan=kwargs.pop('scan')        
+            scan=kwargs.pop('scan')
             self.nom=scan['nom']
             self.description=scan['description']
             self.nmap=scan['nmap']
@@ -19,7 +19,6 @@ class scanPlannifie(forms.Form):
             self.nessus=scan['nessus']
             self.nessus_policy=scan['nessus_policy_id']
             self.jours=scan['jours_execution']
-                
 
         except:
             self.nom=''
@@ -34,22 +33,23 @@ class scanPlannifie(forms.Form):
             self.mode=kwargs.pop('mode')
 
         except:
-            self.mode='ajout'    
+            self.mode='ajout'
 
 
 
         #################################################
-        self.LISTE_JOUR=[('lundi','lundi'),
-('mardi','mardi'),
-('mercredi','mercredi'),
-('jeudi','jeudi'),
-('vendredi','vendredi'),
-('samedi','samedi'),
-('dimanche','dimanche')
-]
+        self.LISTE_JOUR=[
+                ('lundi','lundi'),
+                ('mardi','mardi'),
+                ('mercredi','mercredi'),
+                ('jeudi','jeudi'),
+                ('vendredi','vendredi'),
+                ('samedi','samedi'),
+                ('dimanche','dimanche')
+        ]
 
         JOURS_SELECTIONNES=[]
-    
+
         try:
             for j in self.jours.split(';'):
                 JOURS_SELECTIONNES.append(j)
@@ -67,7 +67,7 @@ class scanPlannifie(forms.Form):
                 self.liste_noms.append(nom['nom'])
         except:
             pass
-        
+
 
 
         selection_initiale=''
@@ -100,7 +100,7 @@ class scanPlannifie(forms.Form):
             #    LISTE_VALIDATION.append(True)
 
         del liste_ip_existantes
-        
+
 
         ######### APPLIS ###############
         liste_appli=kwargs.pop('liste_appli')
@@ -109,14 +109,14 @@ class scanPlannifie(forms.Form):
         for i  in range(len(liste_appli)):
             nom=liste_appli[i]['nom']
             LISTE_APPLI.append((nom,nom))
-        
+
 
 
         APPLIS_SELECTIONNEES=[]
-        
+
         try:
             liste_applis_selectionnees=kwargs.pop('liste_applis_selectionnees')
-            
+
             selection_initiale='id_applis' if len(liste_applis_selectionnees)>0 else selection_initiale
             for j  in range(len(liste_applis_selectionnees)):
                 APPLIS_SELECTIONNEES.append(liste_applis_selectionnees[j]['nom'])
@@ -140,8 +140,6 @@ class scanPlannifie(forms.Form):
         except:
             pass
 
-    
-        
 
         super(scanPlannifie,self).__init__(*args,**kwargs)
         self.fields['nom']=forms.CharField(label="Nom",initial=self.nom,required=True,max_length=30)
@@ -170,7 +168,7 @@ class scanPlannifie(forms.Form):
                 self.liste_noms.remove(nom)
             except:
                 pass
-    
+
         if nom in self.liste_noms:
             raise forms.ValidationError('Nom du scan deja existant')
 
@@ -179,14 +177,13 @@ class scanPlannifie(forms.Form):
 
 
     def clean_nmapOptions(self):
-        error=re.search('[;|<>]',self.cleaned_data['nmapOptions'])
-
-        if error!=None:
+        try:
+            desatanize(self.cleaned_data['nmapOptions'])
+            return self.cleaned_data['nmapOptions']
+        except:
             raise forms.ValidationError('Options invalides')
 
-        else:
-            return self.cleaned_data['nmapOptions']
-                                        
+
     def is_valid(self):
             is_valid = super(scanPlannifie,self).is_valid()
             if not is_valid:
@@ -219,7 +216,6 @@ class scanManuel(forms.Form):
                 LISTE_IP.append((adresse,adresse))
 
 
-            
 
             liste_appli=kwargs.pop('liste_appli')
             LISTE_APPLI=[]
@@ -227,8 +223,8 @@ class scanManuel(forms.Form):
             for i  in range(len(liste_appli)):
                 nom=liste_appli[i]['nom']
                 LISTE_APPLI.append((nom,nom))
-    
-    
+
+
         else:
             liste_appli=kwargs.pop('liste_appli')
             liste_ip=kwargs.pop('liste_ip')
@@ -249,8 +245,8 @@ class scanManuel(forms.Form):
         except:
             pass
 
-    
-        errors=kwargs.pop('errors')
+
+        self.erreurs=kwargs.pop('errors')
 
         super(scanManuel,self).__init__(*args,**kwargs)
         self.fields['nmap']=forms.BooleanField(label="Scan Nmap",initial=False,required=False)
@@ -258,11 +254,10 @@ class scanManuel(forms.Form):
 
 
         #On controle si il y a des problemes pour contacter Nessus
-        if errors['indisponible']==False and errors['policy']==False:
+        if self.erreurs['indisponible']==False and self.erreurs['policy']==False:
             self.fields['nessus']=forms.BooleanField(label="Scan Nessus",initial=False,required=False)
             self.fields['nessus_policy']=forms.CharField(label="Nessus Policy",max_length=40,widget=forms.Select(choices=LISTE_POLICIES),required=False)
 
-                       
 
         if ip is None:
             self.fields['type_selection']=forms.CharField(label="Selection par",max_length=40,widget=forms.Select( choices=[('',''),('id_adresses','ip'),('id_applis','appli')],attrs={'onchange':'Selection()'}),required=True,initial=selection_initiale)
@@ -270,27 +265,32 @@ class scanManuel(forms.Form):
             self.fields['applis']=forms.MultipleChoiceField(label='Applis',choices=LISTE_APPLI,required=False, widget=forms.SelectMultiple(attrs={'size':'10','style':'display:none'}))
 
 
-    def clean_nmapOptions(self):
-        error=re.search('[;|<>]',self.cleaned_data['nmapOptions'])
 
-        if error!=None:
+    def clean_nmapOptions(self):
+        try:
+            desatanize(self.cleaned_data['nmapOptions'])
+            return self.cleaned_data['nmapOptions']
+        except:
             raise forms.ValidationError('Options invalides')
 
-        else:
-            return self.cleaned_data['nmapOptions']
 
 
     def clean(self):
         form_data = self.cleaned_data
 
-        if (form_data['nmap']==False) and (form_data['nessus']==False):
-            self._errors["nmap"] = self._errors["nessus"]="Aucun type de scan selectionne"
-            del form_data['nmap']
-            del form_data["nessus"]
+        if self.erreurs['indisponible']==False and self.erreurs['policy']==False:
+            if (form_data['nmap']==False) and (form_data['nessus']==False):
+                self._errors["nmap"] = "Aucun type de scan selectionne"
+                self._errors["nessus"]= "Aucun type de scan selectionne"
+                del form_data["nessus"]
+        else:
+            if (form_data['nmap']==False):
+                self._errors['nmap']= "Aucun type de scan selectionne"
+
+        del form_data['nmap']
 
         return form_data
-        
-                                
+
     def is_valid(self):
             is_valid = super(scanManuel,self).is_valid()
             if not is_valid:

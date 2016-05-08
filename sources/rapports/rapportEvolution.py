@@ -6,7 +6,7 @@ from generationRapports.rapportEvolution.tableauServices import *
 from shutil import copyfile
 import subprocess
 from django.db import connection
-from fonctions import dictfetchall
+from fonctions import dictfetchall, desatanize
 import socket
 import ConfigParser
 import codecs
@@ -137,10 +137,7 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
     #Contrôle des arguments
     #On s'assure qu'il n'y ait pas d'injection de codes tiers
     for arg in liste_arguments:
-        error=re.search('[;|<>]',str(arg))
-
-        if error!=None:
-            raise Exception("Erreur de paramètres")
+        desatanize(str(arg))
 
 
     #Necessaire pour la creation des liens dans le sommaire vers les différentes parties

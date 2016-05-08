@@ -22,7 +22,7 @@ from django.core.files import File
 import datetime,pytz,time
 from passlib.hash import django_pbkdf2_sha256 as django_password
 import logging
-
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -31,29 +31,43 @@ BASE=settings.BASE_DIR+'/'
 
 @ajax
 def connectionSQL(request):
-    host=request.POST['host']
+    address=request.POST['address']
     port=request.POST['port']
     database=request.POST['database']
-    user=request.POST['user']
+    login=request.POST['login']
     password=request.POST['password']
 
     try:
-        testConnectionSQL(host,port,database,user,password)
+        testConnectionSQL(address,port,database,login,password)
         return 'OK'
-    except ValueError as e:        
+    except ValueError as e:
         return str(e)
 
 @ajax
 def connectionNessus(request):
-    host=request.POST['host']
+    address=request.POST['address']
     port=request.POST['port']
-    user=request.POST['user']
+    login=request.POST['login']
     password=request.POST['password']
+    verify=request.POST['verify']
 
     try:
-        testConnectionNessus(host,port,user,password)
+        testConnectionNessus(address,port,login,password,verify)
         return 'OK'
-    except ValueError as e:        
+    except Exception as e:
+        return str(e)
+
+@ajax
+def connectionMail(request):
+    address=request.POST['address']
+    port=request.POST['port']
+    login=request.POST['login']
+    password=request.POST['password']
+    tls=request.POST['tls']
+
+    try:
+        testConnectionMail(address,port,login,password,tls)
+    except Exception as e:
         return str(e)
 
 
@@ -178,7 +192,6 @@ class InitWizard(CookieWizardView):
                 self.config.set('LOCALISATION',loc_tuple[0],loc_tuple[1])
             except IndexError:
                 pass
-            
 
         self.config.remove_section('ENVIRONNEMENT')
         self.config.add_section('ENVIRONNEMENT')
@@ -212,7 +225,7 @@ class InitWizard(CookieWizardView):
         image_path=BASE+'static/img/'
 
         image_file=open(image_path+image_name,'wb',0)
-    
+
         for chunk in image.chunks():
             image_file.write(chunk)
 
@@ -230,6 +243,8 @@ class InitWizard(CookieWizardView):
         self.config.set('MAIL','SMTP_Port',str(form_list[4].cleaned_data['port']))
         self.config.set('MAIL','Mail_Addr',str(form_list[4].cleaned_data['email']))
         self.config.set('MAIL','Password',str(form_list[4].cleaned_data['password']))
+        self.config.set('MAIL','TLS',"True" if (str(form_list[4].cleaned_data['tls'])=="on" or str(form_list[4].cleaned_data['tls'])=="True") else "False")
+
 
         with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
             self.config.write(configfile)
@@ -313,14 +328,185 @@ def importConfig(request):
 
 
         else:
-             return render(request, 'maintenance/import.html', locals())      
+             return render(request, 'maintenance/import.html', locals())
 
     else:
         form=importTAR()
 
         return render(request, 'maintenance/import.html', locals())
-    
-    
-    
 
-        
+
+@login_required
+@ajax
+def validerInfosRapports(request):
+    config = ConfigParser.ConfigParser()
+    config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
+
+    try:
+        image=request.FILES['logo']
+        image_name=image._get_name()
+        image_path=BASE+'static/img/'
+
+        image_file=open(image_path+image_name,'wb',0)
+
+        for chunk in image.chunks():
+            image_file.write(chunk)
+
+        image_file.close()
+
+        self.config.set('Rapports','Logo',str(image_name))
+        self.config.set('Rapports','Societe',str(request.POST['societe']))
+        self.config.set('Rapports','Auteur',str(request.POST['auteur']))
+
+    except Exception as e:
+            return str(request)+' = '+str(e)
+
+
+
+
+@login_required
+@ajax
+def validerNessus(request):
+    config = ConfigParser.ConfigParser()
+    config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
+
+    config.set('Nessus','adresse',str(request.POST['address']))
+    config.set('Nessus','port',str(request.POST['port']))
+    config.set('Nessus','login',str(request.POST['login']))
+    config.set('Nessus','password',str(request.POST['password']))
+    config.set('Nessus','directory_id',str(request.POST['directory-id']))
+    config.set('Nessus','verify_ssl','True' if ((str(request.POST['verify'])=='on') or (str(request.POST['verify'])=='True')) else 'False')
+
+    with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
+        config.write(configfile)
+
+
+@login_required
+@ajax
+def validerMail(request):
+    config = ConfigParser.ConfigParser()
+    config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
+
+    config.set('MAIL','SMTP_Addr',str(request.POST['address']))
+    config.set('MAIL','SMTP_Port',str(request.POST['port']))
+    config.set('MAIL','Mail_Addr',str(request.POST['login']))
+    config.set('MAIL','Password',str(request.POST['password']))
+    config.set('MAIL','TLS','True' if (str(request.POST['tls'])=="on" or str(request.POST['tls'])=='True') else 'False')
+
+    with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
+        config.write(configfile)
+
+
+@login_required
+@ajax
+def validerVariables(request):
+    config = ConfigParser.ConfigParser()
+    config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
+
+    loc=request.POST['localisation']
+    env=request.POST['environnement']
+    typ=request.POST['type']
+
+
+    loc=testTuples(loc)
+    env=testTuples(env)
+    typ=testTuples(typ)
+
+    config.remove_section('LOCALISATION')
+    config.add_section('LOCALISATION')
+
+    for localisation in loc.split('\r\n'):
+        loc_tuple=localisation.split(';')
+        try:
+            config.set('LOCALISATION',loc_tuple[0],loc_tuple[1])
+        except IndexError:
+            pass
+
+
+    config.remove_section('ENVIRONNEMENT')
+    config.add_section('ENVIRONNEMENT')
+
+    for environnement in env.split('\r\n'):
+        env_tuple=environnement.split(';')
+        try:
+            config.set('ENVIRONNEMENT',env_tuple[0],env_tuple[1])
+        except IndexError:
+            pass
+
+    config.remove_section('TYPE')
+    config.add_section('TYPE')
+
+
+    for type_machine in typ.split('\r\n'):
+        machine_tuple=type_machine.split(';')
+        try:
+            config.set('TYPE',machine_tuple[0],machine_tuple[1])
+        except IndexError:
+            pass
+
+    with open(BASE+"soc/default.cfg", 'wb') as configfile:
+        config.write(configfile)
+
+
+
+
+@login_required
+@ensure_csrf_cookie
+def editConfig(request):
+    forms=[]
+    config = ConfigParser.ConfigParser()
+    config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
+
+    #Récuperation des infos Nessus
+    nessus_addr=config.get('Nessus','adresse')
+    nessus_port=config.get('Nessus','port')
+    nessus_login=config.get('Nessus','Login')
+    nessus_password=config.get('Nessus','Password')
+    nessus_directory_id=config.get('Nessus','Directory_Id')
+    nessus_verify='off' if str(config.get('Nessus','Verify_SSL')).lower()=='false' else 'on'
+
+    form1=modifNessus(addr=nessus_addr,port=nessus_port,login=nessus_login,password=nessus_password,directory_id=nessus_directory_id,verify=nessus_verify)
+    forms.append(form1)
+
+    #Récupération des infos du mail
+    mail_addr=config.get('MAIL','SMTP_Addr')
+    mail_port=config.get('MAIL','SMTP_Port')
+    mail_login=config.get('MAIL','Mail_Addr')
+    mail_password=config.get('MAIL','Password')
+    mail_tls=config.get('MAIL','TLS')
+
+    form2=modifMail(addr=mail_addr,port=mail_port,login=mail_login,password=mail_password,tls=mail_tls)
+    forms.append(form2)
+
+
+    #Récupération des différents paramètres de l'application
+    loc=""
+
+    for localisation in config.items('LOCALISATION'):
+        loc+=str(localisation[0])+';'+str(localisation[1])+'\r\n'
+
+    env=""
+
+    for environnement in config.items('ENVIRONNEMENT'):
+        env+=str(environnement[0])+';'+str(environnement[1])+'\r\n'
+
+    typ=""
+
+    for type_machine in config.items('TYPE'):
+        typ+=str(type_machine[0])+';'+str(type_machine[1])+'\r\n'
+
+
+    form3=modifVariables(localisations=loc, environnements=env, types=typ)
+    forms.append(form3)
+
+    nom_logo=config.get('Rapports','logo')
+    logo=Image.open(BASE+'static/img/'+str(nom_logo))
+    societe=config.get('Rapports','societe')
+    auteur=config.get('Rapports','auteur')
+
+    form4=modifInfosRapports(logo=logo,societe=societe,auteur=auteur)
+    forms.append(form4)
+
+    return render(request,'maintenance/modif_parametres.html',{'forms':forms})
+
+

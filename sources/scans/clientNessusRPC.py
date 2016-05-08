@@ -38,12 +38,13 @@ CUSTOM_TEMPLATE_UUID=Config.get('Nessus','Custom_Template_UUID')
 
 class Nessus(object):
 
-    def __init__(self,adresse=ADRESSE,port=PORT):
+    def __init__(self,adresse=ADRESSE,port=PORT,verify=None):
         self.adresse=adresse
         self.port=port
         self.url='https://'+str(self.adresse)+':'+str(self.port)+'/'
         self.token=None
         self.headers={'Content-Type':'application/json'}
+        self.verify=VERIFY if verify is None else verify
 
 
     def envoyer(self,methode, lien, data=None):
@@ -51,13 +52,13 @@ class Nessus(object):
         data = json.dumps(data)
 
         if methode == 'POST':
-            r = requests.post(self.url+str(lien), data=data, headers=self.headers, verify=VERIFY)
+            r = requests.post(self.url+str(lien), data=data, headers=self.headers, verify=self.verify)
 
         elif methode == 'PUT':
-            r = requests.put(self.url+str(lien), data=data, headers=self.headers, verify=VERIFY)
+            r = requests.put(self.url+str(lien), data=data, headers=self.headers, verify=self.verify)
 
         elif methode == 'DELETE':
-            r = requests.delete(self.url+str(lien), data=data, headers=self.headers, verify=VERIFY)
+            r = requests.delete(self.url+str(lien), data=data, headers=self.headers, verify=self.verify)
 
         else:
             r = requests.get(self.url+str(lien), params=data, headers=self.headers, verify=VERIFY)

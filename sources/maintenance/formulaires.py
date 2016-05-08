@@ -9,14 +9,14 @@ class postgreSQL(forms.Form):
         self.titre='postgreSQL'
         self.erreur=None
         self.button="testPostgreSQL()"
-        
+
 
         super(postgreSQL,self).__init__(*args,**kwargs)
-        self.fields['pg_ip']=forms.CharField(label="Adresse IP")
-        self.fields['pg_port']=forms.IntegerField(label="Port",required=True)
-        self.fields['pg_base']=forms.CharField(label="Nom base",max_length=17,required=True)
-        self.fields['pg_user']=forms.CharField(label="Login",required=True)
-        self.fields['pg_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput)
+        self.fields['pg_ip']=forms.CharField(label="Adresse IP",widget=forms.TextInput(attrs={'id':"postgresql_addr"}))
+        self.fields['pg_port']=forms.IntegerField(label="Port",required=True,widget=forms.NumberInput(attrs={'id':"postgresql_port"}))
+        self.fields['pg_base']=forms.CharField(label="Nom base",max_length=17,required=True,widget=forms.TextInput(attrs={'id':"postgresql_database"}))
+        self.fields['pg_user']=forms.CharField(label="Login",required=True,widget=forms.TextInput(attrs={'id':"postgresql_login"}))
+        self.fields['pg_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id':"postgresql_password"}, render_value=True))
 
     def clean_pg_ip(self):
         ip=self.cleaned_data['pg_ip']
@@ -51,12 +51,12 @@ class Nessus(forms.Form):
         self.titre='Nessus'
         self.erreur=None
         self.button="testNessus()"
-    
+
         super(Nessus,self).__init__(*args,**kwargs)
-        self.fields['nessus_ip']=forms.CharField(label="Adresse IP")
-        self.fields['nessus_port']=forms.IntegerField(label="Port",required=True)
-        self.fields['nessus_user']=forms.CharField(label="Login",required=True)
-        self.fields['nessus_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput)
+        self.fields['nessus_ip']=forms.CharField(label="Adresse IP",widget=forms.TextInput(attrs={'id':"nessus_addr"}))
+        self.fields['nessus_port']=forms.IntegerField(label="Port",required=True,widget=forms.NumberInput(attrs={'id':"nessus_port"}))
+        self.fields['nessus_user']=forms.CharField(label="Login",required=True,widget=forms.TextInput(attrs={'id':"nessus_login"}))
+        self.fields['nessus_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id': "nessus_password"},render_value=True))
 
     def clean_nessus_ip(self):
         ip=self.cleaned_data['nessus_ip']
@@ -88,9 +88,9 @@ class Nessus(forms.Form):
 
 class Variables(forms.Form):
     legende="<span class='helptext'><p>Tuples séparés par des ;<br>Un tuple par ligne<br>Valeur_ajoutée_en_base;valeur_affichée<br><br>Ces données seront utilisées par les différents formulaires de l'application</p></span>"
-    localisation=forms.CharField(label="Localisation",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em;'}),help_text=mark_safe(legende),max_length=200,required=False)
+    localisation=forms.CharField(label="Localisation",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em; width:30em;'}),help_text=mark_safe(legende),max_length=200,required=False)
     environnement=forms.CharField(label="Environnement",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em;'}),help_text=legende,max_length=200,required=False)
-    type_machine=forms.CharField(label="Type Machine",widget=forms.Textarea(attrs={'rows': 15,'cols': 80,'style': 'height: 12em;'}),help_text=legende,max_length=200,required=False)
+    type_machine=forms.CharField(label="Type Machine",widget=forms.Textarea(attrs={'rows': 15,'cols': 80,'style': 'height: 12em; width: 30em;'}),help_text=legende,max_length=200,required=False)
 
 
     def clean_localisation(self):
@@ -154,10 +154,32 @@ class rapport(forms.Form):
 
 
 class email(forms.Form):
-    serveur=forms.CharField(label="Serveur SMTP",max_length=50,required=True)
-    port=forms.IntegerField(label="Port",required=True)
-    email=forms.EmailField(label="Mail",max_length=50,required=True)
-    password=forms.CharField(label="Mot de passe",max_length=50,required=True,widget=forms.PasswordInput)
+    def __init__(self,*args,**kwargs):
+        self.titre='Mail'
+        self.erreur=None
+        self.button="testMail()"
+
+        super(email,self).__init__(*args,**kwargs)
+        self.fields['serveur']=forms.CharField(label="Serveur SMTP",max_length=50,required=True,widget=forms.TextInput(attrs={'id':"mail_addr"}))
+        self.fields['port']=forms.IntegerField(label="Port",required=True,widget=forms.NumberInput(attrs={'id':"mail_port"}))
+        self.fields['email']=forms.EmailField(label="Mail",max_length=50,required=True,widget=forms.EmailInput(attrs={'id':"mail_login"}))
+        self.fields['password']=forms.CharField(label="Mot de passe",max_length=50,required=True,widget=forms.PasswordInput(attrs={'id':"mail_password"}))
+        self.fields['tls']=forms.BooleanField(label='tls',widget=forms.CheckboxInput(attrs={'id':'mail_tls'}))
+
+
+    def is_valid(self):
+        is_valid = super(email,self).is_valid()
+        if not is_valid:
+            for field in self.errors.keys():
+                print "ValidationError: %s" % (self.errors[field].as_text())
+        else:
+            try:
+                testConnectionMail(self.cleaned_data['serveur'],self.cleaned_data['port'],self.cleaned_data['email'],self.cleaned_data['password'],self.cleaned_data['tls'])
+                self.erreur=None
+                return is_valid
+
+            except ValueError as e:
+                self.erreur=str(e)
 
 
 class utilisateurs(forms.Form):
@@ -192,7 +214,7 @@ class modifNessus(forms.Form):
         self.fields['login']=forms.CharField(label="Login",required=True,initial=login,widget=forms.TextInput(attrs={'id':"nessus_login"}))
         self.fields['password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id':'nessus_password'},render_value=True),initial=password)
         self.fields['directory_id']=forms.CharField(label="Directory ID",initial=directory_id,widget=forms.TextInput(attrs={'id':"nessus_directory-id"}))
-        self.fields['verify']=forms.BooleanField(label="Verify",initial=verify,widget=forms.CheckboxInput(attrs={'id':"nessus_verify"}))      
+        self.fields['verify']=forms.BooleanField(label="Verify",initial=verify,widget=forms.CheckboxInput(attrs={'id':"nessus_verify"}))
 
 
 class modifMail(forms.Form):
@@ -201,17 +223,20 @@ class modifMail(forms.Form):
         port=kwargs.pop('port')
         login=kwargs.pop('login')
         password=kwargs.pop('password')
+        tls=kwargs.pop('tls')
 
         self.titre="Paramètres de connexion au serveur SMTP"
-        self.test=None
+        self.test="testMail()"
         self.commit="validerMail()"
 
 
         super(modifMail,self).__init__(*args,**kwargs)
         self.fields['addr']=forms.CharField(label="Adresse IP",required=True,initial=addr,widget=forms.TextInput(attrs={'id':"mail_addr"}))
         self.fields['port']=forms.IntegerField(label="Port",required=True,initial=port,widget=forms.NumberInput(attrs={'id':"mail_port"}))
-        self.fields['login']=forms.CharField(label="Login",required=True,initial=login,widget=forms.TextInput(attrs={'id':"mail_login"}))
+        self.fields['login']=forms.CharField(label="Login",required=True,initial=login,widget=forms.EmailInput(attrs={'id':"mail_login"}))
         self.fields['password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id':'mail_password'},render_value=True),initial=password)
+        self.fields['tls']=forms.BooleanField(label="TLS",widget=forms.CheckboxInput(attrs={'id':"mail_tls"}),initial=tls)
+
 
 
 class modifVariables(forms.Form):
@@ -229,4 +254,21 @@ class modifVariables(forms.Form):
         self.fields['environnement']=forms.CharField(label="Environnement",widget=forms.Textarea(attrs={'rows': 7,'cols': 80,'style': 'height: 7em; width:30em;','id':'var_environnement'}),max_length=100,required=False,initial=env)
         self.fields['type_machine']=forms.CharField(label="Type Machine",widget=forms.Textarea(attrs={'rows': 15,'cols': 80,'style': 'height: 12em; width:30em;','id':'var_type'}),max_length=100,required=False,initial=typ)
 
-    
+
+class modifInfosRapports(forms.Form):
+    def __init__(self,*args,**kwargs):
+        logo=kwargs.pop('logo')
+        societe=kwargs.pop('societe')
+        auteur=kwargs.pop('auteur')
+
+        self.titre="Paramètres des rapports"
+        self.test=None
+        self.commit="validerInfosRapports()"
+
+
+        super(modifInfosRapports,self).__init__(*args,**kwargs)
+        self.fields['societe']=forms.CharField(label="Societe",required=True,initial=societe,widget=forms.TextInput(attrs={'id':'infos-rapports_societe'}))
+        self.fields['auteur']=forms.CharField(label="Auteur",required=True,initial=auteur,widget=forms.TextInput(attrs={'id':'infos-rapports_auteur'}))
+        self.fields['logo']=forms.ImageField(label="logo",help_text=mark_safe("<span class='helptext'><p>Aucun changement si aucun fichier uploader</p></span>"),widget=forms.FileInput(attrs={'id':'infos-rapports_logo'}),initial=logo)
+
+

@@ -1,4 +1,4 @@
-{% extends "serveurs/app_base.html" %}
+{% extends "soc/app_base.html" %}
 {% block content %}
 <div class="container">
 	<div class="span10 offset1">
@@ -11,8 +11,13 @@
 	    		{% for field in form %}
    			<div class="form-horizontal">
         		{{ field.label_tag }} {{ field }}
-			{{ field.errors }}
-        		{% if field.help_text %}
+        		
+			{% if field.errors %}
+				<FONT color="red"><strong>{{field.errors}}</FONT></strong><br>{%endif%}
+			{%endif%}
+
+			
+			{% if field.help_text %}
         		<p class="help">{{ field.help_text|safe }}</p>
        			 {% endif %}
    			</div>

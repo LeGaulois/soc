@@ -48,7 +48,7 @@ def run():
 
         nessus.deconnexion()
     except Exception as e:
-        logger.error("Erreur lors de la suppresion des scans Nessus: "+str(e))
+        logger.error("Erreur lors de la suppresion des scans Nessus")
 
     srv=srvTCP()
     srv.start()

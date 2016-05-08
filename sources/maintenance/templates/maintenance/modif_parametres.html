@@ -1,4 +1,4 @@
-{% extends "serveurs/app_base.html" %}
+{% extends "soc/app_base.html" %}
 {% block content %}
 
 {% load static %}
@@ -30,9 +30,11 @@
        			<div class="form-horizontal">
             		{{ field.label_tag }} {{ field }}
 			    {{ field.errors }}
+
             		{% if field.help_text %}
-            		<p class="help">{{ field.help_text|safe }}</p>
-           			 {% endif %}
+            			{{ field.help_text|safe }}
+           		{% endif %}
+
        			</div>
 			    {% endfor %}
 		    <div class="form-actions">

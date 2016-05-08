@@ -196,12 +196,11 @@ def modifvulns(tableauDict):
 
         #Si la vulnerabilite n'est pas presente dans notre tableau de travail, on l'ajoute
         #On remplace la valeur ref_id par un tableau de refs
-        if(nouveau==True):    
+        if(nouveau==True):
             nouveau=False
             table.append(element)
             tmp=[element.get('ref_nom')]
             table[-1]['ref_nom']=tmp
-                            
 
     return table
 
@@ -211,24 +210,27 @@ def desatanize(string):
     Permet verifier qu'un string ne contient pas
     de caractere succeptibles d'engendrer une injection de commande
     '''
-    error=re.search('[;|<>]&',str(string))
 
-    if error!=None:
-        raise Exception("Erreur de paramètre")
+    elements_recherches=['\[','\]',';','|','<','>','/','\.\.']
+
+    for elem in elements_recherches:
+        error=re.search(elem, str(string))
+
+        if error!=None:
+            raise Exception("Erreur de paramètre")
 
     return string
-    
-    
-    
+
+
 def get_value_from_liste_dict(liste_dict,nom_colonne_filtre,condition,cle_recherche):
     """
     Cette fonction permet de retourner la valeur d'un élement recherché
-    dans un tableau de dictionnaire 
+    dans un tableau de dictionnaire
     """
 
     for elem in liste_dict:
         if elem[nom_colonne_filtre]==condition:
-            return elem[cle_recherche]  
+            return elem[cle_recherche]
 
     return 0
 

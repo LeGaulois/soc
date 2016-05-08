@@ -306,9 +306,9 @@ class serveurTache(Thread,Observable):
                 scan.nessusSetID(int(nessus_id))
                 self.ScannerNessus.lancerScan(int(nessus_id))
                 self.log.ecrire('['+str(id_scan_status)+']= Demmarage du scan nessus','info')
-            except:
+            except Exception as e:
                 self.attenteNessus.append({'action':'ajout_scan','id_scan_status':id_scan_status,'scan':scan,'policy_id':policy_id,'tableau_ip':tableau_ip,'nom_unique':nom_unique,'info':'Scan DJANGO'})
-
+                self.log.ecrire("["+str(id_scan_status)+"]= Echec de l'ajout du scan Nessus, "+str(e),"error")
         if nmap==True:
             scan.demarrerScanNmap()
 

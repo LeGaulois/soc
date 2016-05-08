@@ -13,7 +13,6 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "soc.settings")
 
 import soc.startup as startup

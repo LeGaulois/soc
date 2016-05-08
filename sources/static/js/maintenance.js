@@ -9,11 +9,11 @@ function testPostgreSQL() {
     div.innerHTML="Test de connection en cours...";
 
     ajaxPost('/maintenance/testConnectionSQL/',{
-            'host': document.getElementById('id_0-pg_ip').value,
-            'port': document.getElementById('id_0-pg_port').value,
-            'database': document.getElementById('id_0-pg_base').value,
-            'user': document.getElementById('id_0-pg_user').value,
-            'password': document.getElementById('id_0-pg_password').value
+            'address': document.getElementById('postgresql_addr').value,
+            'port': document.getElementById('postgresql_port').value,
+            'database': document.getElementById('postgresql_database').value,
+            'login': document.getElementById('postgresql_login').value,
+            'password': document.getElementById('postgresql_password').value
             },function(content){
                 if (content=='OK'){div.innerHTML="<br><span style ='float'><img src='/static/img/ok.png' %}' alt='completed' style='width:30px;height:30px;'></span>Connection reussi";
                 document.getElementById('suivant').disabled=false;}
@@ -33,11 +33,20 @@ function testNessus() {
 
     div.innerHTML="<br>Test de connection en cours...";
 
+    try {	
+    	var verify = document.getElementById('nessus_verify').value;
+    }
+
+    catch (err) {
+    	var verify = 'off';
+    }	
+
     ajaxPost('/maintenance/testConnectionNessus/',{
-            'host': document.getElementById('id_1-nessus_ip').value,
-            'port': document.getElementById('id_1-nessus_port').value,
-            'user': document.getElementById('id_1-nessus_user').value,
-            'password': document.getElementById('id_1-nessus_password').value
+            'address': document.getElementById('nessus_addr').value,
+            'port': document.getElementById('nessus_port').value,
+            'login': document.getElementById('nessus_login').value,
+            'password': document.getElementById('nessus_password').value,
+	    'verify': verify	    
             },function(content){
                 if (content=='OK'){div.innerHTML="<br><span style ='float'><img src='/static/img/ok.png' %}' alt='completed' style='width:30px;height:30px;'></span>  Connection reussi";
                 document.getElementById('suivant').disabled=false;
@@ -45,6 +54,33 @@ function testNessus() {
                 else {div.innerHTML="<br><span style ='float'><img src='/static/img/error.png' %}' alt='completed' style='width:30px;height:30px;'></span>  "+content; }
     })
 }
+
+
+function testMail() {
+    $( "#popup" ).dialog({
+        title: "test Mail",
+        buttons:{},
+    });
+    $( "#popup" ).dialog("open");
+
+    var div=document.getElementById('popup');    
+
+    div.innerHTML="<br>Test de connection en cours...";	
+
+    ajaxPost('/maintenance/testConnectionMail/',{
+            'address': document.getElementById('mail_addr').value,
+            'port': document.getElementById('mail_port').value,
+            'login': document.getElementById('mail_login').value,
+            'password': document.getElementById('mail_password').value,
+	    'tls': document.getElementById('mail_tls').value 	    
+            },function(content){
+                if (content=='OK'){div.innerHTML="<br><span style ='float'><img src='/static/img/ok.png' %}' alt='completed' style='width:30px;height:30px;'></span>  Connection reussi";
+                document.getElementById('suivant').disabled=false;
+                }
+                else {div.innerHTML="<br><span style ='float'><img src='/static/img/error.png' %}' alt='completed' style='width:30px;height:30px;'></span>  "+content; }
+    })
+}
+
 
 
 function alertAlreadyInit() {
@@ -85,7 +121,8 @@ function validerMail() {
                 'address': document.getElementById('mail_addr').value,
                 'port': document.getElementById('mail_port').value,
                 'login': document.getElementById('mail_login').value,
-                'password': document.getElementById('mail_password').value
+                'password': document.getElementById('mail_password').value,
+		'tls': document.getElementById('mail_tls').value	
     })
 }
 
@@ -94,5 +131,17 @@ function validerVariables() {
                 'localisation': document.getElementById('var_localisation').value,
                 'type': document.getElementById('var_type').value,
                 'environnement': document.getElementById('var_environnement').value
+    })
+}
+
+
+function validerInfosRapports() {
+var temp=document.getElementById('infos-rapports_logo');
+var image=temp.files[0];
+
+    ajaxPost('/maintenance/validerInfosRapports/',{
+                'societe': document.getElementById('infos-rapports_societe').value,
+                'auteur': document.getElementById('infos-rapports_auteur').value,
+		'logo':
     })
 }

@@ -6,7 +6,7 @@ from generationRapports.rapportSolutions.tableauVulnerabilites import *
 from shutil import copyfile
 import subprocess
 from django.db import connection
-from fonctions import dictfetchall
+from fonctions import dictfetchall,desatanize
 import socket
 import ConfigParser
 import codecs
@@ -147,10 +147,7 @@ def creerRapportSolutions(listeIP,group_by,titre='rapportSolutions',traduire=Fal
 
     #Contrôle des arguments
     for arg in liste_arguments:
-        error=re.search('[;|<>]',str(arg))
-
-        if error!=None:
-            raise Exception("Erreur de paramètres")
+        desatanize(str(arg))
 
 
     titre_latex=titre

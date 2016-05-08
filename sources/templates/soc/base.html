@@ -9,6 +9,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script src="{% static 'js/soc.js' %}"></script>
 </head>
+
 <body>
 
 <nav>
@@ -19,7 +20,7 @@
 		<ul>
 			<li><a href="{% url 'scans:liste_scans_plannifies' %}">Liste plannifies</a></li>
 			<li><a href="{% url 'scans:status_scans_plannifies' %}">Historique plannifies</a></li>
-            <li><a href="{% url 'scans:historiqueScansManuels' %}">Historique manuels</a></li>
+            		<li><a href="{% url 'scans:historiqueScansManuels' %}">Historique manuels</a></li>
 			<li><a href="{% url 'scans:status_scans' %}">Status Scans</a></li>
 			<li><a href="{% url 'scans:ajoutScanManuel' %}">Ajout manuel</a></li>
 		</ul>
@@ -30,11 +31,21 @@
 			<li><a href="{% url 'vulns:stats_vulns' %}">Statistiques</a></li>
 		</ul>
 	</li>
+
 	<li><a href="{% url 'rapports:getPDF' %}">Rapports</a></li>
 
-	 <ul style="float:right;list-style-type:none;">
-	    <li><a  href="{% url 'logout_view' %}">Deconnexion</a></li>
-	  </ul>
+	<ul style="float:right;list-style-type:none;">
+		<li><a  href="{% url 'logout_view' %}">Deconnexion</a></li>
+	</ul>
+
+         <li style="float:right;list-style-type:none;"><a>Maintenance</a>
+		<ul>
+			<li><a  href="{% url 'maintenance:editConfig' %}">Editer</a></li>
+			<li><a  href="{% url 'maintenance:import' %}">Importer</a></li>
+			<li><a  href="{% url 'maintenance:export' %}">Exporter</a></li>
+	 	</ul>
+	 </li>
+
       </ul>
 	
 </nav>

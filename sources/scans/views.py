@@ -381,11 +381,12 @@ def ajoutScanManuel(request, ip=None):
     if request.method == 'POST':
         #Obligatoire, car dans le cas où la perte de connexion avec Nessus intervient entre le moment où l'utilisateur appelle le formulaire
         #et le moment où il l'envoie; les champs 'nessus' et 'nessus_policy' seront supprimés de la validation 
+        temp_nessus=error_nessus.copy()
         error_nessus['policy']=False
         error_nessus['indisponible']=False
 
         form = scanManuel(request.POST,liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli,errors=error_nessus)
-            
+
         if form.is_valid():
             type_scan='manuel'
             Nmap=form.cleaned_data['nmap']
@@ -399,7 +400,7 @@ def ajoutScanManuel(request, ip=None):
             else:
                 nessus=False
                 nessusPolicy_id=None
-            
+
 
             if ip==None:
                 liste_ip=form.cleaned_data['adresses']
@@ -462,11 +463,15 @@ def ajoutScanManuel(request, ip=None):
                 cursor.close()
                 return HttpResponse(status=500)
 
-            
+
             cursor.close()
             return redirect('scans:status_scans')
 
         else:
+            error_nessus=temp_nessus
+            del form
+
+            form = scanManuel(request.POST,liste_ip=liste_ip,liste_policies=liste_policies,ip=ip,liste_appli=liste_appli,errors=temp_nessus)
             return render(request, 'scans/ajout_manuel.html', locals())
 
 
