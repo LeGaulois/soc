@@ -38,9 +38,7 @@ git clone https://github.com/LeGaulois/soc.git
 
 Création des certificats:
 ```
-cd soc/docker/django/
-mkdir certificats
-cd certificats
+cd soc/docker/django/install
 
 openssl genrsa 4096 > django.key
 openssl req -new -key django.key > django.csr
