@@ -13,7 +13,7 @@ django:
     volumes:
         - ../sources/:/var/www/html/soc/
     ports:
-        - "80:80"
+        - "443:443"
     links:
         - postgresql
         - nessus

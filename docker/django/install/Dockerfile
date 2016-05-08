@@ -16,17 +16,21 @@ RUN chgrp adm /usr/bin/nmap \
 
 ###### DJANGO ######
 RUN pip install --upgrade pip \
-&& pip install django django-extensions configparser pytz dnspython djangoajax django-formtools passlib Pillow
+&& pip install django django-extensions configparser pytz dnspython djangoajax django-formtools passlib Pillow \
+&& a2enmod proxy \
+&& a2enmod proxy_http \
+&& a2enmod ssl \
+&& a2enmod rewrite
 
 
 ##### CONF APACHE ####
-COPY ../certificats/django.crt /etc/ssl/certs/
-COPY ../certificats/django.key /etc/ssl/private/
+COPY django.crt /etc/ssl/certs/
+COPY django.key /etc/ssl/private/
 COPY 000-default.conf /etc/apache2/sites-available/
 VOLUME  ["/var/www/html/soc/"]
 
 ###### APACHE ######
-EXPOSE 80
+EXPOSE 443
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
 ENV APACHE_LOG_DIR /var/log/apache2
