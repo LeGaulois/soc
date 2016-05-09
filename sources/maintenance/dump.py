@@ -78,7 +78,7 @@ def importProjet(fichier):
     password=desatanize(postgresql['PASSWORD'])
 
     initialiserPG(chemin+'sav/database.pg',host,port,base,user,password)
-    
+
     shutil.rmtree(chemin)
     subprocess.check_output('touch '+BASE+'soc/wsgi-apache.py', shell=True)
 

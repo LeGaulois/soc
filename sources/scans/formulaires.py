@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 from django import forms
-from fonctions import valideIP,valideMAC
+from fonctions import valideIP,valideMAC,desatanize
 import re
 
 
@@ -178,7 +178,7 @@ class scanPlannifie(forms.Form):
 
     def clean_nmapOptions(self):
         try:
-            desatanize(self.cleaned_data['nmapOptions'])
+            opt=desatanize(self.cleaned_data['nmapOptions'])
             return self.cleaned_data['nmapOptions']
         except:
             raise forms.ValidationError('Options invalides')
@@ -268,7 +268,7 @@ class scanManuel(forms.Form):
 
     def clean_nmapOptions(self):
         try:
-            desatanize(self.cleaned_data['nmapOptions'])
+            opt=desatanize(self.cleaned_data['nmapOptions'])
             return self.cleaned_data['nmapOptions']
         except:
             raise forms.ValidationError('Options invalides')
@@ -282,12 +282,10 @@ class scanManuel(forms.Form):
             if (form_data['nmap']==False) and (form_data['nessus']==False):
                 self._errors["nmap"] = "Aucun type de scan selectionne"
                 self._errors["nessus"]= "Aucun type de scan selectionne"
-                del form_data["nessus"]
-        else:
+
             if (form_data['nmap']==False):
                 self._errors['nmap']= "Aucun type de scan selectionne"
 
-        del form_data['nmap']
 
         return form_data
 

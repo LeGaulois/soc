@@ -137,7 +137,7 @@ def creerRapportEvolution(nomUnique,id_scan,type_scan):
     #Contrôle des arguments
     #On s'assure qu'il n'y ait pas d'injection de codes tiers
     for arg in liste_arguments:
-        desatanize(str(arg))
+        tmp=desatanize(str(arg))
 
 
     #Necessaire pour la creation des liens dans le sommaire vers les différentes parties

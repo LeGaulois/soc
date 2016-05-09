@@ -23,7 +23,7 @@ def liste(request):
     cursor.execute('SELECT DISTINCT criticite FROM application')
     liste_criticite=dictfetchall(cursor)
     cursor.close()
-    
+
     #Cas de l'utilisation du filtre
     if request.method == 'POST':
         form = formFiltreApplis(request.POST,criticite=liste_criticite)
@@ -34,7 +34,7 @@ def liste(request):
             liste_filtres['criticite']=form.cleaned_data['criticite']
 
             requete='''SELECT * FROM application '''
-            
+
             precedent=False
             valeurs_filtres=[]
 
@@ -45,16 +45,14 @@ def liste(request):
                     if(precedent==True):
                         requete+=" AND "
                     else:
-                        requete+=" WHERE " 
+                        requete+=" WHERE "
 
                     requete+=desatanize(filtre)+"=%s"
                     valeurs_filtres.append(valeur_filtre)
-                    precedent=True            
-            
+                    precedent=True
 
             requete+=' ORDER BY nom ASC'
-                
-            
+
             cursor=connection.cursor()
             cursor.execute(str(requete),valeurs_filtres)
             liste_applis=dictfetchall(cursor)
@@ -63,7 +61,7 @@ def liste(request):
             return render(request, 'applications/liste.html', locals())
 
         #Dans le cas ou la formulaire n'est pas valide
-        else:    
+        else:
             form = formFiltreApplis(criticite=liste_criticite)
             return render(request, 'applications/liste.html', locals())
 
