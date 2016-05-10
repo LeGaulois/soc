@@ -274,7 +274,7 @@ def identite(request,ip):
 
     #Requetes vulnerabilites
     cursor.execute('''SELECT vulnerabilitees.nom AS vuln_nom, description, criticite, services.nom AS service_nom, refs.nom AS ref_nom FROM vulnerabilitees
-    INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id  
+    INNER JOIN vuln_hote_service ON vuln_hote_service.id_vuln=vulnerabilitees.id
     LEFT JOIN vulns_refs ON vulnerabilitees.id=vulns_refs.vuln_id
     LEFT JOIN refs ON refs.id=vulns_refs.ref_id
     INNER JOIN services ON services.id=vuln_hote_service.id_service
@@ -282,14 +282,14 @@ def identite(request,ip):
     infoVulns=dictfetchall(cursor)
     infoVulns=modifvulns(infoVulns)
 
-    cursor.execute('''SELECT nom,solution,infos_complementaires FROM vuln_hote_service 
+    cursor.execute('''SELECT DISTINCT(nom),solution,infos_complementaires FROM vuln_hote_service
     INNER JOIN vulnerabilitees ON vulnerabilitees.id=vuln_hote_service.id_vuln
     WHERE ip_hote=%s and solution is NOT NULL and solution!='n/a' ''',[ip])
     infoSolutions=dictfetchall(cursor)
     cursor.close()
 
     infosSolutions=prepareListeSolution(infoSolutions)
-    
+
     graph=None
 
     if type(infoHost[0].get('nb_vulnerabilites'))==int:
