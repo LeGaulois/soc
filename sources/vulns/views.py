@@ -188,7 +188,7 @@ def details_cve(request,cve):
     cve_details=dictfetchall(cursor)
 
     if len(cve_details)==0:
-        return HTTPResponse(status=404)
+        return HttpResponse(status=404)
 
     cursor.execute("""
         SELECT vuln_hote_service.ip_hote,protocole,port,services.nom FROM refs
@@ -233,12 +233,6 @@ def liste_cve_famille(request,type_cve):
         cve['nom_url']=cve['nom'].replace('-','_')
 
     if len(liste_cve)==0:
-        return HTTPResponse(status=404)
+        return HttpResponse(status=404)
 
     return render(request, 'vulns/liste_cve_famille.html',{'type_cve':type_cve,'liste_cve':liste_cve,'type':type_cve} )
-  
-
-    
-        
-
-    
