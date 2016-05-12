@@ -30,6 +30,7 @@ def envoieMail(scan):
     msg = MIMEMultipart()
     msg['From'] = fromaddr
     msg['Subject'] = "Rapport du scan N°"+str(scan['id'])
+    msg['Charset'] = 'utf-8'
 
     cursor=connection.cursor()
     cursor.execute('SELECT type FROM scans_status WHERE id=%s LIMIT 1',[scan['id']])
@@ -48,7 +49,7 @@ def envoieMail(scan):
 
 
     body+="\n\n Cordialement"
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, 'plain', _charset='utf-8'))
 
 
     #Gestion des PJ
@@ -77,18 +78,17 @@ def envoieMail(scan):
     	    msg.attach(part)
 
 
-    if scan['nmap']==True:
-        liste_fichier=glob.glob(chemin+str(scan['id'])+"__*_evolution.pdf")
+    liste_fichier=glob.glob(chemin+str(scan['id'])+"__*_evolution.pdf")
     
-        if len(liste_fichier)!=0:
-            nom_fichier=liste_fichier[0].split('/')[-1]
-    	    attachment = open(str(chemin+nom_fichier), "rb")
+    if len(liste_fichier)!=0:
+        nom_fichier=liste_fichier[0].split('/')[-1]
+    	attachment = open(str(chemin+nom_fichier), "rb")
     	 
-    	    part = MIMEBase('application', 'octet-stream')
-    	    part.set_payload((attachment).read())
-    	    encoders.encode_base64(part)
-    	    part.add_header('Content-Disposition', "attachment; filename= %s" % nom_fichier)
-    	    msg.attach(part)
+    	part = MIMEBase('application', 'octet-stream')
+    	part.set_payload((attachment).read())
+    	encoders.encode_base64(part)
+    	part.add_header('Content-Disposition', "attachment; filename= %s" % nom_fichier)
+    	msg.attach(part)
     
 
     #Connexion
@@ -109,3 +109,4 @@ def envoieMail(scan):
 	
 	
     server.quit()
+
