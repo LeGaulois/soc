@@ -343,23 +343,33 @@ def validerInfosRapports(request):
     config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 
     try:
-        image=request.FILES['logo']
-        image_name=image._get_name()
-        image_path=BASE+'static/img/'
+        if ( 'logo' in request.FILES):
+            image=request.FILES['logo']
+            image_name=image._get_name()
+            image_name = desatanize(image_name)
+            image_path=BASE+'static/img/'
 
-        image_file=open(image_path+image_name,'wb',0)
+            image_file=open(image_path+image_name,'wb',0)
 
-        for chunk in image.chunks():
-            image_file.write(chunk)
+            for chunk in image.chunks():
+                image_file.write(chunk)
 
-        image_file.close()
+            image_file.close()
 
-        self.config.set('Rapports','Logo',str(image_name))
-        self.config.set('Rapports','Societe',str(request.POST['societe']))
-        self.config.set('Rapports','Auteur',str(request.POST['auteur']))
+            old_image_name= desatanize( str(config.get("Rapports",'Logo') ))
+            os.remove(BASE+'static/img/'+str(old_image_name))
+
+            config.set('Rapports','Logo',str(image_name))
+
+
+        config.set('Rapports','Societe',str(request.POST['societe']))
+        config.set('Rapports','Auteur',str(request.POST['auteur']))
+
+        with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
+            config.write(configfile)
 
     except Exception as e:
-            return str(request)+' = '+str(e)
+        return "Erreur de traitement"
 
 
 

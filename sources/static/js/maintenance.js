@@ -136,12 +136,46 @@ function validerVariables() {
 
 
 function validerInfosRapports() {
-var temp=document.getElementById('infos-rapports_logo');
-var image=temp.files[0];
+    var files = document.getElementById('infos-rapports_logo').files;
+    var formData = new FormData();
 
-    ajaxPost('/maintenance/validerInfosRapports/',{
-                'societe': document.getElementById('infos-rapports_societe').value,
-                'auteur': document.getElementById('infos-rapports_auteur').value,
-		'logo':
-    })
+    if (files.length > 0) {
+        image = files[0];
+
+        if (!image.type.match('image.*')) {
+            $( "#popup" ).dialog({
+                title: "test Mail",
+                buttons:{},
+            });
+
+            $( "#popup" ).dialog("open");
+            var div=document.getElementById('popup');
+
+            div.innerHTML="<br>Le fichier spécifié n'est pas une image";
+            exit()
+        }
+
+        formData.append('logo', image, image.name);
+    }
+    
+    formData.append('societe',document.getElementById('infos-rapports_societe').value);
+    formData.append('auteur',document.getElementById('infos-rapports_auteur').value);
+
+
+    $.ajax({
+        type: 'POST',
+        url: '/maintenance/validerInfosRapports/',
+        headers: {"X-CSRFToken": getCookie('csrftoken')},
+        data: formData,
+        processData: false,
+        contentType: false,
+        cache: false,
+
+        success: function(result) {
+            if (result.info === 'OK') {
+              console.log('OK');
+            }
+        }
+
+    });
 }
