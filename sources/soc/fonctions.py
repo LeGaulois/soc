@@ -211,7 +211,7 @@ def desatanize(string):
     de caractere succeptibles d'engendrer une injection de commande
     '''
 
-    elements_recherches=['\[','\]',';','\|','<','>','/','\.\.']
+    elements_recherches=['\[','\]',';','\|','<','>','\.\.']
 
     for elem in elements_recherches:
         error=re.search(elem, str(string))
