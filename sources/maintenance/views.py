@@ -290,7 +290,7 @@ class InitWizard(CookieWizardView):
 
         #Ajout du script python dans la crontab de www-data
         try:
-            subprocess.check_output(['crontab -l | { cat; echo "10 1 * * * '+BASE+'scan_crontab.py; } | crontab -'],shell=True)
+            subprocess.check_output(['crontab -l | { cat; echo "10 1 * * * '+BASE+'scan_crontab.py"; } | crontab -'],shell=True)
         except Exception as e:
             logger.error("Erreur de creation de la crontab: "+str(e))
             pass

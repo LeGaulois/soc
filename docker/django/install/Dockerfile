@@ -3,7 +3,7 @@ FROM debian:jessie
 ##### INSTALLATION ######
 RUN apt-get update \
 && apt-get upgrade -y \
-&& apt-get install -y apache2 libapache2-mod-wsgi python-pip nmap python2.7 python3 libcap2-bin python-psycopg2 python-dnspython python-dns texlive-latex-base texlive-lang-french texlive-latex-recommended texlive-pictures texlive-latex-extra python-dev libjpeg-dev libpng3 libfreetype6-dev postgresql-client-9.4 
+&& apt-get install -y cron apache2 libapache2-mod-wsgi python-pip nmap python2.7 python3 libcap2-bin python-psycopg2 python-dnspython python-dns texlive-latex-base texlive-lang-french texlive-latex-recommended texlive-pictures texlive-latex-extra python-dev libjpeg-dev libpng3 libfreetype6-dev postgresql-client-9.4 
 
 
 
