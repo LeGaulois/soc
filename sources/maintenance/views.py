@@ -57,16 +57,22 @@ def connectionNessus(request):
     except Exception as e:
         return str(e)
 
+
 @ajax
 def connectionMail(request):
     address=request.POST['address']
-    port=request.POST['port']
+    port=int(request.POST['port'])
     login=request.POST['login']
     password=request.POST['password']
     tls=request.POST['tls']
 
     try:
         testConnectionMail(address,port,login,password,tls)
+        return 'OK'
+
+    except ValueError as e:
+        return str(e)
+
     except Exception as e:
         return str(e)
 
@@ -89,7 +95,7 @@ class InitWizard(CookieWizardView):
             'pg_port': '5432',
             'pg_base': 'django',
             'pg_user': 'django_db',
-            'pg_password': 'Django_DB_Pa$$Word'},
+            'pg_password': 'DjangoDBPassWordSOC'},
         '1': {
             'nessus_ip':'nessus',
             'nessus_port': '8834',

@@ -54,7 +54,7 @@ def testConnectionSQL(address,port,database,login,password):
 
 
 
-def testConnectionNessus(address,port,login,password,verify):
+def testConnectionNessus(address,port,login,password,verify=False):
     try:
         verify=True if (verify=='True' or verify=='on') else False
         ScannerNessus=Nessus(address,port,verify)
@@ -107,15 +107,26 @@ def testTuples(variable):
 
     return res
 
+
 def testConnectionMail(address,port,login,password,tls):
     '''
     Fonction de test de connection au serveur de mail sortant
     '''
+
     server = smtplib.SMTP(address, int(port))
 
-    tls=True if (tls=='True' or tls=='on') else False
+    tls=True if (tls=='True' or tls=='on' or tls==True) else False
 
     if tls==True:
-        server.starttls()
+        conn_tls=server.starttls()
 
-    server.login(login,password)
+        if int(conn_tls[0])!=220:
+            raise ValueError ("Erreur connection SSL")
+
+    try:
+        server.login(login,password)
+
+    except smtplib.SMTPAuthenticationError:
+        raise ValueError("Erreur de login/mot_de_passe")
+
+    server.quit()

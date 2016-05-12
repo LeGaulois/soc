@@ -72,7 +72,7 @@ function testMail() {
             'port': document.getElementById('mail_port').value,
             'login': document.getElementById('mail_login').value,
             'password': document.getElementById('mail_password').value,
-	    'tls': document.getElementById('mail_tls').value 	    
+	        'tls': document.getElementById('mail_tls').value 	    
             },function(content){
                 if (content=='OK'){div.innerHTML="<br><span style ='float'><img src='/static/img/ok.png' %}' alt='completed' style='width:30px;height:30px;'></span>  Connection reussi";
                 document.getElementById('suivant').disabled=false;
