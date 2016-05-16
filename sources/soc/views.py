@@ -5,23 +5,30 @@ from django.contrib.auth import authenticate, login,logout
 from formulaires import *
 import locale
 import sys
- 
+
 
 def erreur400(request):
-    return render(request, 'soc/400.html')
+    if request.user.is_authenticated():
+        return render(request, 'soc/400.html')
+    else:
+        return render(request, 'soc/400_public.html')
 
 def erreur404(request):
-    return render(request, 'soc/404.html')
+    if request.user.is_authenticated():
+        return render(request, 'soc/404.html')
+    else:
+        return render(request, 'soc/404_public.html')
 
 def erreur500(request):
-    return render(request, 'soc/500.html')
-
-
+    if request.user.is_authenticated():
+        return render(request, 'soc/500.html')
+    else:
+        return render(request, 'soc/500_public.html')
 
 def login_view(request):
     if request.method == 'POST':
         form = formulaire_authentification(request.POST)
-            
+
         if form.is_valid():
             username=form.cleaned_data['username']
             password=form.cleaned_data['password']
