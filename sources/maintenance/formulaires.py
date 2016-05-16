@@ -9,6 +9,7 @@ class postgreSQL(forms.Form):
         self.titre='postgreSQL'
         self.erreur=None
         self.button="testPostgreSQL()"
+        self.restrict=True
 
 
         super(postgreSQL,self).__init__(*args,**kwargs)
@@ -54,9 +55,9 @@ class Nessus(forms.Form):
 
         super(Nessus,self).__init__(*args,**kwargs)
         self.fields['nessus_ip']=forms.CharField(label="Adresse IP",widget=forms.TextInput(attrs={'id':"nessus_addr"}))
-        self.fields['nessus_port']=forms.IntegerField(label="Port",required=True,widget=forms.NumberInput(attrs={'id':"nessus_port"}))
-        self.fields['nessus_user']=forms.CharField(label="Login",required=True,widget=forms.TextInput(attrs={'id':"nessus_login"}))
-        self.fields['nessus_password']=forms.CharField(label="Password",required=True,widget=forms.PasswordInput(attrs={'id': "nessus_password"},render_value=True))
+        self.fields['nessus_port']=forms.IntegerField(label="Port",required=False,widget=forms.NumberInput(attrs={'id':"nessus_port"}))
+        self.fields['nessus_user']=forms.CharField(label="Login",required=False,widget=forms.TextInput(attrs={'id':"nessus_login"}))
+        self.fields['nessus_password']=forms.CharField(label="Password",required=False,widget=forms.PasswordInput(attrs={'id': "nessus_password"},render_value=True))
 
     def clean_nessus_ip(self):
         ip=self.cleaned_data['nessus_ip']
@@ -78,7 +79,7 @@ class Nessus(forms.Form):
                 print "ValidationError: %s" % (self.errors[field].as_text())
         else:
             try:
-                testConnectionNessus(self.cleaned_data['nessus_ip'],self.cleaned_data['nessus_port'],self.cleaned_data['nessus_user'],self.cleaned_data['nessus_password'])
+                #testConnectionNessus(self.cleaned_data['nessus_ip'],self.cleaned_data['nessus_port'],self.cleaned_data['nessus_user'],self.cleaned_data['nessus_password'])
                 self.erreur=None
                 return is_valid
 
@@ -160,11 +161,11 @@ class email(forms.Form):
         self.button="testMail()"
 
         super(email,self).__init__(*args,**kwargs)
-        self.fields['serveur']=forms.CharField(label="Serveur SMTP",max_length=50,required=True,widget=forms.TextInput(attrs={'id':"mail_addr"}))
-        self.fields['port']=forms.IntegerField(label="Port",required=True,widget=forms.NumberInput(attrs={'id':"mail_port"}))
-        self.fields['email']=forms.EmailField(label="Mail",max_length=50,required=True,widget=forms.EmailInput(attrs={'id':"mail_login"}))
-        self.fields['password']=forms.CharField(label="Mot de passe",max_length=50,required=True,widget=forms.PasswordInput(attrs={'id':"mail_password"}))
-        self.fields['tls']=forms.BooleanField(label='tls',widget=forms.CheckboxInput(attrs={'id':'mail_tls'}))
+        self.fields['serveur']=forms.CharField(label="Serveur SMTP",max_length=50,required=False,widget=forms.TextInput(attrs={'id':"mail_addr"}))
+        self.fields['port']=forms.IntegerField(label="Port",required=False,widget=forms.NumberInput(attrs={'id':"mail_port"}))
+        self.fields['email']=forms.EmailField(label="Mail",max_length=50,required=False,widget=forms.EmailInput(attrs={'id':"mail_login"}))
+        self.fields['password']=forms.CharField(label="Mot de passe",max_length=50,required=False,widget=forms.PasswordInput(attrs={'id':"mail_password"}))
+        self.fields['tls']=forms.BooleanField(label='tls',widget=forms.CheckboxInput(attrs={'id':'mail_tls'}), required=False)
 
 
     def is_valid(self):
@@ -174,7 +175,7 @@ class email(forms.Form):
                 print "ValidationError: %s" % (self.errors[field].as_text())
         else:
             try:
-                testConnectionMail(self.cleaned_data['serveur'],self.cleaned_data['port'],self.cleaned_data['email'],self.cleaned_data['password'],self.cleaned_data['tls'])
+                #testConnectionMail(self.cleaned_data['serveur'],self.cleaned_data['port'],self.cleaned_data['email'],self.cleaned_data['password'],self.cleaned_data['tls'])
                 self.erreur=None
                 return is_valid
 

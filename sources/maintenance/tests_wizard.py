@@ -113,15 +113,16 @@ def testConnectionMail(address,port,login,password,tls):
     Fonction de test de connection au serveur de mail sortant
     '''
 
-    server = smtplib.SMTP(address, int(port))
-
     tls=True if (tls=='True' or tls=='on' or tls==True) else False
 
-    if tls==True:
-        conn_tls=server.starttls()
+    try:
+        if (tls==False):
+            server = smtplib.SMTP(address, int(port),timeout=10)
 
-        if int(conn_tls[0])!=220:
-            raise ValueError ("Erreur connection SSL")
+        else:
+            server=smtplib.SMTP_SSL(address, int(port), timeout=10)
+    except:
+        raise ValueError("connection impossible")
 
     try:
         server.login(login,password)

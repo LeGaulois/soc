@@ -64,7 +64,7 @@
 
         {% if wizard.steps.step1 == wizard.steps.count %} 
             <input type="submit" class="btn btn-success" value='Initialiser'>
-        {%elif wizard.form.button %}
+        {%elif wizard.form.restrict %}
             <input id='suivant' disabled type="submit" class="btn btn-success" value='suivant'>
         {%else%}
             <input id='suivant' type="submit" class="btn btn-success" value='suivant'>
