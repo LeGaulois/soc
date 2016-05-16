@@ -139,6 +139,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+
     'formatters': {
         'verbose': {
             'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
@@ -148,19 +149,33 @@ LOGGING = {
             'format': '%(levelname)s %(message)s'
         },
     },
+
     'handlers': {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR+'/django.log',
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         },
     },
+
     'loggers': {
         'django': {
-            'handlers':['file'],
+            'handlers': ['file'],
             'propagate': True,
-            'level':'ERROR',
-        }
+            'level':'DEBUG',
+        },
+        'soc': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'scans': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
+
+

@@ -12,12 +12,16 @@ BASE=settings.BASE_DIR+'/'
 Config = ConfigParser.ConfigParser()
 Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 DIRECTORY_ID=Config.get('Nessus','Directory_Id')
+INITIALISER=Config.get('PROJET','initialiser')
 
 logger = logging.getLogger(__name__)
 
 def run():
     #Purge des scans dans la base
-    
+    if INITIALISER=='YES':
+        demarrageServeurTache()
+
+def demarrageServeurTache():
     d=datetime.datetime.now()
     tz = pytz.timezone('Europe/Paris')
     date_fin=date_fin=tz.localize(d)
