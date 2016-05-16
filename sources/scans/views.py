@@ -311,11 +311,9 @@ WHERE id_scan_plannifie=%s''',[id_scan_plannifie])
     else:
         form = scanPlannifie(mode='edit',liste_ip_selectionnees=liste_ip_selectionnees,liste_ip_existantes=liste_ip_existantes,liste_noms=liste_noms,liste_policies=liste_policies,scan=infoScan,liste_applis_selectionnees=liste_applis_selectionnees,liste_appli=liste_appli)
         return render(request, 'scans/edit_plannifie.html', locals())
-    
-    
 
 
-    
+ 
 @login_required
 @ensure_csrf_cookie
 def suppression(request,id):
@@ -364,7 +362,7 @@ def ajoutScanManuel(request, ip=None):
             'policy':False
     }
 
-    try:    
+    try:
         ScannerNessus=Nessus()
         ScannerNessus.connexion()
         dict_policies=ScannerNessus.listePolicies()
@@ -377,10 +375,11 @@ def ajoutScanManuel(request, ip=None):
     error_nessus['policy']=True if len(liste_policies)==0 else False
 
     cursor.close()
-    
+
+
     if request.method == 'POST':
         #Obligatoire, car dans le cas où la perte de connexion avec Nessus intervient entre le moment où l'utilisateur appelle le formulaire
-        #et le moment où il l'envoie; les champs 'nessus' et 'nessus_policy' seront supprimés de la validation 
+        #et le moment où il l'envoie; les champs 'nessus' et 'nessus_policy' seront supprimés de la validation
         temp_nessus=error_nessus.copy()
         error_nessus['policy']=False
         error_nessus['indisponible']=False
