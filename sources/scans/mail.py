@@ -17,7 +17,7 @@ Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 ADRESSE_ENVOIE=Config.get('MAIL','Mail_Addr')
 PASSWORD=Config.get('MAIL','Password')
 SMTP=Config.get('MAIL','SMTP_Addr')
-PORT=int(Config.get('MAIL','SMTP_Port'))
+PORT=Config.get('MAIL','SMTP_Port')
 SSL=Config.get('MAIL','TLS')
 
 def envoieMail(scan):

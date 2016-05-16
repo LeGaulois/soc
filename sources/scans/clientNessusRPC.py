@@ -51,7 +51,7 @@ class Nessus(object):
         self.token=None
         self.headers={'Content-Type':'application/json'}
         self.verify=param['verify'] if verify is None else verify
-        self.login = param'login'] if login is None else login
+        self.login = param['login'] if login is None else login
         self.password = param['password'] if password is None else password
 
 
