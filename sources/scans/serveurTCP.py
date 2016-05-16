@@ -47,7 +47,7 @@ class dialogueClient(Thread):
             request=self.client.recevoir()
 
             if not request:
-                self.client.close()
+                self.client.fermer()
                 break
 
             else:
@@ -62,6 +62,7 @@ class dialogueClient(Thread):
                             self.client.envoyer("done")
 
                     except Exception as e:
+                        logger.error(str(e))
                         self.client.envoyer('error: '+str(e))
 
                 
@@ -89,7 +90,7 @@ class serveurTache(Thread,Observable):
 
         except:
             pass
-      
+
         self.log=log(CHEMIN_LOGS+'scan.log','scanner.'+'srv_tache')
 
 
@@ -115,7 +116,7 @@ class serveurTache(Thread,Observable):
                         emetteur.nessusSetID(int(nessus_id))
                     except Exception as e:
                         pass
-                
+
                 elif action=='nessus_getRapport':
                     parametres=tache['param']
 
@@ -129,9 +130,9 @@ class serveurTache(Thread,Observable):
 
             if kwargs.has_key('status') or kwargs.has_key('status_import'):
                 self.updateStatusBase(emetteur)
-                
-                
-                    
+
+
+
     def updateStatusBase(self,scan):
         '''
         Cette fonction permet de controler si le scan est termine
@@ -158,12 +159,12 @@ class serveurTache(Thread,Observable):
 
         d=datetime.datetime.now()
         tz = pytz.timezone('Europe/Paris')
-        date_fin=tz.localize(d)      
+        date_fin=tz.localize(d)
 
         if nessus_status=='running' or nmap_status=='running':
             cursor.execute('UPDATE scans_status SET etat=\'running\' WHERE id=%s', [id_scan])
 
-        
+
         else:
             #Données pour l'envoie de mail
             infos_scan={
@@ -173,7 +174,7 @@ class serveurTache(Thread,Observable):
                 'nmap': None,
                 'erreurs': erreurs
             }
-            
+
             infos_scan['nessus']=True if nessus_status!='disable' else False
             infos_scan['nmap']=True if nmap_status!='disable' else False
 
@@ -193,7 +194,7 @@ class serveurTache(Thread,Observable):
                 message='['+str(id_scan)+']= Scan termine avec des erreurs'
                 level='error'
 
-                                            
+
             elif (nmap_status in status_error) and (nmap_import in status_error) and (nessus_status in status_error) and (nessus_import in status_error):
                 f.write("error\n")
                 status="error"
@@ -218,12 +219,12 @@ class serveurTache(Thread,Observable):
                     self.log.ecrire(message,level)
 
         cursor.close()
-        
+
 
 
     def generationRapport(self,id_scan,nom_unique,type_scan):
         self.log.ecrire('['+str(id_scan)+"]= Génération du rapport d'évolution en cours...",'info')
-            
+
         try:
             creerRapportEvolution(nom_unique,id_scan,type_scan)
             self.log.ecrire('['+str(id_scan)+"]= La génération du rapport d'évolution a réussi",'info')
@@ -244,18 +245,16 @@ class serveurTache(Thread,Observable):
             cursor.execute('SELECT * FROM scans_plannifies WHERE id=%s LIMIT 1',[id_scan])
             dictScan=dictfetchall(cursor)
 
-    
-        
+
         nmap=dictScan[0]['nmap']
         nessus=dictScan[0]['nessus']
 
-        
         nmapOptions=dictScan[0]['nmap_options'] if nmap==True else None
         policy_id=dictScan[0]['nessus_policy_id'] if nessus==True else None
 
         tz = pytz.timezone('Europe/Paris')
         date_lancement=datetime.datetime.now()
-        date_postgresql=tz.localize(date_lancement)      
+        date_postgresql=tz.localize(date_lancement)
         date_lancement=datetime.datetime.now()
 
 
@@ -318,7 +317,7 @@ class serveurTache(Thread,Observable):
 
         if scan.nessusGetStatus()=='ready' and (type_scan=='nessus' or type_scan=='all'):
             self.ScannerNessus.lancerScan(scan.nessusGetID())
-            self.log.ecrire('['+str(id_scan)+']= Demmarage du Scan Nessus','info') 
+            self.log.ecrire('['+str(id_scan)+']= Demmarage du Scan Nessus','info')
 
         if scan.nmapGetStatus()=='ready' and (type_scan=='nmap' or type_scan=='all'):
             scan.demarrerScanNmap()
@@ -332,7 +331,7 @@ class serveurTache(Thread,Observable):
             if int(scan['id'])==int(id_scan_status):
                 sc=scan['scan']
                 id_nessus=sc.nessusGetID()
-            
+
                 if id_nessus is not None:
                     try:
                         self.ScannerNessus.supprimerScan(id_nessus)
@@ -346,15 +345,15 @@ class serveurTache(Thread,Observable):
     def getScanProgress(self,id_scan,type_scan):
         scan=self.getScan(id_scan)
 
-        if type_scan=='nmap':   
+        if type_scan=='nmap':
              return scan.nmapGetProgress()
 
-        if type_scan=='nessus':   
+        if type_scan=='nessus':
              return scan.nessusGetProgress()
-    
 
 
-    def getScan(self,id_scan):  
+
+    def getScan(self,id_scan):
         for elem in self.scanListe:
             if int(elem['id'])==int(id_scan):
                 return elem['scan']
@@ -366,7 +365,7 @@ class serveurTache(Thread,Observable):
 
         for elem in self.scanListe:
             if int(elem['id'])==int(id_scan):
-                return elem['scan']   
+                return elem['scan']
 
         raise Exception('scan non présent en base')
 
@@ -385,13 +384,27 @@ class serveurTache(Thread,Observable):
         Gestion des tentatives de reconnexion au serveur Nessus
         et à la reprise des tâches en attentes
         """
-        try:
-            self.log.ecrire('Tentative de reconnexion au serveur Nessus','debug')
-            self.ScannerNessus.connexion()
-            self.log.ecrire('Reconnexion réussi','debug')
-        except Exception as e:
-            self.log.ecrire('Echec de reconnexion au serveur Nessus: '+str(e),'error')    
-            pass
+
+        self.log.ecrire('Tentative de reconnexion au serveur Nessus','debug')
+
+        timeout = 10
+        compteur = 0
+        reussi=False
+
+        while compteur < timeout:
+            try:
+                self.ScannerNessus.connexion()
+                self.log.ecrire('Reconnexion réussi','debug')
+                reussi=True
+                break
+
+            except Exception as e:
+                time.sleep(10)
+                compteur+=1
+
+        if reussi==False:
+            self.log.ecrire('Echec de reconnexion au serveur Nessus: '+str(e),'error')
+
 
         else:
             #si la connexion reussi on verifie si des scans sont en attente d'ajout
@@ -421,21 +434,20 @@ class serveurTache(Thread,Observable):
                         self.log.ecrire('Erreur d etraitement de la tâche en attente '+str(e),'error')
                     else:
                         self.attenteNessus.remove(scan_en_attente)
-                        
-    
+
     def run(self):
         '''
         On fait des requêtes auprès de Nessus afin de récupérer régulièrement
         le status et la progression des scans
         Puis on compare les résultats avec les précédents
-        En cas d'évolution, on prévient les scans 
+        En cas d'évolution, on prévient les scans
         '''
 
         while True:
             try:
                 time.sleep(10)
                 status=self.ScannerNessus.listScanStatusAndProgress(DIRECTORY_ID)
-                
+
                 for scan in self.scanListe:
                     id_scan=scan['id']
                     nessus_id=scan['scan'].nessusGetID()
@@ -450,28 +462,28 @@ class serveurTache(Thread,Observable):
                             if int(elem['progress'])!=int(nessus_progress):
                                 self.notify_observers(str(id_scan),progress=elem['progress'])
 
-                         
 
             #En cas de perte de la connexion avec Nessus
             except requests.exceptions.ConnectionError:
                 self.log.ecrire('Perte de la connexion au serveur Nessus','warning')
                 self.tentativeReconnexion()
 
-            
             except Exception as e:
                 #Dans le cas ou la session trop longtemps, elle passe en timeout
-                #On se reconnecte donc                
+                #On se reconnecte donc
                 if(str(e)=='Invalid Credentials'):
                     self.log.ecrire('Connexion timeout, reconnexion...','debug')
-                    self.tentativeReconnexion()
 
                 elif(str(e)=='You need to log in to perform this request'):
                     self.log.ecrire('Perte de la connexion au serveur Nessus','warning')
-                    self.tentativeReconnexion()
-                else:
-                    self.log.ecrire(str(e),'error')
 
-             
+                else:
+                    self.log.ecrire(str(e),'warning')
+
+                self.tentativeReconnexion()
+
+
+
 
 class srvTCP(Thread):
     def __init__(self):

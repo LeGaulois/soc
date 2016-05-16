@@ -14,37 +14,45 @@ Elle sera utilisé typiquement pour:
     - afficher la liste des policies définis (formulaire) 
 '''
 
-
-
-#Variables globales
 BASE=settings.BASE_DIR+'/'
-Config = ConfigParser.ConfigParser()
-Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 
-ADRESSE=Config.get('Nessus','adresse')
-PORT=Config.get('Nessus','port')
-LOGIN=Config.get('Nessus','Login')
-PASSWORD=Config.get('Nessus','Password')
-DIRECTORY_ID=Config.get('Nessus','Directory_Id')
-VERIFY=str(Config.get('Nessus','Verify_SSL')).lower()
+def getParametresNessus():
+    """
+    Fonction permettant de récupérer les infos
+    relatives à Nessus dans le fichier default.cfg
+    """
+    res={}
+    Config = ConfigParser.ConfigParser()
+    Config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
 
-if VERIFY=="false" or VERIFY=="no" or VERIFY=="non" or VERIFY=="0":
-    VERIFY=False
-else:
-    VERIFY=True
- 
-CUSTOM_TEMPLATE_UUID=Config.get('Nessus','Custom_Template_UUID')
+    res['adresse'] = Config.get('Nessus','adresse')
+    res['port'] = Config.get('Nessus','port')
+    res['login'] = Config.get('Nessus','Login')
+    res['password'] = Config.get('Nessus','Password')
+    res['directory_id'] = Config.get('Nessus','Directory_Id')
+    VERIFY=str(Config.get('Nessus','Verify_SSL')).lower()
+
+    if VERIFY=="false" or VERIFY=="no" or VERIFY=="non" or VERIFY=="0":
+        res['verify'] = False
+    else:
+        res['verify'] = True
+
+    res['custom_template_uuid'] = Config.get('Nessus','Custom_Template_UUID')
+
+    return res
 
 
 class Nessus(object):
-
-    def __init__(self,adresse=ADRESSE,port=PORT,verify=None):
-        self.adresse=adresse
-        self.port=port
+    def __init__(self,adresse=None,port=None,verify=None, login=None, password=None):
+        param=getParametresNessus()
+        self.adresse= param['adresse'] if adresse is None else adresse
+        self.port=param['port'] if port is None else port
         self.url='https://'+str(self.adresse)+':'+str(self.port)+'/'
         self.token=None
         self.headers={'Content-Type':'application/json'}
-        self.verify=VERIFY if verify is None else verify
+        self.verify=param['verify'] if verify is None else verify
+        self.login = param'login'] if login is None else login
+        self.password = param['password'] if password is None else password
 
 
     def envoyer(self,methode, lien, data=None):
@@ -61,7 +69,7 @@ class Nessus(object):
             r = requests.delete(self.url+str(lien), data=data, headers=self.headers, verify=self.verify)
 
         else:
-            r = requests.get(self.url+str(lien), params=data, headers=self.headers, verify=VERIFY)
+            r = requests.get(self.url+str(lien), params=data, headers=self.headers, verify=self.verify)
 
 
         if r.status_code != 200:
@@ -75,18 +83,46 @@ class Nessus(object):
             return r.json()
 
 
+    def updateParametresConnexion(self):
+        """
+        Permet d emettre à jour les parametres de connexio
+        Suite à leur modification par exemple
+        Se fait en cas de connexion infrustueuse
+        """
+        config = ConfigParser.ConfigParser()
+        config.readfp(codecs.open(BASE+"soc/default.cfg","r","utf-8"))
+        self.adresse = config.get('Nessus','adresse')
+        self.port = config.get('Nessus','port')
+        self.url='https://'+str(self.adresse)+':'+str(self.port)+'/'
+        self.login = config.get('Nessus','Login')
+        self.password = config.get('Nessus','Password')
+        ssl_tmp = str(config.get('Nessus','Verify_SSL')).lower()
 
-    def connexion(self,login=LOGIN,password=PASSWORD):
+        if ssl_tmp=="false" or ssl_tmp=="no" or ssl_tmp=="non" or ssl_tmp=="0":
+            self.verify = VERIFY=False
+        else:
+            self.verify = VERIFY=True
+
+
+
+    def connexion(self,login=None,password=None):
         '''
         Methode permettant de se logger sur le serveur Nessus
         La methode ajoute le token renvoye par le serveur
         à la variable headers de l'objet Nessus
         '''
+        login = self.login if login is None else login
+        password = self.password if password is None else password
 
-        login_data={'username' : str(login), 'password' : str(password)}
-        res=self.envoyer('POST','session/', login_data)
-        self.token=str(res['token'])
-        self.headers['X-Cookie']='token='+str(res['token'])+';'
+        try:
+            login_data={'username' : str(login), 'password' : str(password)}
+            res=self.envoyer('POST','session/', login_data)
+            self.token=str(res['token'])
+            self.headers['X-Cookie']='token='+str(res['token'])+';'
+
+        except Exception as e:
+            self.updateParametresConnexion()
+            raise e
 
 
     def deconnexion(self):
@@ -170,7 +206,7 @@ class Nessus(object):
         définient sur Nessus
         '''
 
-        res=self.envoyer('GET','editor/scan/templates/'+CUSTOM_TEMPLATE_UUID)
+        res=self.envoyer('GET','editor/scan/templates/'+self.custom_template_uuid)
         return res['settings']['basic']['inputs'][4]['options']
             
 
@@ -215,7 +251,7 @@ class Nessus(object):
         for i in range(1,len(tableau_cible)):
             adresse+=','+str(tableau_cible[i])
 
-        param_scan={"uuid": CUSTOM_TEMPLATE_UUID,
+        param_scan={"uuid": self.custom_template_uuid,
             "settings": {
                 "name": str(nom),
                 "description": str(description),
