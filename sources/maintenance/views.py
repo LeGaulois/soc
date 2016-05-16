@@ -249,7 +249,8 @@ class InitWizard(CookieWizardView):
         self.config.set('MAIL','SMTP_Port',str(form_list[4].cleaned_data['port']))
         self.config.set('MAIL','Mail_Addr',str(form_list[4].cleaned_data['email']))
         self.config.set('MAIL','Password',str(form_list[4].cleaned_data['password']))
-        self.config.set('MAIL','TLS',"True" if (str(form_list[4].cleaned_data['tls'])=="on" or str(form_list[4].cleaned_data['tls'])=="True") else "False")
+        tls=str(form_list[4].cleaned_data['tls'])
+        self.config.set('MAIL','TLS',"True" if (tls=="on" or tls=="True" or tls=='true' or tls==True) else "False")
 
 
         with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
@@ -391,7 +392,8 @@ def validerNessus(request):
     config.set('Nessus','login',str(request.POST['login']))
     config.set('Nessus','password',str(request.POST['password']))
     config.set('Nessus','directory_id',str(request.POST['directory-id']))
-    config.set('Nessus','verify_ssl','True' if ((str(request.POST['verify'])=='on') or (str(request.POST['verify'])=='True')) else 'False')
+    ssl=str(request.POST['verify'])
+    config.set('Nessus','verify_ssl','True' if ((ssl=='on') or (str(ssl=='True')) or (ssl=='true') or (ssl==True)) else 'False')
 
     with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
         config.write(configfile)
@@ -407,7 +409,8 @@ def validerMail(request):
     config.set('MAIL','SMTP_Port',str(request.POST['port']))
     config.set('MAIL','Mail_Addr',str(request.POST['login']))
     config.set('MAIL','Password',str(request.POST['password']))
-    config.set('MAIL','TLS','True' if (str(request.POST['tls'])=="on" or str(request.POST['tls'])=='True') else 'False')
+    tls=str(request.POST['tls'])
+    config.set('MAIL','TLS','True' if (tls=="on" or tls=='True' or tls=='true' or tls==True) else 'False')
 
     with open(BASE+"soc/default.cfg", 'wb',0) as configfile:
         config.write(configfile)
@@ -479,7 +482,7 @@ def editConfig(request):
     nessus_login=config.get('Nessus','Login')
     nessus_password=config.get('Nessus','Password')
     nessus_directory_id=config.get('Nessus','Directory_Id')
-    nessus_verify='off' if str(config.get('Nessus','Verify_SSL')).lower()=='false' else 'on'
+    nessus_verify=True if config.get('Nessus','Verify_SSL')=='True' else False
 
     form1=modifNessus(addr=nessus_addr,port=nessus_port,login=nessus_login,password=nessus_password,directory_id=nessus_directory_id,verify=nessus_verify)
     forms.append(form1)
@@ -489,7 +492,7 @@ def editConfig(request):
     mail_port=config.get('MAIL','SMTP_Port')
     mail_login=config.get('MAIL','Mail_Addr')
     mail_password=config.get('MAIL','Password')
-    mail_tls=config.get('MAIL','TLS')
+    mail_tls=True if config.get('MAIL','TLS')=='True' else False
 
     form2=modifMail(addr=mail_addr,port=mail_port,login=mail_login,password=mail_password,tls=mail_tls)
     forms.append(form2)

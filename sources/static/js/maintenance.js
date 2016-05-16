@@ -34,11 +34,11 @@ function testNessus() {
     div.innerHTML="<br>Test de connection en cours...";
 
     try {	
-    	var verify = document.getElementById('nessus_verify').value;
+    	var verify = document.getElementById('nessus_verify').checked;
     }
 
     catch (err) {
-    	var verify = 'off';
+    	var verify = 'false';
     }	
 
     ajaxPost('/maintenance/testConnectionNessus/',{
@@ -72,7 +72,7 @@ function testMail() {
             'port': document.getElementById('mail_port').value,
             'login': document.getElementById('mail_login').value,
             'password': document.getElementById('mail_password').value,
-	        'tls': document.getElementById('mail_tls').value 	    
+	    'tls': document.getElementById('mail_tls').checked 	    
             },function(content){
                 if (content=='OK'){div.innerHTML="<br><span style ='float'><img src='/static/img/ok.png' %}' alt='completed' style='width:30px;height:30px;'></span>  Connection reussi";
                 document.getElementById('suivant').disabled=false;
@@ -114,7 +114,7 @@ function validerNessus() {
                 'login': document.getElementById('nessus_login').value,
                 'password': document.getElementById('nessus_password').value,
                 'directory-id': document.getElementById('nessus_directory-id').value,
-                'verify': document.getElementById('nessus_verify').value
+                'verify': document.getElementById('nessus_verify').checked
     })
 }
 
@@ -124,7 +124,7 @@ function validerMail() {
                 'port': document.getElementById('mail_port').value,
                 'login': document.getElementById('mail_login').value,
                 'password': document.getElementById('mail_password').value,
-		'tls': document.getElementById('mail_tls').value	
+		'tls': document.getElementById('mail_tls').checked	
     })
 }
 

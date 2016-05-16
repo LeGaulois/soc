@@ -56,7 +56,7 @@ def testConnectionSQL(address,port,database,login,password):
 
 def testConnectionNessus(address,port,login,password,verify=False):
     try:
-        verify=True if (verify=='True' or verify=='on') else False
+        verify=True if (verify=='True' or verify=='true' or verify=='on' or verify==True) else False
         ScannerNessus=Nessus(address,port,verify)
         ScannerNessus.connexion(login,password)
         ScannerNessus.deconnexion()
@@ -113,7 +113,7 @@ def testConnectionMail(address,port,login,password,tls):
     Fonction de test de connection au serveur de mail sortant
     '''
 
-    tls=True if (tls=='True' or tls=='on' or tls==True) else False
+    tls=True if (tls=='True' or tls=='true' or tls=='on' or tls==True) else False
 
     try:
         if (tls==False):
