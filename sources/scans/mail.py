@@ -93,9 +93,9 @@ def envoieMail(scan):
 
     #Connexion
     if SSL:
-        server = smtplib.SMTP_SSL(SMTP,PORT,timeout=10)
+        server = smtplib.SMTP_SSL(SMTP,int(PORT),timeout=10)
     else:
-        server = smtplib.SMTP(SMTP, PORT, timeout=10)
+        server = smtplib.SMTP(SMTP, int(PORT), timeout=10)
 
     server.login(fromaddr,PASSWORD)
 
