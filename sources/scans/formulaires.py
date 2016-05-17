@@ -283,11 +283,8 @@ class scanManuel(forms.Form):
                 self._errors["nmap"] = "Aucun type de scan selectionne"
                 self._errors["nessus"]= "Aucun type de scan selectionne"
 
-            if (form_data['nmap']==False):
-                self._errors['nmap']= "Aucun type de scan selectionne"
-
-
         return form_data
+
 
     def is_valid(self):
             is_valid = super(scanManuel,self).is_valid()
