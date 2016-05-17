@@ -53,7 +53,8 @@ class Nessus(object):
         self.verify=param['verify'] if verify is None else verify
         self.login = param['login'] if login is None else login
         self.password = param['password'] if password is None else password
-
+        self.custom_template_uuid= param['custom_template_uuid']
+        self.directory_id= param['directory_id']
 
     def envoyer(self,methode, lien, data=None):
 
@@ -255,7 +256,7 @@ class Nessus(object):
             "settings": {
                 "name": str(nom),
                 "description": str(description),
-                "folder_id": str(DIRECTORY_ID),
+                "folder_id": str(self.directory_id),
                 "policy_id": str(policy_id),
                 "text_targets": adresse,
                 "file_targets": "",
