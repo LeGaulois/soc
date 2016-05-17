@@ -26,14 +26,14 @@ def exportProjet():
 
     #DUMP postgreSQL
     postgresql=settings.DATABASES['default']
-    host=valideIP(postgresql['HOST'])
+    host=postgresql['HOST']
     port=int(postgresql['PORT'])
     base=desatanize(postgresql['NAME'])
     user=desatanize(postgresql['USER'])
     password=desatanize(postgresql['PASSWORD'])
 
     #Variables de temps
-    date_dump=datetime.datetime.now()
+    date_dump=str(datetime.datetime.now()).replace(' ','_')
 
     os.putenv('PGPASSWORD',password)
     subprocess.check_output('pg_dump -h '+host+' -p '+str(port)+' -d '+base+' -U '+user+' > '+BASE+'sav/database.pg', shell=True)
@@ -56,7 +56,7 @@ def importProjet(fichier):
     #Variables de temps
     date_import=datetime.datetime.now()
 
-    chemin=BASE+'sav_'+date_import+'/'
+    chemin=BASE+'sav_'+str(date_import).replacae(' ','_')+'/'
     os.mkdir(chemin)
 
     with open(chemin+'import.tar.gz', 'wb+',0) as archive:
@@ -71,7 +71,7 @@ def importProjet(fichier):
 
     #Import postgreSQL
     postgresql=settings.DATABASES['default']
-    host=valideIP(postgresql['HOST'])
+    host=postgresql['HOST']
     port=int(postgresql['PORT'])
     base=desatanize(postgresql['NAME'])
     user=desatanize(postgresql['USER'])
